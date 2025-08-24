@@ -11,6 +11,13 @@ type SentenceRecord = {
 
 const AI_KEY = 'aac_ai_v1';
 
+function tokenize(text: string): string[] {
+  return text
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+}
+
 export function useAI() {
   const [records, setRecords] = useState<SentenceRecord[]>([]);
   const [todayCount, setTodayCount] = useState(0);
@@ -64,27 +71,92 @@ export function useAI() {
     setTodayCount(c => c + 1);
   }, []);
 
-  const suggestForPrefix = useCallback((prefixText: string) => {
-    const prefix = prefixText.trim().toLowerCase();
-    // Score by frequency and recency
-    const decay = (t: number) => {
+  // Build n-gram statistics on the fly (memoized)
+  const ngramStats = useMemo(() => {
+    const bigrams = new Map<string, Map<string, number>>();
+    const trigrams = new Map<string, Map<string, number>>();
+    const unigram = new Map<string, number>();
+    const recencyBoost = (t: number) => {
       const hours = (Date.now() - t) / (1000 * 60 * 60);
       return Math.exp(-hours / 72); // 3-day half-ish life
     };
 
-    const scored = records
-      .map(r => {
-        const starts = prefix.length === 0 || r.text.toLowerCase().startsWith(prefix);
-        const contains = prefix.length > 0 && r.text.toLowerCase().includes(prefix);
-        const base = r.count * 1.0 + decay(r.lastAt) * 2.0;
-        const bonus = starts ? 2 : contains ? 0.5 : 0;
-        return { text: r.text, score: base + bonus };
-      })
-      .filter(x => x.score > 0 && (prefix.length === 0 || x.text.toLowerCase().includes(prefix)));
+    for (const r of records) {
+      const words = tokenize(r.text.toLowerCase());
+      // accumulate unigrams
+      for (const w of words) {
+        unigram.set(w, (unigram.get(w) || 0) + r.count);
+      }
+      for (let i = 0; i < words.length - 1; i++) {
+        const k = words[i];
+        const nxt = words[i + 1];
+        if (!bigrams.has(k)) bigrams.set(k, new Map());
+        const m = bigrams.get(k)!;
+        m.set(nxt, (m.get(nxt) || 0) + r.count + recencyBoost(r.lastAt));
+      }
+      for (let i = 0; i < words.length - 2; i++) {
+        const k = `${words[i]} ${words[i + 1]}`;
+        const nxt = words[i + 2];
+        if (!trigrams.has(k)) trigrams.set(k, new Map());
+        const m = trigrams.get(k)!;
+        m.set(nxt, (m.get(nxt) || 0) + r.count + recencyBoost(r.lastAt) * 1.5);
+      }
+    }
 
-    scored.sort((a, b) => b.score - a.score);
-    return scored.slice(0, 10).map(s => s.text);
+    return { bigrams, trigrams, unigram };
   }, [records]);
+
+  const suggestNextWords = useCallback((currentWords: string[], libraryWords: string[], max = 6) => {
+    const words = currentWords.map(w => w.toLowerCase()).filter(Boolean);
+    const last = words[words.length - 1];
+    const last2 = words.slice(-2).join(' ');
+    const { bigrams, trigrams, unigram } = ngramStats;
+
+    const candidates = new Map<string, number>();
+
+    // 1) Trigram suggestions
+    if (words.length >= 2 && trigrams.has(last2)) {
+      const m = trigrams.get(last2)!;
+      for (const [w, s] of m.entries()) candidates.set(w, (candidates.get(w) || 0) + s + 4);
+    }
+
+    // 2) Bigram suggestions
+    if (last && bigrams.has(last)) {
+      const m = bigrams.get(last)!;
+      for (const [w, s] of m.entries()) candidates.set(w, (candidates.get(w) || 0) + s + 2);
+    }
+
+    // 3) Fallback to common unigrams (overall frequent words)
+    if (candidates.size < max) {
+      const sortedUnigrams = Array.from(unigram.entries()).sort((a, b) => b[1] - a[1]);
+      for (const [w, s] of sortedUnigrams) {
+        if (!candidates.has(w)) candidates.set(w, s);
+        if (candidates.size >= max) break;
+      }
+    }
+
+    // 4) Blend in library words to ensure discoverability
+    if (candidates.size < max) {
+      for (const lw of libraryWords) {
+        const lwLower = lw.toLowerCase();
+        if (!candidates.has(lwLower)) candidates.set(lwLower, 0.1);
+        if (candidates.size >= max) break;
+      }
+    }
+
+    // Rank and return
+    const ranked = Array.from(candidates.entries())
+      .filter(([w]) => w && w !== '')
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, max)
+      .map(([w]) => w);
+
+    // Keep the original case if it's in the library; otherwise use lowercase (Apple-like).
+    const librarySet = new Map<string, string>();
+    for (const lw of libraryWords) librarySet.set(lw.toLowerCase(), lw);
+
+    return ranked.map(w => librarySet.get(w) || w);
+  }, [ngramStats]);
 
   const resetLearning = useCallback(() => {
     setRecords([]);
@@ -93,7 +165,7 @@ export function useAI() {
 
   return {
     recordSentence,
-    suggestForPrefix,
+    suggestNextWords,
     dailySentenceCount: todayCount,
     resetLearning,
   };

@@ -1,6 +1,6 @@
 
-import { useCallback, useMemo, useRef, useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { useCallback, useMemo, useState } from 'react';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import * as Speech from 'expo-speech';
 import Icon from '../components/Icon';
 import { commonStyles, colors } from '../styles/commonStyles';
@@ -23,7 +23,7 @@ export default function MainScreen() {
 
   const {
     recordSentence,
-    suggestForPrefix,
+    suggestNextWords,
     dailySentenceCount,
     resetLearning,
   } = useAI();
@@ -33,16 +33,29 @@ export default function MainScreen() {
   const [addOpen, setAddOpen] = useState(false);
 
   const handleTilePress = useCallback((tile: Tile) => {
+    // Do not speak on tile press to avoid "read as you type"
     setSentence(prev => [...prev, tile]);
-    Speech.speak(tile.text, { language: 'en-US', pitch: 1, rate: 0.9 });
   }, []);
+
+  const normalizeForTTS = (text: string) => {
+    // Mitigate iOS voices announcing capitalization by avoiding uppercase-only words.
+    // Lowercase the string to avoid "capital X" callouts. This keeps pronunciation natural.
+    // Special care is not required for 'I' because 'i' is pronounced "eye" which is correct.
+    const lowered = text.toLowerCase();
+    // Clean up extra spaces
+    const cleaned = lowered.replace(/\s+/g, ' ').trim();
+    return cleaned;
+  };
 
   const handleSpeak = useCallback(() => {
     const text = sentence.map(t => t.text).join(' ');
     if (!text.trim()) {
       return;
     }
-    Speech.speak(text, { language: 'en-US', pitch: 1, rate: 0.9 });
+    const ttsText = normalizeForTTS(text);
+    console.log('Speaking sentence:', ttsText);
+    Speech.stop();
+    Speech.speak(ttsText, { language: 'en-US', pitch: 1, rate: 0.9 });
     recordSentence(sentence.map(t => t.id), text);
     setSentence([]);
   }, [sentence, recordSentence]);
@@ -52,25 +65,21 @@ export default function MainScreen() {
   }, []);
 
   const suggestions = useMemo(() => {
-    const prefix = sentence.map(s => s.text).join(' ');
-    return suggestForPrefix(prefix);
-  }, [sentence, suggestForPrefix]);
+    const words = sentence.map(s => s.text);
+    const libraryWords = tiles.map(t => t.text);
+    return suggestNextWords(words, libraryWords);
+  }, [sentence, tiles, suggestNextWords]);
 
   const onSuggestionPress = useCallback((suggestionText: string) => {
-    // Replace current sentence with suggestion
-    const words = suggestionText.split(' ');
-    // Map words to existing tiles if possible, otherwise create transient tiles
-    const mapped: Tile[] = words.map((w, idx) => {
-      const found = tiles.find(t => t.text.toLowerCase() === w.toLowerCase());
-      if (found) return found;
-      return {
-        id: `temp-${w}-${idx}`,
-        text: w,
-        color: colors.backgroundAlt,
-        imageUri: undefined,
-      };
-    });
-    setSentence(mapped);
+    // Append the suggested word to the sentence (Apple-like next word prediction)
+    const found = tiles.find(t => t.text.toLowerCase() === suggestionText.toLowerCase());
+    const tile: Tile = found || {
+      id: `temp-${suggestionText}-${Date.now()}`,
+      text: suggestionText,
+      color: colors.backgroundAlt,
+      imageUri: undefined,
+    };
+    setSentence(prev => [...prev, tile]);
   }, [tiles]);
 
   return (
