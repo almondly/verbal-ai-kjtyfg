@@ -24,9 +24,11 @@ module.exports = function (api) {
             '@style': './style',
             '@hooks': './hooks',
             '@types': './types',
+            '@data': './data',
           },
         },
       ],
+      'react-native-reanimated/plugin',
     ],
   };
 };
