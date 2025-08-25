@@ -115,7 +115,11 @@ export default function MainScreen() {
           onSelect={setSelectedCategory}
         />
 
-        <ScrollView contentContainerStyle={{ paddingBottom: 24 }} keyboardShouldPersistTaps="handled">
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={{ paddingBottom: 24 }}
+          keyboardShouldPersistTaps="handled"
+        >
           <CommunicationGrid
             tiles={visibleTiles}
             onPressTile={handleTilePress}
@@ -161,6 +165,7 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingTop: 8,
     paddingBottom: 6,
+    marginBottom: 10,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',

@@ -16,6 +16,7 @@ export default function SuggestionsRow({ suggestions, onPressSuggestion }: Props
       horizontal
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={styles.row}
+      style={{ marginBottom: 8 }}
     >
       {suggestions.slice(0, 6).map((s) => (
         <TouchableOpacity

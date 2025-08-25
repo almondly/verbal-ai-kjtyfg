@@ -16,6 +16,7 @@ export default function CategoryBar({ categories, selectedId, onSelect }: Props)
       horizontal
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={styles.row}
+      style={{ marginBottom: 10 }}
     >
       {categories.map((cat) => {
         const active = cat.id === selectedId;
