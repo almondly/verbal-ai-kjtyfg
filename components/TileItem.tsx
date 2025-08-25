@@ -55,7 +55,7 @@ export default TileItem;
 const styles = StyleSheet.create({
   tileWrap: {
     paddingHorizontal: 1,
-    paddingVertical: 1,
+    paddingVertical: 0,
   },
   tile: {
     aspectRatio: 1,

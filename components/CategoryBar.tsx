@@ -32,7 +32,7 @@ export default function CategoryBar({ categories, selectedId, onSelect, style }:
             onPress={() => onSelect(cat.id)}
             activeOpacity={0.9}
           >
-            <Icon name={cat.icon as any} size={14} color={colors.text} />
+            <Icon name={cat.icon as any} size={12} color={colors.text} />
             <Text style={styles.chipText}>{cat.label}</Text>
           </TouchableOpacity>
         );
@@ -57,14 +57,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 3 as any,
     paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 8,
+    paddingVertical: 1,
+    borderRadius: 7,
     borderWidth: 1,
     boxShadow: '0px 2px 6px rgba(0,0,0,0.03)',
   },
   chipText: {
     color: colors.text,
     fontFamily: 'Montserrat_600SemiBold',
-    fontSize: 11,
+    fontSize: 10,
   },
 });

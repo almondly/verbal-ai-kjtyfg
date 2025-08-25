@@ -39,7 +39,6 @@ const styles = StyleSheet.create({
     marginTop: 0,
     marginBottom: 0,
     paddingVertical: 0,
-    minHeight: 0,
   },
   row: {
     paddingVertical: 0,
@@ -48,15 +47,15 @@ const styles = StyleSheet.create({
   },
   suggestion: {
     backgroundColor: colors.backgroundAlt,
-    borderRadius: 6,
+    borderRadius: 5,
     paddingHorizontal: 6,
-    paddingVertical: 1,
+    paddingVertical: 0,
     boxShadow: '0px 2px 4px rgba(0,0,0,0.03)',
   },
   text: {
     color: colors.text,
     fontFamily: 'Montserrat_600SemiBold',
-    fontSize: 10,
-    lineHeight: 12,
+    fontSize: 9,
+    lineHeight: 11,
   },
 });

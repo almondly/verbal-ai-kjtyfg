@@ -65,6 +65,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     marginHorizontal: -1,
-    marginTop: 0,
+    marginTop: -1, // pull grid up to remove the tiny gap before first row
   },
 });
