@@ -24,7 +24,7 @@ function getColumns(width: number): number {
 export default function CommunicationGrid({ tiles, onPressTile, onPressAdd, onRemoveTile }: Props) {
   const { width } = useWindowDimensions();
   const columns = getColumns(width);
-  const itemPercent = 100 / columns - 0.5; // slight gap compensation
+  const itemPercent = 100 / columns; // exact percentage; gutters handled by child padding
 
   // Show an "Add" tile
   const addTile: Tile = {
@@ -64,7 +64,8 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8 as any,
-    paddingTop: 6,
+    // Use child padding for consistent gutters; cancel outer padding with negative margins
+    marginHorizontal: -3,
+    marginTop: 0,
   },
 });

@@ -16,7 +16,6 @@ export default function CategoryBar({ categories, selectedId, onSelect }: Props)
       horizontal
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={styles.row}
-      style={{ marginBottom: 4 }}
     >
       {categories.map((cat) => {
         const active = cat.id === selectedId;
@@ -41,7 +40,7 @@ export default function CategoryBar({ categories, selectedId, onSelect }: Props)
 
 const styles = StyleSheet.create({
   row: {
-    paddingVertical: 4,
+    paddingVertical: 0,
     gap: 6 as any,
     alignItems: 'center',
   },

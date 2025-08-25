@@ -54,7 +54,8 @@ export default TileItem;
 
 const styles = StyleSheet.create({
   tileWrap: {
-    // width is controlled via prop to be responsive
+    paddingHorizontal: 3,
+    paddingVertical: 3,
   },
   tile: {
     aspectRatio: 1,

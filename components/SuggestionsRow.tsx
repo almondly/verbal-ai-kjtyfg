@@ -16,7 +16,6 @@ export default function SuggestionsRow({ suggestions, onPressSuggestion }: Props
       horizontal
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={styles.row}
-      style={{ marginBottom: 4 }}
     >
       {suggestions.slice(0, 6).map((s) => (
         <TouchableOpacity
@@ -34,7 +33,7 @@ export default function SuggestionsRow({ suggestions, onPressSuggestion }: Props
 
 const styles = StyleSheet.create({
   row: {
-    paddingVertical: 4,
+    paddingVertical: 0,
     gap: 6 as any,
   },
   suggestion: {
