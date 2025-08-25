@@ -12,6 +12,8 @@ import DonutProgress from '../components/DonutProgress';
 import { useLibrary } from '../hooks/useLibrary';
 import { useAI } from '../hooks/useAI';
 import { Tile } from '../types';
+import CategoryBar from '../components/CategoryBar';
+import { categories } from '../data/categories';
 
 export default function MainScreen() {
   const {
@@ -31,18 +33,14 @@ export default function MainScreen() {
   const [sentence, setSentence] = useState<Tile[]>([]);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>('core');
 
   const handleTilePress = useCallback((tile: Tile) => {
-    // Do not speak on tile press to avoid "read as you type"
     setSentence(prev => [...prev, tile]);
   }, []);
 
   const normalizeForTTS = (text: string) => {
-    // Mitigate iOS voices announcing capitalization by avoiding uppercase-only words.
-    // Lowercase the string to avoid "capital X" callouts. This keeps pronunciation natural.
-    // Special care is not required for 'I' because 'i' is pronounced "eye" which is correct.
     const lowered = text.toLowerCase();
-    // Clean up extra spaces
     const cleaned = lowered.replace(/\s+/g, ' ').trim();
     return cleaned;
   };
@@ -71,7 +69,6 @@ export default function MainScreen() {
   }, [sentence, tiles, suggestNextWords]);
 
   const onSuggestionPress = useCallback((suggestionText: string) => {
-    // Append the suggested word to the sentence (Apple-like next word prediction)
     const found = tiles.find(t => t.text.toLowerCase() === suggestionText.toLowerCase());
     const tile: Tile = found || {
       id: `temp-${suggestionText}-${Date.now()}`,
@@ -81,6 +78,11 @@ export default function MainScreen() {
     };
     setSentence(prev => [...prev, tile]);
   }, [tiles]);
+
+  const visibleTiles = useMemo(() => {
+    if (selectedCategory === 'all') return tiles;
+    return tiles.filter(t => t.category === selectedCategory);
+  }, [tiles, selectedCategory]);
 
   return (
     <View style={[commonStyles.container, { paddingHorizontal: 12 }]}>
@@ -105,9 +107,15 @@ export default function MainScreen() {
         onPressSuggestion={onSuggestionPress}
       />
 
+      <CategoryBar
+        categories={categories}
+        selectedId={selectedCategory}
+        onSelect={setSelectedCategory}
+      />
+
       <ScrollView contentContainerStyle={{ paddingBottom: 24 }} keyboardShouldPersistTaps="handled">
         <CommunicationGrid
-          tiles={tiles}
+          tiles={visibleTiles}
           onPressTile={handleTilePress}
           onPressAdd={() => setAddOpen(true)}
           onRemoveTile={removeTile}
@@ -129,6 +137,7 @@ export default function MainScreen() {
         open={addOpen}
         title="Add Tile"
         mode="add"
+        defaultCategoryId={selectedCategory === 'all' ? 'core' : selectedCategory}
         onClose={() => setAddOpen(false)}
         onAddTile={(tile) => {
           addTile(tile);

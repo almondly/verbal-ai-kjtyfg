@@ -1,11 +1,12 @@
 
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, ScrollView } from 'react-native';
 import { colors } from '../styles/commonStyles';
 import Icon from './Icon';
 import * as ImagePicker from 'expo-image-picker';
 import { Tile } from '../types';
+import { categories } from '../data/categories';
 
 interface Props {
   open: boolean;
@@ -15,6 +16,7 @@ interface Props {
   title?: string;
   mode?: 'settings' | 'add';
   onAddTile?: (tile: Tile) => void;
+  defaultCategoryId?: string;
 }
 
 export default function SettingsSheet({
@@ -25,16 +27,23 @@ export default function SettingsSheet({
   title,
   mode = 'settings',
   onAddTile,
+  defaultCategoryId,
 }: Props) {
   const sheetRef = useRef<BottomSheet>(null);
-  const snapPoints = useMemo(() => ['25%', '60%'], []);
+  const snapPoints = useMemo(() => ['25%', '70%'], []);
   const [phrase, setPhrase] = useState('');
   const [color, setColor] = useState('#FFFFFF');
   const [imageUri, setImageUri] = useState<string | undefined>(undefined);
+  const [selectedCategory, setSelectedCategory] = useState<string | undefined>(defaultCategoryId);
+
+  useEffect(() => {
+    if (open && mode === 'add') {
+      setSelectedCategory(defaultCategoryId);
+    }
+  }, [open, mode, defaultCategoryId]);
 
   // Control opening/closing
   if (open && sheetRef.current) {
-    // expand to second snap
     setTimeout(() => sheetRef.current?.snapToIndex(1), 0);
   } else if (!open && sheetRef.current) {
     setTimeout(() => sheetRef.current?.close(), 0);
@@ -74,6 +83,7 @@ export default function SettingsSheet({
       text: phrase.trim(),
       color,
       imageUri,
+      category: selectedCategory,
     };
     onAddTile && onAddTile(tile);
     closeAndReset();
@@ -112,6 +122,27 @@ export default function SettingsSheet({
           </View>
         ) : (
           <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Folder</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.catRow}>
+              {categories.filter(c => c.id !== 'all').map((c) => {
+                const active = selectedCategory === c.id;
+                return (
+                  <TouchableOpacity
+                    key={c.id}
+                    style={[
+                      styles.catChip,
+                      { backgroundColor: active ? c.color : '#F3F4F6', borderColor: c.color },
+                    ]}
+                    onPress={() => setSelectedCategory(c.id)}
+                    activeOpacity={0.9}
+                  >
+                    <Icon name={c.icon as any} size={18} color={colors.text} />
+                    <Text style={styles.catChipText}>{c.label}</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+
             <Text style={styles.sectionTitle}>Phrase</Text>
             <TextInput
               placeholder="e.g., I want water"
@@ -241,5 +272,24 @@ const styles = StyleSheet.create({
   addBtnText: {
     color: '#fff',
     fontFamily: 'Montserrat_600SemiBold',
+  },
+  catRow: {
+    gap: 8 as any,
+    alignItems: 'center',
+    paddingVertical: 2,
+  },
+  catChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6 as any,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 14,
+    borderWidth: 1,
+  },
+  catChipText: {
+    color: colors.text,
+    fontFamily: 'Montserrat_600SemiBold',
+    fontSize: 12,
   },
 });
