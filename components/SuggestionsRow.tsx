@@ -25,7 +25,7 @@ export default function SuggestionsRow({ suggestions, onPressSuggestion }: Props
           onPress={() => onPressSuggestion(s)}
           activeOpacity={0.9}
         >
-          <Text style={styles.text}>{s}</Text>
+          <Text style={styles.text} numberOfLines={1}>{s}</Text>
         </TouchableOpacity>
       ))}
     </ScrollView>
@@ -34,23 +34,27 @@ export default function SuggestionsRow({ suggestions, onPressSuggestion }: Props
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: 0,
+    marginTop: 4,
+    marginBottom: 2,
     paddingVertical: 0,
+    minHeight: 32,
   },
   row: {
     paddingVertical: 0,
-    gap: 6 as any,
+    gap: 4 as any,
+    alignItems: 'center',
   },
   suggestion: {
     backgroundColor: colors.backgroundAlt,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    boxShadow: '0px 6px 14px rgba(0,0,0,0.06)',
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    boxShadow: '0px 4px 10px rgba(0,0,0,0.04)',
   },
   text: {
     color: colors.text,
     fontFamily: 'Montserrat_600SemiBold',
-    fontSize: 13,
+    fontSize: 12,
+    lineHeight: 14,
   },
 });

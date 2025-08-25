@@ -117,7 +117,7 @@ export default function MainScreen() {
 
         <ScrollView
           style={{ flex: 1 }}
-          contentContainerStyle={{ paddingTop: 0, paddingBottom: 6 }}
+          contentContainerStyle={{ paddingTop: 0, paddingBottom: 2 }}
           keyboardShouldPersistTaps="handled"
         >
           <CommunicationGrid
