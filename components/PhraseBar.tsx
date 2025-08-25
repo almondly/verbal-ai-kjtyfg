@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
     boxShadow: '0px 6px 12px rgba(0,0,0,0.06)',
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 0,
+    marginBottom: -8, // collapse with suggestions row
   },
   text: {
     fontFamily: 'Montserrat_600SemiBold',

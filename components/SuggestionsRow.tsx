@@ -37,7 +37,7 @@ export default function SuggestionsRow({ suggestions, onPressSuggestion, style }
 const styles = StyleSheet.create({
   container: {
     marginTop: 0,
-    marginBottom: -2, // collapse gap to next section
+    marginBottom: 0,
     paddingVertical: 0,
   },
   row: {
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.backgroundAlt,
     borderRadius: 8,
     paddingHorizontal: 8,
-    height: 28,
+    height: 26,
     alignItems: 'center',
     justifyContent: 'center',
     boxShadow: '0px 2px 4px rgba(0,0,0,0.03)',

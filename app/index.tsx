@@ -87,8 +87,8 @@ export default function MainScreen() {
 
   return (
     <LandscapeGuard>
-      <View style={[commonStyles.container, { paddingHorizontal: 10 }]}>
-        <View style={[styles.topBar, { marginBottom: 0 }]}>
+      <View style={[commonStyles.container, { paddingHorizontal: 8 }]}>
+        <View style={[styles.topBar]}>
           <TouchableOpacity onPress={() => setSettingsOpen(true)} style={styles.iconBtn} activeOpacity={0.8}>
             <Icon name="settings-outline" size={22} color={colors.text} />
           </TouchableOpacity>
@@ -107,19 +107,20 @@ export default function MainScreen() {
         <SuggestionsRow
           suggestions={suggestions}
           onPressSuggestion={onSuggestionPress}
-          style={{ marginTop: 0, marginBottom: -2 }}
+          style={{ marginTop: -8, marginBottom: -8 }}
         />
 
         <CategoryBar
           categories={categories}
           selectedId={selectedCategory}
           onSelect={setSelectedCategory}
-          style={{ marginTop: 0, marginBottom: -2 }}
+          style={{ marginTop: -8, marginBottom: -8 }}
         />
 
         <ScrollView
-          style={{ flex: 1, marginTop: -2 }}
+          style={{ flex: 1, marginTop: -8 }}
           contentContainerStyle={{ paddingTop: 0, paddingBottom: 0 }}
+          contentInsetAdjustmentBehavior="never"
           keyboardShouldPersistTaps="handled"
         >
           <CommunicationGrid
@@ -170,6 +171,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    marginBottom: 0,
   },
   iconBtn: {
     backgroundColor: colors.backgroundAlt,

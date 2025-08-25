@@ -54,15 +54,15 @@ export default TileItem;
 
 const styles = StyleSheet.create({
   tileWrap: {
-    paddingHorizontal: 2, // tight gutter
-    paddingVertical: 2,
+    paddingHorizontal: 1, // ultra-tight gutter
+    paddingVertical: 1,
   },
   tile: {
     aspectRatio: 1,
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 8,
+    padding: 6,
     boxShadow: '0px 6px 12px rgba(0,0,0,0.06)',
   },
   imageWrap: {
@@ -81,6 +81,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.text,
     textAlign: 'center',
-    marginTop: 2,
+    marginTop: 0,
   },
 });

@@ -44,7 +44,7 @@ export default function CategoryBar({ categories, selectedId, onSelect, style }:
 const styles = StyleSheet.create({
   container: {
     marginTop: 0,
-    marginBottom: -2, // pull up the grid below
+    marginBottom: 0,
     paddingVertical: 0,
   },
   row: {
@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6 as any,
     paddingHorizontal: 10,
-    height: 30,
+    height: 28,
     borderRadius: 10,
     borderWidth: 1,
     boxShadow: '0px 2px 6px rgba(0,0,0,0.03)',
