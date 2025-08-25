@@ -1,3 +1,4 @@
+
 import { StyleSheet } from 'react-native';
 
 export const colors = {
@@ -37,8 +38,9 @@ export const commonStyles = StyleSheet.create({
     backgroundColor: colors.background,
     width: '100%',
     height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
+    // Important: do not center everything by default, it breaks top-aligned layouts
+    justifyContent: 'flex-start',
+    alignItems: 'stretch',
   },
   content: {
     flex: 1,

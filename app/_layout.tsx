@@ -11,7 +11,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 const STORAGE_KEY = 'emulated_device';
 
-export default function RootLayout() {
+function RootLayoutInner() {
   const actualInsets = useSafeAreaInsets();
   const [storedEmulate, setStoredEmulate] = useState<string | null>(null);
   const [fontsLoaded] = useFonts({
@@ -54,27 +54,33 @@ export default function RootLayout() {
   }
 
   return (
+    <SafeAreaView
+      style={[
+        commonStyles.wrapper,
+        {
+          paddingTop: insetsToUse.top,
+          paddingBottom: insetsToUse.bottom,
+          paddingLeft: insetsToUse.left,
+          paddingRight: insetsToUse.right,
+        },
+      ]}
+    >
+      <StatusBar style="dark" />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          animation: 'default',
+        }}
+      />
+    </SafeAreaView>
+  );
+}
+
+export default function RootLayout() {
+  return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <SafeAreaView
-          style={[
-            commonStyles.wrapper,
-            {
-              paddingTop: insetsToUse.top,
-              paddingBottom: insetsToUse.bottom,
-              paddingLeft: insetsToUse.left,
-              paddingRight: insetsToUse.right,
-            },
-          ]}
-        >
-          <StatusBar style="dark" />
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              animation: 'default',
-            }}
-          />
-        </SafeAreaView>
+        <RootLayoutInner />
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
