@@ -10,19 +10,19 @@ interface Props {
 
 export default function LandscapeGuard({ children }: Props) {
   const { width, height } = useWindowDimensions();
-  const isLandscape = width >= height;
+  const isPortrait = height >= width;
 
-  if (isLandscape) {
+  if (isPortrait) {
     return <>{children}</>;
   }
 
-  // If somehow rendered in portrait (e.g., on web), show rotate prompt
+  // If rendered in landscape, show rotate prompt for portrait use
   return (
     <View style={styles.container}>
       <View style={styles.card}>
-        <Icon name="phone-landscape-outline" size={48} color={colors.text} />
+        <Icon name="phone-portrait-outline" size={48} color={colors.text} />
         <Text style={styles.title}>Rotate Device</Text>
-        <Text style={styles.text}>Please rotate your device to landscape to use the app.</Text>
+        <Text style={styles.text}>Please rotate your device to portrait to use the app.</Text>
       </View>
     </View>
   );
