@@ -37,25 +37,27 @@ export default function SuggestionsRow({ suggestions, onPressSuggestion, style }
 const styles = StyleSheet.create({
   container: {
     marginTop: 0,
-    marginBottom: 0,
+    marginBottom: -2, // collapse gap to next section
     paddingVertical: 0,
   },
   row: {
     paddingVertical: 0,
-    gap: 2 as any,
+    gap: 4 as any,
     alignItems: 'center',
   },
   suggestion: {
     backgroundColor: colors.backgroundAlt,
-    borderRadius: 5,
-    paddingHorizontal: 6,
-    paddingVertical: 0,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    height: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
     boxShadow: '0px 2px 4px rgba(0,0,0,0.03)',
   },
   text: {
     color: colors.text,
     fontFamily: 'Montserrat_600SemiBold',
-    fontSize: 9,
-    lineHeight: 11,
+    fontSize: 12,
+    lineHeight: 14,
   },
 });

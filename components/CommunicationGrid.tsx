@@ -2,7 +2,6 @@
 import { View, StyleSheet, useWindowDimensions } from 'react-native';
 import TileItem from './TileItem';
 import { Tile } from '../types';
-import { colors } from '../styles/commonStyles';
 
 interface Props {
   tiles: Tile[];
@@ -12,13 +11,13 @@ interface Props {
 }
 
 function getColumns(width: number): number {
-  // Slightly increase columns to reduce tile size in landscape
-  if (width >= 1400) return 9;
-  if (width >= 1200) return 8;
-  if (width >= 1000) return 7;
-  if (width >= 820) return 6;
-  if (width >= 680) return 5;
-  return 4;
+  // Reduce columns to make tiles larger at each breakpoint
+  if (width >= 1400) return 8;
+  if (width >= 1200) return 7;
+  if (width >= 1000) return 6;
+  if (width >= 820) return 5;
+  if (width >= 680) return 4;
+  return 3;
 }
 
 export default function CommunicationGrid({ tiles, onPressTile, onPressAdd, onRemoveTile }: Props) {
@@ -64,7 +63,7 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginHorizontal: -1,
-    marginTop: -1, // pull grid up to remove the tiny gap before first row
+    marginHorizontal: -2, // match TileItem horizontal padding for tight gutters
+    marginTop: -4, // pull grid up to minimize the gap from previous section
   },
 });

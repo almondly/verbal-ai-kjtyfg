@@ -1,5 +1,5 @@
 
-import { ScrollView, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { ScrollView, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { colors } from '../styles/commonStyles';
 import Icon from './Icon';
 import { Category } from '../types';
@@ -32,7 +32,7 @@ export default function CategoryBar({ categories, selectedId, onSelect, style }:
             onPress={() => onSelect(cat.id)}
             activeOpacity={0.9}
           >
-            <Icon name={cat.icon as any} size={12} color={colors.text} />
+            <Icon name={cat.icon as any} size={14} color={colors.text} />
             <Text style={styles.chipText}>{cat.label}</Text>
           </TouchableOpacity>
         );
@@ -44,27 +44,27 @@ export default function CategoryBar({ categories, selectedId, onSelect, style }:
 const styles = StyleSheet.create({
   container: {
     marginTop: 0,
-    marginBottom: 0,
+    marginBottom: -2, // pull up the grid below
     paddingVertical: 0,
   },
   row: {
     paddingVertical: 0,
-    gap: 2 as any,
+    gap: 4 as any,
     alignItems: 'center',
   },
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 3 as any,
-    paddingHorizontal: 8,
-    paddingVertical: 1,
-    borderRadius: 7,
+    gap: 6 as any,
+    paddingHorizontal: 10,
+    height: 30,
+    borderRadius: 10,
     borderWidth: 1,
     boxShadow: '0px 2px 6px rgba(0,0,0,0.03)',
   },
   chipText: {
     color: colors.text,
     fontFamily: 'Montserrat_600SemiBold',
-    fontSize: 10,
+    fontSize: 12,
   },
 });

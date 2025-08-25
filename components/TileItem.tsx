@@ -13,7 +13,7 @@ interface Props {
   itemPercent?: number; // dynamic width from grid for responsive columns
 }
 
-const TileItem = memo(function TileItem({ tile, onPress, onLongPress, isAdd, itemPercent = 31 }: Props) {
+const TileItem = memo(function TileItem({ tile, onPress, onLongPress, isAdd, itemPercent = 33.33 }: Props) {
   const scale = useRef(new Animated.Value(1)).current;
 
   const handlePressIn = () => {
@@ -37,14 +37,14 @@ const TileItem = memo(function TileItem({ tile, onPress, onLongPress, isAdd, ite
       >
         <View style={styles.imageWrap}>
           {isAdd ? (
-            <Icon name="add-circle-outline" size={28} color={colors.text} />
+            <Icon name="add-circle-outline" size={34} color={colors.text} />
           ) : tile.imageUri ? (
             <Image source={{ uri: tile.imageUri }} style={styles.image} resizeMode="cover" />
           ) : (
-            <Icon name="chatbubble-ellipses-outline" size={28} color={colors.text} />
+            <Icon name="chatbubble-ellipses-outline" size={34} color={colors.text} />
           )}
         </View>
-        <Text style={styles.text}>{tile.text}</Text>
+        <Text style={styles.text} numberOfLines={2}>{tile.text}</Text>
       </TouchableOpacity>
     </Animated.View>
   );
@@ -54,15 +54,15 @@ export default TileItem;
 
 const styles = StyleSheet.create({
   tileWrap: {
-    paddingHorizontal: 1,
-    paddingVertical: 0,
+    paddingHorizontal: 2, // tight gutter
+    paddingVertical: 2,
   },
   tile: {
     aspectRatio: 1,
-    borderRadius: 12,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 6,
+    padding: 8,
     boxShadow: '0px 6px 12px rgba(0,0,0,0.06)',
   },
   imageWrap: {
@@ -72,15 +72,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   image: {
-    width: '68%',
-    height: '68%',
-    borderRadius: 9,
+    width: '72%',
+    height: '72%',
+    borderRadius: 10,
   },
   text: {
     fontFamily: 'Montserrat_600SemiBold',
-    fontSize: 12,
+    fontSize: 14,
     color: colors.text,
     textAlign: 'center',
-    marginTop: 0,
+    marginTop: 2,
   },
 });
