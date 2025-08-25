@@ -14,6 +14,7 @@ import { useAI } from '../hooks/useAI';
 import { Tile } from '../types';
 import CategoryBar from '../components/CategoryBar';
 import { categories } from '../data/categories';
+import LandscapeGuard from '../components/LandscapeGuard';
 
 export default function MainScreen() {
   const {
@@ -85,66 +86,68 @@ export default function MainScreen() {
   }, [tiles, selectedCategory]);
 
   return (
-    <View style={[commonStyles.container, { paddingHorizontal: 12 }]}>
-      <View style={styles.topBar}>
-        <TouchableOpacity onPress={() => setSettingsOpen(true)} style={styles.iconBtn} activeOpacity={0.8}>
-          <Icon name="settings-outline" size={24} color={colors.text} />
-        </TouchableOpacity>
-        <Text style={styles.appTitle}>Speak Buddy</Text>
-        <View style={styles.progressWrap}>
-          <DonutProgress size={36} strokeWidth={6} progress={Math.min(1, dailySentenceCount / 10)} />
+    <LandscapeGuard>
+      <View style={[commonStyles.container, { paddingHorizontal: 12 }]}>
+        <View style={styles.topBar}>
+          <TouchableOpacity onPress={() => setSettingsOpen(true)} style={styles.iconBtn} activeOpacity={0.8}>
+            <Icon name="settings-outline" size={24} color={colors.text} />
+          </TouchableOpacity>
+          <Text style={styles.appTitle}>Speak Buddy</Text>
+          <View style={styles.progressWrap}>
+            <DonutProgress size={36} strokeWidth={6} progress={Math.min(1, dailySentenceCount / 10)} />
+          </View>
         </View>
-      </View>
 
-      <PhraseBar
-        sentence={sentence}
-        onClear={handleClear}
-        onSpeak={handleSpeak}
-      />
-
-      <SuggestionsRow
-        suggestions={suggestions}
-        onPressSuggestion={onSuggestionPress}
-      />
-
-      <CategoryBar
-        categories={categories}
-        selectedId={selectedCategory}
-        onSelect={setSelectedCategory}
-      />
-
-      <ScrollView contentContainerStyle={{ paddingBottom: 24 }} keyboardShouldPersistTaps="handled">
-        <CommunicationGrid
-          tiles={visibleTiles}
-          onPressTile={handleTilePress}
-          onPressAdd={() => setAddOpen(true)}
-          onRemoveTile={removeTile}
+        <PhraseBar
+          sentence={sentence}
+          onClear={handleClear}
+          onSpeak={handleSpeak}
         />
-      </ScrollView>
 
-      <SettingsSheet
-        open={settingsOpen}
-        onClose={() => setSettingsOpen(false)}
-        onResetLearning={() => {
-          resetLearning();
-        }}
-        onResetTiles={() => {
-          resetTiles();
-        }}
-      />
+        <SuggestionsRow
+          suggestions={suggestions}
+          onPressSuggestion={onSuggestionPress}
+        />
 
-      <SettingsSheet
-        open={addOpen}
-        title="Add Tile"
-        mode="add"
-        defaultCategoryId={selectedCategory === 'all' ? 'core' : selectedCategory}
-        onClose={() => setAddOpen(false)}
-        onAddTile={(tile) => {
-          addTile(tile);
-          setAddOpen(false);
-        }}
-      />
-    </View>
+        <CategoryBar
+          categories={categories}
+          selectedId={selectedCategory}
+          onSelect={setSelectedCategory}
+        />
+
+        <ScrollView contentContainerStyle={{ paddingBottom: 24 }} keyboardShouldPersistTaps="handled">
+          <CommunicationGrid
+            tiles={visibleTiles}
+            onPressTile={handleTilePress}
+            onPressAdd={() => setAddOpen(true)}
+            onRemoveTile={removeTile}
+          />
+        </ScrollView>
+
+        <SettingsSheet
+          open={settingsOpen}
+          onClose={() => setSettingsOpen(false)}
+          onResetLearning={() => {
+            resetLearning();
+          }}
+          onResetTiles={() => {
+            resetTiles();
+          }}
+        />
+
+        <SettingsSheet
+          open={addOpen}
+          title="Add Tile"
+          mode="add"
+          defaultCategoryId={selectedCategory === 'all' ? 'core' : selectedCategory}
+          onClose={() => setAddOpen(false)}
+          onAddTile={(tile) => {
+            addTile(tile);
+            setAddOpen(false);
+          }}
+        />
+      </View>
+    </LandscapeGuard>
   );
 }
 

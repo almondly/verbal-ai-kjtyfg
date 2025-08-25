@@ -1,5 +1,5 @@
 
-import { memo, useMemo, useRef } from 'react';
+import { memo, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Animated } from 'react-native';
 import { Tile } from '../types';
 import { colors } from '../styles/commonStyles';
@@ -10,9 +10,10 @@ interface Props {
   onPress: () => void;
   onLongPress?: () => void;
   isAdd?: boolean;
+  itemPercent?: number; // dynamic width from grid for responsive columns
 }
 
-const TileItem = memo(function TileItem({ tile, onPress, onLongPress, isAdd }: Props) {
+const TileItem = memo(function TileItem({ tile, onPress, onLongPress, isAdd, itemPercent = 31 }: Props) {
   const scale = useRef(new Animated.Value(1)).current;
 
   const handlePressIn = () => {
@@ -25,7 +26,7 @@ const TileItem = memo(function TileItem({ tile, onPress, onLongPress, isAdd }: P
   const bg = isAdd ? '#F3F4F6' : tile.color || '#FFFFFF';
 
   return (
-    <Animated.View style={[styles.tileWrap, { transform: [{ scale }] }]}>
+    <Animated.View style={[styles.tileWrap, { width: `${itemPercent}%`, transform: [{ scale }] }]}>
       <TouchableOpacity
         onPress={onPress}
         onLongPress={onLongPress}
@@ -53,7 +54,7 @@ export default TileItem;
 
 const styles = StyleSheet.create({
   tileWrap: {
-    width: '31%',
+    // width is controlled via prop to be responsive
   },
   tile: {
     aspectRatio: 1,

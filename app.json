@@ -1,9 +1,10 @@
+
 {
   "expo": {
     "name": "Natively",
     "slug": "Natively",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "landscape",
     "icon": "./assets/images/natively-dark.png",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,

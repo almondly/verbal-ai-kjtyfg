@@ -1,5 +1,5 @@
 
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, useWindowDimensions } from 'react-native';
 import TileItem from './TileItem';
 import { Tile } from '../types';
 import { colors } from '../styles/commonStyles';
@@ -11,7 +11,20 @@ interface Props {
   onRemoveTile: (id: string) => void;
 }
 
+function getColumns(width: number): number {
+  // Simple responsive breakpoints optimized for landscape
+  if (width >= 1200) return 7;
+  if (width >= 1000) return 6;
+  if (width >= 820) return 5;
+  if (width >= 680) return 4;
+  return 3;
+}
+
 export default function CommunicationGrid({ tiles, onPressTile, onPressAdd, onRemoveTile }: Props) {
+  const { width } = useWindowDimensions();
+  const columns = getColumns(width);
+  const itemPercent = 100 / columns - 0.5; // slight gap compensation
+
   // Show an "Add" tile
   const addTile: Tile = {
     id: '__add__',
@@ -30,6 +43,7 @@ export default function CommunicationGrid({ tiles, onPressTile, onPressAdd, onRe
             tile={tile}
             onPress={() => onPressAdd()}
             isAdd
+            itemPercent={itemPercent}
           />
         ) : (
           <TileItem
@@ -37,6 +51,7 @@ export default function CommunicationGrid({ tiles, onPressTile, onPressAdd, onRe
             tile={tile}
             onPress={() => onPressTile(tile)}
             onLongPress={() => onRemoveTile(tile.id)}
+            itemPercent={itemPercent}
           />
         )
       )}
