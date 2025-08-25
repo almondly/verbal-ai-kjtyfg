@@ -87,14 +87,14 @@ export default function MainScreen() {
 
   return (
     <LandscapeGuard>
-      <View style={[commonStyles.container, { paddingHorizontal: 12 }]}>
+      <View style={[commonStyles.container, { paddingHorizontal: 10 }]}>
         <View style={styles.topBar}>
           <TouchableOpacity onPress={() => setSettingsOpen(true)} style={styles.iconBtn} activeOpacity={0.8}>
-            <Icon name="settings-outline" size={24} color={colors.text} />
+            <Icon name="settings-outline" size={22} color={colors.text} />
           </TouchableOpacity>
           <Text style={styles.appTitle}>Speak Buddy</Text>
           <View style={styles.progressWrap}>
-            <DonutProgress size={36} strokeWidth={6} progress={Math.min(1, dailySentenceCount / 10)} />
+            <DonutProgress size={34} strokeWidth={6} progress={Math.min(1, dailySentenceCount / 10)} />
           </View>
         </View>
 
@@ -117,7 +117,7 @@ export default function MainScreen() {
 
         <ScrollView
           style={{ flex: 1 }}
-          contentContainerStyle={{ paddingBottom: 24 }}
+          contentContainerStyle={{ paddingBottom: 12 }}
           keyboardShouldPersistTaps="handled"
         >
           <CommunicationGrid
@@ -157,29 +157,29 @@ export default function MainScreen() {
 
 const styles = StyleSheet.create({
   appTitle: {
-    fontSize: 20,
+    fontSize: 19,
     fontFamily: 'Montserrat_700Bold',
     color: colors.text,
   },
   topBar: {
     width: '100%',
-    paddingTop: 8,
-    paddingBottom: 6,
-    marginBottom: 10,
+    paddingTop: 6,
+    paddingBottom: 4,
+    marginBottom: 6,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
   iconBtn: {
     backgroundColor: colors.backgroundAlt,
-    padding: 10,
+    padding: 8,
     borderRadius: 10,
-    boxShadow: '0px 6px 16px rgba(0,0,0,0.08)',
+    boxShadow: '0px 6px 14px rgba(0,0,0,0.08)',
   },
   progressWrap: {
     backgroundColor: colors.backgroundAlt,
-    padding: 6,
+    padding: 4,
     borderRadius: 18,
-    boxShadow: '0px 6px 16px rgba(0,0,0,0.08)',
+    boxShadow: '0px 6px 14px rgba(0,0,0,0.08)',
   },
 });

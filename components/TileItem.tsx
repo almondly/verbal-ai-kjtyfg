@@ -37,11 +37,11 @@ const TileItem = memo(function TileItem({ tile, onPress, onLongPress, isAdd, ite
       >
         <View style={styles.imageWrap}>
           {isAdd ? (
-            <Icon name="add-circle-outline" size={32} color={colors.text} />
+            <Icon name="add-circle-outline" size={28} color={colors.text} />
           ) : tile.imageUri ? (
             <Image source={{ uri: tile.imageUri }} style={styles.image} resizeMode="cover" />
           ) : (
-            <Icon name="chatbubble-ellipses-outline" size={32} color={colors.text} />
+            <Icon name="chatbubble-ellipses-outline" size={28} color={colors.text} />
           )}
         </View>
         <Text style={styles.text}>{tile.text}</Text>
@@ -58,11 +58,11 @@ const styles = StyleSheet.create({
   },
   tile: {
     aspectRatio: 1,
-    borderRadius: 16,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 10,
-    boxShadow: '0px 10px 20px rgba(0,0,0,0.08)',
+    padding: 8,
+    boxShadow: '0px 8px 16px rgba(0,0,0,0.07)',
   },
   imageWrap: {
     width: '100%',
@@ -71,15 +71,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   image: {
-    width: '80%',
-    height: '80%',
-    borderRadius: 12,
+    width: '72%',
+    height: '72%',
+    borderRadius: 10,
   },
   text: {
     fontFamily: 'Montserrat_600SemiBold',
-    fontSize: 14,
+    fontSize: 13,
     color: colors.text,
     textAlign: 'center',
-    marginTop: 4,
+    marginTop: 3,
   },
 });

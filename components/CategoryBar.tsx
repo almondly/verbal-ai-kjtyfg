@@ -16,7 +16,7 @@ export default function CategoryBar({ categories, selectedId, onSelect }: Props)
       horizontal
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={styles.row}
-      style={{ marginBottom: 10 }}
+      style={{ marginBottom: 4 }}
     >
       {categories.map((cat) => {
         const active = cat.id === selectedId;
@@ -41,8 +41,8 @@ export default function CategoryBar({ categories, selectedId, onSelect }: Props)
 
 const styles = StyleSheet.create({
   row: {
-    paddingVertical: 8,
-    gap: 8 as any,
+    paddingVertical: 4,
+    gap: 6 as any,
     alignItems: 'center',
   },
   chip: {
@@ -50,10 +50,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6 as any,
     paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 14,
+    paddingVertical: 6,
+    borderRadius: 12,
     borderWidth: 1,
-    boxShadow: '0px 8px 18px rgba(0,0,0,0.06)',
+    boxShadow: '0px 6px 14px rgba(0,0,0,0.06)',
   },
   chipText: {
     color: colors.text,

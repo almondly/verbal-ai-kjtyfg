@@ -12,12 +12,13 @@ interface Props {
 }
 
 function getColumns(width: number): number {
-  // Simple responsive breakpoints optimized for landscape
-  if (width >= 1200) return 7;
-  if (width >= 1000) return 6;
-  if (width >= 820) return 5;
-  if (width >= 680) return 4;
-  return 3;
+  // Slightly increase columns to reduce tile size in landscape
+  if (width >= 1400) return 9;
+  if (width >= 1200) return 8;
+  if (width >= 1000) return 7;
+  if (width >= 820) return 6;
+  if (width >= 680) return 5;
+  return 4;
 }
 
 export default function CommunicationGrid({ tiles, onPressTile, onPressAdd, onRemoveTile }: Props) {
@@ -63,7 +64,7 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12 as any,
-    paddingTop: 12,
+    gap: 8 as any,
+    paddingTop: 6,
   },
 });
