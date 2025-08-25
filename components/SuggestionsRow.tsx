@@ -5,9 +5,10 @@ import { colors } from '../styles/commonStyles';
 interface Props {
   suggestions: string[];
   onPressSuggestion: (text: string) => void;
+  style?: any;
 }
 
-export default function SuggestionsRow({ suggestions, onPressSuggestion }: Props) {
+export default function SuggestionsRow({ suggestions, onPressSuggestion, style }: Props) {
   if (!suggestions || suggestions.length === 0) {
     return null;
   }
@@ -15,10 +16,11 @@ export default function SuggestionsRow({ suggestions, onPressSuggestion }: Props
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      style={styles.container}
+      style={[styles.container, style]}
       contentContainerStyle={styles.row}
+      keyboardShouldPersistTaps="handled"
     >
-      {suggestions.slice(0, 6).map((s) => (
+      {suggestions.slice(0, 7).map((s) => (
         <TouchableOpacity
           key={s}
           style={styles.suggestion}
@@ -37,24 +39,24 @@ const styles = StyleSheet.create({
     marginTop: 0,
     marginBottom: 0,
     paddingVertical: 0,
-    minHeight: 26,
+    minHeight: 0,
   },
   row: {
     paddingVertical: 0,
-    gap: 3 as any,
+    gap: 2 as any,
     alignItems: 'center',
   },
   suggestion: {
     backgroundColor: colors.backgroundAlt,
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    boxShadow: '0px 3px 8px rgba(0,0,0,0.04)',
+    borderRadius: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    boxShadow: '0px 2px 4px rgba(0,0,0,0.03)',
   },
   text: {
     color: colors.text,
     fontFamily: 'Montserrat_600SemiBold',
-    fontSize: 11,
-    lineHeight: 13,
+    fontSize: 10,
+    lineHeight: 12,
   },
 });

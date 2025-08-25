@@ -64,8 +64,7 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    // Use child padding for consistent gutters; cancel outer padding with negative margins
-    marginHorizontal: -2,
+    marginHorizontal: -1,
     marginTop: 0,
   },
 });

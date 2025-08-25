@@ -8,15 +8,17 @@ interface Props {
   categories: Category[];
   selectedId: string;
   onSelect: (id: string) => void;
+  style?: any;
 }
 
-export default function CategoryBar({ categories, selectedId, onSelect }: Props) {
+export default function CategoryBar({ categories, selectedId, onSelect, style }: Props) {
   return (
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      style={styles.container}
+      style={[styles.container, style]}
       contentContainerStyle={styles.row}
+      keyboardShouldPersistTaps="handled"
     >
       {categories.map((cat) => {
         const active = cat.id === selectedId;
@@ -30,7 +32,7 @@ export default function CategoryBar({ categories, selectedId, onSelect }: Props)
             onPress={() => onSelect(cat.id)}
             activeOpacity={0.9}
           >
-            <Icon name={cat.icon as any} size={16} color={colors.text} />
+            <Icon name={cat.icon as any} size={14} color={colors.text} />
             <Text style={styles.chipText}>{cat.label}</Text>
           </TouchableOpacity>
         );
@@ -47,22 +49,22 @@ const styles = StyleSheet.create({
   },
   row: {
     paddingVertical: 0,
-    gap: 3 as any,
+    gap: 2 as any,
     alignItems: 'center',
   },
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3 as any,
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-    borderRadius: 9,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
     borderWidth: 1,
-    boxShadow: '0px 3px 8px rgba(0,0,0,0.04)',
+    boxShadow: '0px 2px 6px rgba(0,0,0,0.03)',
   },
   chipText: {
     color: colors.text,
     fontFamily: 'Montserrat_600SemiBold',
-    fontSize: 12,
+    fontSize: 11,
   },
 });

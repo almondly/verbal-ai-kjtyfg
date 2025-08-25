@@ -54,16 +54,16 @@ export default TileItem;
 
 const styles = StyleSheet.create({
   tileWrap: {
-    paddingHorizontal: 2,
+    paddingHorizontal: 1,
     paddingVertical: 1,
   },
   tile: {
     aspectRatio: 1,
-    borderRadius: 14,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 8,
-    boxShadow: '0px 8px 16px rgba(0,0,0,0.07)',
+    padding: 6,
+    boxShadow: '0px 6px 12px rgba(0,0,0,0.06)',
   },
   imageWrap: {
     width: '100%',
@@ -72,15 +72,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   image: {
-    width: '70%',
-    height: '70%',
-    borderRadius: 10,
+    width: '68%',
+    height: '68%',
+    borderRadius: 9,
   },
   text: {
     fontFamily: 'Montserrat_600SemiBold',
-    fontSize: 13,
+    fontSize: 12,
     color: colors.text,
     textAlign: 'center',
-    marginTop: 1,
+    marginTop: 0,
   },
 });

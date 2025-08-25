@@ -107,12 +107,14 @@ export default function MainScreen() {
         <SuggestionsRow
           suggestions={suggestions}
           onPressSuggestion={onSuggestionPress}
+          style={{ marginTop: 0, marginBottom: 0 }}
         />
 
         <CategoryBar
           categories={categories}
           selectedId={selectedCategory}
           onSelect={setSelectedCategory}
+          style={{ marginTop: 0, marginBottom: 0 }}
         />
 
         <ScrollView
