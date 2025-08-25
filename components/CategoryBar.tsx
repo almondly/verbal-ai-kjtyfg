@@ -15,6 +15,7 @@ export default function CategoryBar({ categories, selectedId, onSelect }: Props)
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
+      style={styles.container}
       contentContainerStyle={styles.row}
     >
       {categories.map((cat) => {
@@ -39,6 +40,10 @@ export default function CategoryBar({ categories, selectedId, onSelect }: Props)
 }
 
 const styles = StyleSheet.create({
+  container: {
+    marginVertical: 0,
+    paddingVertical: 0,
+  },
   row: {
     paddingVertical: 0,
     gap: 6 as any,

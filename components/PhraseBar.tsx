@@ -38,12 +38,11 @@ const styles = StyleSheet.create({
     width: '100%',
     backgroundColor: colors.backgroundAlt,
     borderRadius: 14,
-    paddingVertical: 8,
+    paddingVertical: 6,
     paddingHorizontal: 10,
     boxShadow: '0px 8px 16px rgba(0,0,0,0.07)',
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8 as any,
   },
   text: {
     fontFamily: 'Montserrat_600SemiBold',

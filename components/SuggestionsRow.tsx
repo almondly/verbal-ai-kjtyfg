@@ -15,6 +15,7 @@ export default function SuggestionsRow({ suggestions, onPressSuggestion }: Props
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
+      style={styles.container}
       contentContainerStyle={styles.row}
     >
       {suggestions.slice(0, 6).map((s) => (
@@ -32,6 +33,10 @@ export default function SuggestionsRow({ suggestions, onPressSuggestion }: Props
 }
 
 const styles = StyleSheet.create({
+  container: {
+    marginVertical: 0,
+    paddingVertical: 0,
+  },
   row: {
     paddingVertical: 0,
     gap: 6 as any,
