@@ -107,18 +107,18 @@ export default function MainScreen() {
         <SuggestionsRow
           suggestions={suggestions}
           onPressSuggestion={onSuggestionPress}
-          style={{ marginTop: -8, marginBottom: -8 }}
+          style={{ marginTop: -10, marginBottom: -14 }}
         />
 
         <CategoryBar
           categories={categories}
           selectedId={selectedCategory}
           onSelect={setSelectedCategory}
-          style={{ marginTop: -8, marginBottom: -8 }}
+          style={{ marginTop: -14, marginBottom: -12 }}
         />
 
         <ScrollView
-          style={{ flex: 1, marginTop: -8 }}
+          style={{ flex: 1, marginTop: -12 }}
           contentContainerStyle={{ paddingTop: 0, paddingBottom: 0 }}
           contentInsetAdjustmentBehavior="never"
           keyboardShouldPersistTaps="handled"
