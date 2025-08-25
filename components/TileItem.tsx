@@ -55,7 +55,7 @@ export default TileItem;
 const styles = StyleSheet.create({
   tileWrap: {
     paddingHorizontal: 2,
-    paddingVertical: 2,
+    paddingVertical: 1,
   },
   tile: {
     aspectRatio: 1,
@@ -81,6 +81,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.text,
     textAlign: 'center',
-    marginTop: 2,
+    marginTop: 1,
   },
 });

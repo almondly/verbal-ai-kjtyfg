@@ -88,7 +88,7 @@ export default function MainScreen() {
   return (
     <LandscapeGuard>
       <View style={[commonStyles.container, { paddingHorizontal: 10 }]}>
-        <View style={[styles.topBar, { marginBottom: 4 }]}>
+        <View style={[styles.topBar, { marginBottom: 2 }]}>
           <TouchableOpacity onPress={() => setSettingsOpen(true)} style={styles.iconBtn} activeOpacity={0.8}>
             <Icon name="settings-outline" size={22} color={colors.text} />
           </TouchableOpacity>
@@ -117,7 +117,7 @@ export default function MainScreen() {
 
         <ScrollView
           style={{ flex: 1 }}
-          contentContainerStyle={{ paddingTop: 0, paddingBottom: 2 }}
+          contentContainerStyle={{ paddingTop: 0, paddingBottom: 0 }}
           keyboardShouldPersistTaps="handled"
         >
           <CommunicationGrid

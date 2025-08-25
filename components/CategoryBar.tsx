@@ -41,24 +41,24 @@ export default function CategoryBar({ categories, selectedId, onSelect }: Props)
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 2,
-    marginBottom: 2,
+    marginTop: 0,
+    marginBottom: 0,
     paddingVertical: 0,
   },
   row: {
     paddingVertical: 0,
-    gap: 4 as any,
+    gap: 3 as any,
     alignItems: 'center',
   },
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4 as any,
+    gap: 3 as any,
     paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 10,
+    paddingVertical: 3,
+    borderRadius: 9,
     borderWidth: 1,
-    boxShadow: '0px 4px 10px rgba(0,0,0,0.04)',
+    boxShadow: '0px 3px 8px rgba(0,0,0,0.04)',
   },
   chipText: {
     color: colors.text,
