@@ -64,6 +64,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     marginHorizontal: -1, // match TileItem horizontal padding for ultra-tight gutters
-    marginTop: -12, // pull grid closer to the CategoryBar
+    marginTop: -8, // collapse gap from previous section
   },
 });
