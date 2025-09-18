@@ -71,7 +71,11 @@ function RootLayoutInner() {
           headerShown: false,
           animation: 'default',
         }}
-      />
+        initialRouteName="main-menu"
+      >
+        <Stack.Screen name="main-menu" />
+        <Stack.Screen name="index" />
+      </Stack>
     </SafeAreaView>
   );
 }

@@ -1,5 +1,6 @@
+
 import { ReactNode } from 'react';
-import { View, Text, useWindowDimensions, StyleSheet } from 'react-native';
+import { View, Text, useWindowDimensions, StyleSheet, Platform } from 'react-native';
 import { colors } from '../styles/commonStyles';
 import Icon from './Icon';
 
@@ -11,12 +12,40 @@ export default function LandscapeGuard({ children }: Props) {
   const { width, height } = useWindowDimensions();
   const isLandscape = width >= height;
 
-  // Only render app content in landscape
+  // On web, we'll be more lenient and show a message instead of blocking
+  if (Platform.OS === 'web') {
+    if (isLandscape) {
+      return <>{children}</>;
+    }
+    
+    // Show a less intrusive message on web
+    return (
+      <View style={styles.container}>
+        <View style={styles.card}>
+          <Icon name="phone-landscape-outline" size={48} color={colors.text} />
+          <Text style={styles.title}>Better in Landscape</Text>
+          <Text style={styles.text}>
+            This app works best in landscape mode. Please rotate your device or resize your browser window for the optimal experience.
+          </Text>
+          <View style={styles.webFallback}>
+            <Text style={styles.webFallbackText}>
+              You can continue in portrait mode, but some features may not display optimally.
+            </Text>
+            <View style={styles.appContainer}>
+              {children}
+            </View>
+          </View>
+        </View>
+      </View>
+    );
+  }
+
+  // On mobile, enforce landscape more strictly
   if (isLandscape) {
     return <>{children}</>;
   }
 
-  // Render rotate prompt if portrait
+  // Render rotate prompt if portrait on mobile
   return (
     <View style={styles.container}>
       <View style={styles.card}>
@@ -66,5 +95,24 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: 'center',
     opacity: 0.8,
+  },
+  webFallback: {
+    marginTop: 20,
+    width: '100%',
+    alignItems: 'center',
+  },
+  webFallbackText: {
+    fontFamily: 'Montserrat_400Regular',
+    color: colors.textSecondary,
+    fontSize: 12,
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  appContainer: {
+    width: '100%',
+    height: 400,
+    overflow: 'hidden',
+    borderRadius: 8,
+    backgroundColor: colors.background,
   },
 });
