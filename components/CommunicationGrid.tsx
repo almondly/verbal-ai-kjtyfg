@@ -1,4 +1,3 @@
-
 import { View, StyleSheet, useWindowDimensions } from 'react-native';
 import TileItem from './TileItem';
 import { Tile } from '../types';
@@ -11,7 +10,6 @@ interface Props {
 }
 
 function getColumns(width: number): number {
-  // Reduce columns to make tiles larger at each breakpoint
   if (width >= 1400) return 8;
   if (width >= 1200) return 7;
   if (width >= 1000) return 6;
@@ -20,12 +18,16 @@ function getColumns(width: number): number {
   return 3;
 }
 
-export default function CommunicationGrid({ tiles, onPressTile, onPressAdd, onRemoveTile }: Props) {
+export default function CommunicationGrid({
+  tiles,
+  onPressTile,
+  onPressAdd,
+  onRemoveTile,
+}: Props) {
   const { width } = useWindowDimensions();
   const columns = getColumns(width);
-  const itemPercent = 100 / columns; // exact percentage; gutters handled by child padding
+  const itemPercent = 100 / columns;
 
-  // Show an "Add" tile
   const addTile: Tile = {
     id: '__add__',
     text: 'Add',
@@ -63,7 +65,8 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginHorizontal: -1, // match TileItem horizontal padding for ultra-tight gutters
-    marginTop: -12, // pull grid closer to the CategoryBar
+    marginHorizontal: -1,
+    marginTop: 260, // increased from 200 to 260 for more spacing
+    backgroundColor: 'transparent',
   },
 });

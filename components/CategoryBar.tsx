@@ -1,6 +1,6 @@
 
-import { ScrollView, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { colors } from '../styles/commonStyles';
+import { ScrollView, Text, TouchableOpacity, StyleSheet, View, Animated } from 'react-native';
+import { useRef } from 'react';
 import Icon from './Icon';
 import { Category } from '../types';
 
@@ -12,59 +12,99 @@ interface Props {
 }
 
 export default function CategoryBar({ categories, selectedId, onSelect, style }: Props) {
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  const animatePop = () => {
+    Animated.sequence([
+      Animated.timing(scaleAnim, { toValue: 1.15, duration: 100, useNativeDriver: true }),
+      Animated.timing(scaleAnim, { toValue: 1, duration: 100, useNativeDriver: true }),
+    ]).start();
+  };
+
   return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      style={[styles.container, style]}
-      contentContainerStyle={styles.row}
-      keyboardShouldPersistTaps="handled"
-    >
-      {categories.map((cat) => {
-        const active = cat.id === selectedId;
-        return (
-          <TouchableOpacity
-            key={cat.id}
-            style={[
-              styles.chip,
-              { backgroundColor: active ? cat.color : colors.backgroundAlt, borderColor: cat.color },
-            ]}
-            onPress={() => onSelect(cat.id)}
-            activeOpacity={0.9}
-          >
-            <Icon name={cat.icon as any} size={14} color={colors.text} />
-            <Text style={styles.chipText}>{cat.label}</Text>
-          </TouchableOpacity>
-        );
-      })}
-    </ScrollView>
+    <View style={[styles.wrapper, style]}>
+      <View style={styles.backgroundBox} />
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.row}
+        keyboardShouldPersistTaps="handled"
+      >
+        {categories.map((cat, index) => {
+          const active = cat.id === selectedId;
+
+          return (
+            <Animated.View
+              key={cat.id}
+              style={{
+                transform: [{ scale: active ? scaleAnim : 1 }],
+                marginRight: index < categories.length - 1 ? 10 : 0,
+              }}
+            >
+              <TouchableOpacity
+                style={[
+                  styles.chip,
+                  {
+                    backgroundColor: active ? cat.color : '#FFFFFF',
+                    borderColor: cat.color,
+                    shadowColor: active ? cat.color : 'transparent',
+                    shadowOpacity: active ? 0.8 : 0,
+                    shadowRadius: active ? 10 : 0,
+                    elevation: active ? 10 : 0,
+                  },
+                ]}
+                onPress={() => {
+                  onSelect(cat.id);
+                  animatePop();
+                }}
+                activeOpacity={0.8}
+              >
+                <Icon name={cat.icon as any} size={28} color="#000" />
+                <Text style={[styles.chipText, { color: '#000' }]}>{cat.label}</Text>
+              </TouchableOpacity>
+            </Animated.View>
+          );
+        })}
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    marginTop: 0,
-    marginBottom: 0,
-    paddingVertical: 0,
+  wrapper: {
+    position: 'absolute',
+    top: 280,
+    left: 0,
+    right: 0,
+    zIndex: 2,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  backgroundBox: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
   },
   row: {
-    paddingVertical: 0,
-    gap: 4 as any,
     alignItems: 'center',
   },
   chip: {
-    flexDirection: 'row',
+    width: 80,
+    height: 80,
+    borderRadius: 16,
+    borderWidth: 2,
+    justifyContent: 'center',
     alignItems: 'center',
-    gap: 6 as any,
-    paddingHorizontal: 10,
-    height: 28,
-    borderRadius: 10,
-    borderWidth: 1,
-    boxShadow: '0px 2px 6px rgba(0,0,0,0.03)',
   },
   chipText: {
-    color: colors.text,
-    fontFamily: 'Montserrat_600SemiBold',
     fontSize: 12,
+    fontWeight: '600',
+    marginTop: 6,
+    textAlign: 'center',
   },
 });

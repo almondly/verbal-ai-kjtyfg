@@ -3,6 +3,7 @@ import { memo, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Animated } from 'react-native';
 import { Tile } from '../types';
 import { colors } from '../styles/commonStyles';
+import { categories } from '../data/categories';
 import Icon from './Icon';
 
 interface Props {
@@ -13,20 +14,44 @@ interface Props {
   itemPercent?: number; // dynamic width from grid for responsive columns
 }
 
-const TileItem = memo(function TileItem({ tile, onPress, onLongPress, isAdd, itemPercent = 33.33 }: Props) {
+const TileItem = memo(function TileItem({
+  tile,
+  onPress,
+  onLongPress,
+  isAdd,
+  itemPercent = 33.33,
+}: Props) {
   const scale = useRef(new Animated.Value(1)).current;
 
   const handlePressIn = () => {
     Animated.spring(scale, { toValue: 0.96, useNativeDriver: true, speed: 50, bounciness: 8 }).start();
   };
+
   const handlePressOut = () => {
     Animated.spring(scale, { toValue: 1, useNativeDriver: true, speed: 50, bounciness: 8 }).start();
   };
 
-  const bg = isAdd ? '#F3F4F6' : tile.color || '#FFFFFF';
+  // Get the category color for this tile
+  const getCategoryColor = () => {
+    if (isAdd) return '#F3F4F6';
+    if (tile.color) return tile.color; // Use tile's color if it has one
+    if (tile.category) {
+      const category = categories.find(cat => cat.id === tile.category);
+      if (category) return category.color;
+    }
+    return '#FFFFFF'; // fallback
+  };
+
+  const bg = getCategoryColor();
 
   return (
-    <Animated.View style={[styles.tileWrap, { width: `${itemPercent}%`, transform: [{ scale }] }]}>
+    <Animated.View
+      style={[
+        styles.tileWrap,
+        { width: `${itemPercent}%`, transform: [{ scale }] },
+        { position: 'relative', zIndex: 10 }, // bring in front
+      ]}
+    >
       <TouchableOpacity
         onPress={onPress}
         onLongPress={onLongPress}
@@ -44,7 +69,9 @@ const TileItem = memo(function TileItem({ tile, onPress, onLongPress, isAdd, ite
             <Icon name="chatbubble-ellipses-outline" size={34} color={colors.text} />
           )}
         </View>
-        <Text style={styles.text} numberOfLines={2}>{tile.text}</Text>
+        <Text style={styles.text} numberOfLines={2}>
+          {tile.text}
+        </Text>
       </TouchableOpacity>
     </Animated.View>
   );
@@ -54,7 +81,7 @@ export default TileItem;
 
 const styles = StyleSheet.create({
   tileWrap: {
-    paddingHorizontal: 1, // ultra-tight gutter
+    paddingHorizontal: 1,
     paddingVertical: 1,
   },
   tile: {

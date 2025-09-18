@@ -17,6 +17,8 @@ import { categories } from '../data/categories';
 import LandscapeGuard from '../components/LandscapeGuard';
 
 export default function MainScreen() {
+  console.log('MainScreen rendering...');
+  
   const {
     tiles,
     addTile,
@@ -36,7 +38,12 @@ export default function MainScreen() {
   const [addOpen, setAddOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('core');
 
+  console.log('Tiles loaded:', tiles.length);
+  console.log('Categories loaded:', categories.length);
+  console.log('Selected category:', selectedCategory);
+
   const handleTilePress = useCallback((tile: Tile) => {
+    console.log('Tile pressed:', tile.text);
     setSentence(prev => [...prev, tile]);
   }, []);
 
@@ -49,6 +56,7 @@ export default function MainScreen() {
   const handleSpeak = useCallback(() => {
     const text = sentence.map(t => t.text).join(' ');
     if (!text.trim()) {
+      console.log('No text to speak');
       return;
     }
     const ttsText = normalizeForTTS(text);
@@ -60,6 +68,7 @@ export default function MainScreen() {
   }, [sentence, recordSentence]);
 
   const handleClear = useCallback(() => {
+    console.log('Clearing sentence');
     setSentence([]);
   }, []);
 
@@ -70,6 +79,7 @@ export default function MainScreen() {
   }, [sentence, tiles, suggestNextWords]);
 
   const onSuggestionPress = useCallback((suggestionText: string) => {
+    console.log('Suggestion pressed:', suggestionText);
     const found = tiles.find(t => t.text.toLowerCase() === suggestionText.toLowerCase());
     const tile: Tile = found || {
       id: `temp-${suggestionText}-${Date.now()}`,
@@ -84,6 +94,8 @@ export default function MainScreen() {
     if (selectedCategory === 'all') return tiles;
     return tiles.filter(t => t.category === selectedCategory);
   }, [tiles, selectedCategory]);
+
+  console.log('Visible tiles:', visibleTiles.length);
 
   return (
     <LandscapeGuard>

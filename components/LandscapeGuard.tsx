@@ -1,4 +1,3 @@
-
 import { ReactNode } from 'react';
 import { View, Text, useWindowDimensions, StyleSheet } from 'react-native';
 import { colors } from '../styles/commonStyles';
@@ -10,19 +9,22 @@ interface Props {
 
 export default function LandscapeGuard({ children }: Props) {
   const { width, height } = useWindowDimensions();
-  const isPortrait = height >= width;
+  const isLandscape = width >= height;
 
-  if (isPortrait) {
+  // Only render app content in landscape
+  if (isLandscape) {
     return <>{children}</>;
   }
 
-  // If rendered in landscape, show rotate prompt for portrait use
+  // Render rotate prompt if portrait
   return (
     <View style={styles.container}>
       <View style={styles.card}>
-        <Icon name="phone-portrait-outline" size={48} color={colors.text} />
+        <Icon name="phone-landscape-outline" size={48} color={colors.text} />
         <Text style={styles.title}>Rotate Device</Text>
-        <Text style={styles.text}>Please rotate your device to portrait to use the app.</Text>
+        <Text style={styles.text}>
+          Please rotate your device to landscape to use the app.
+        </Text>
       </View>
     </View>
   );

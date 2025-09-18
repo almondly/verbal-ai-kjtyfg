@@ -1,17 +1,16 @@
-
 import { StyleSheet } from 'react-native';
 
 export const colors = {
-  primary: '#2D6CDF',
-  secondary: '#6FA8FF',
-  accent: '#FFD166',
-  background: '#F5F9FF',
-  backgroundAlt: '#FFFFFF',
-  text: '#1F2937',
-  grey: '#9CA3AF',
-  card: '#FFFFFF',
-  danger: '#EF4444',
-  success: '#10B981',
+  primary: '#3D7EFF', // vibrant blue
+  secondary: '#00E5FF', // bright cyan
+  accent: '#FFD700', // neon yellow
+  background: '#F5F9FF', // keep original
+  backgroundAlt: '#FFFFFF', // keep original
+  text: '#1F2937', // same dark text for readability
+  grey: '#A3A3A3', // slightly brighter grey
+  card: '#FFFFFF', // keep original
+  danger: '#FF4C4C', // vibrant red
+  success: '#32CD32', // bright green
 };
 
 export const buttonStyles = StyleSheet.create({
@@ -38,7 +37,6 @@ export const commonStyles = StyleSheet.create({
     backgroundColor: colors.background,
     width: '100%',
     height: '100%',
-    // Important: do not center everything by default, it breaks top-aligned layouts
     justifyContent: 'flex-start',
     alignItems: 'stretch',
   },
