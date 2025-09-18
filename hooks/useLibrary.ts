@@ -6,7 +6,7 @@ import { defaultTiles } from '../data/defaultTiles';
 
 const LIBRARY_KEY = 'aac_tiles_v1';
 const SEED_VERSION_KEY = 'aac_tiles_seed_version';
-const CURRENT_SEED_VERSION = 2;
+const CURRENT_SEED_VERSION = 3; // Incremented to trigger migration with new expanded vocabulary
 
 function mergeMissingDefaults(stored: Tile[], defaults: Tile[]): Tile[] {
   // Keep user tiles intact; add any missing defaults by id
@@ -47,7 +47,7 @@ export function useLibrary() {
 
         if (!loadedTiles) {
           // No saved tiles: seed with defaults and mark version
-          console.log('Seeding tiles for the first time');
+          console.log('Seeding tiles for the first time with expanded vocabulary and images');
           setTiles(defaultTiles);
           await AsyncStorage.setItem(LIBRARY_KEY, JSON.stringify(defaultTiles));
           await AsyncStorage.setItem(SEED_VERSION_KEY, String(CURRENT_SEED_VERSION));
@@ -57,7 +57,7 @@ export function useLibrary() {
         if (seedVersion < CURRENT_SEED_VERSION) {
           // Migrate: merge in any missing defaults
           console.log(
-            `Migrating tiles: seedVersion ${seedVersion} -> ${CURRENT_SEED_VERSION}`
+            `Migrating tiles: seedVersion ${seedVersion} -> ${CURRENT_SEED_VERSION} - Adding expanded vocabulary with AAC images`
           );
           const merged = mergeMissingDefaults(loadedTiles, defaultTiles);
           setTiles(merged);
@@ -94,6 +94,7 @@ export function useLibrary() {
 
   const resetTiles = async () => {
     try {
+      console.log('Resetting tiles to expanded vocabulary with AAC images');
       setTiles(defaultTiles);
       await AsyncStorage.setItem(LIBRARY_KEY, JSON.stringify(defaultTiles));
       await AsyncStorage.setItem(SEED_VERSION_KEY, String(CURRENT_SEED_VERSION));

@@ -64,7 +64,13 @@ const TileItem = memo(function TileItem({
           {isAdd ? (
             <Icon name="add-circle-outline" size={34} color={colors.text} />
           ) : tile.imageUri ? (
-            <Image source={{ uri: tile.imageUri }} style={styles.image} resizeMode="cover" />
+            <Image 
+              source={{ uri: tile.imageUri }} 
+              style={styles.image} 
+              resizeMode="cover"
+              // Add loading fallback and error handling for better UX
+              onError={() => console.log(`Failed to load image for tile: ${tile.text}`)}
+            />
           ) : (
             <Icon name="chatbubble-ellipses-outline" size={34} color={colors.text} />
           )}
@@ -97,17 +103,20 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 4,
   },
   image: {
-    width: '72%',
-    height: '72%',
-    borderRadius: 10,
+    width: '80%',
+    height: '80%',
+    borderRadius: 8,
+    backgroundColor: '#f0f0f0', // Light background for loading state
   },
   text: {
     fontFamily: 'Montserrat_600SemiBold',
-    fontSize: 14,
+    fontSize: 12,
     color: colors.text,
     textAlign: 'center',
-    marginTop: 0,
+    marginTop: 2,
+    lineHeight: 14,
   },
 });
