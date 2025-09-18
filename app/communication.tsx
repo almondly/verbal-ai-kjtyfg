@@ -9,11 +9,9 @@ import PhraseBar from '../components/PhraseBar';
 import SuggestionsRow from '../components/SuggestionsRow';
 import AdvancedSuggestionsRow from '../components/AdvancedSuggestionsRow';
 import SettingsSheet from '../components/SettingsSheet';
-import IdleOverlay from '../components/IdleOverlay';
 import { useLibrary } from '../hooks/useLibrary';
 import { useAI } from '../hooks/useAI';
 import { useAdvancedAI } from '../hooks/useAdvancedAI';
-import { useIdleDetection } from '../hooks/useIdleDetection';
 import { useEmotionSettings } from '../hooks/useEmotionSettings';
 import { useTTSSettings } from '../hooks/useTTSSettings';
 import { Tile } from '../types';
@@ -55,25 +53,26 @@ export default function CommunicationScreen() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('core');
-  const [showIdleOverlay, setShowIdleOverlay] = useState(false);
   const [advancedSuggestions, setAdvancedSuggestions] = useState<any[]>([]);
 
-  const { resetTimer } = useIdleDetection({
-    timeout: settings.idleTimeout,
-    onIdle: () => {
-      console.log('Device went idle, showing emotion overlay');
-      setShowIdleOverlay(true);
-    },
-    onActive: () => {
-      console.log('Device became active');
-      setShowIdleOverlay(false);
-    },
-  });
+  // Removed idle detection to prevent flickering issues
+  // const { resetTimer } = useIdleDetection({
+  //   timeout: settings.idleTimeout,
+  //   onIdle: () => {
+  //     console.log('Device went idle, showing emotion overlay');
+  //     setShowIdleOverlay(true);
+  //   },
+  //   onActive: () => {
+  //     console.log('Device became active');
+  //     setShowIdleOverlay(false);
+  //   },
+  // });
 
-  // Reset idle timer on any interaction
+  // Simple user activity handler without idle detection
   const handleUserActivity = useCallback(() => {
-    resetTimer();
-  }, [resetTimer]);
+    console.log('User activity detected');
+    // Just log activity, no idle detection for now
+  }, []);
 
   useEffect(() => {
     // Lock orientation on native platforms only
@@ -86,9 +85,9 @@ export default function CommunicationScreen() {
       }
     }
     
-    // Reset timer when component mounts
-    handleUserActivity();
-  }, [handleUserActivity]);
+    // Log component mount
+    console.log('Communication screen mounted');
+  }, []);
 
   // Update advanced suggestions when sentence changes
   useEffect(() => {
@@ -184,12 +183,6 @@ export default function CommunicationScreen() {
   const handleBackToMenu = () => {
     console.log('Going back to main menu');
     router.push('/main-menu');
-  };
-
-  const handleDismissIdle = () => {
-    console.log('Dismissing idle overlay');
-    setShowIdleOverlay(false);
-    handleUserActivity();
   };
 
   console.log('Visible tiles:', visibleTiles.length);
@@ -307,11 +300,12 @@ export default function CommunicationScreen() {
           }}
         />
 
-        <IdleOverlay
+        {/* Removed IdleOverlay to prevent flickering */}
+        {/* <IdleOverlay
           visible={showIdleOverlay}
           emotion={settings.selectedEmotion}
           onDismiss={handleDismissIdle}
-        />
+        /> */}
       </View>
     </LandscapeGuard>
   );

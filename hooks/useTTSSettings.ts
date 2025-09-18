@@ -29,9 +29,19 @@ const DEFAULT_TTS_SETTINGS: TTSSettings = {
 
 const TTS_STORAGE_KEY = 'tts_settings';
 
+// Only include the clearest, most understandable voices
+const CLEAR_VOICES: TTSVoice[] = [
+  { identifier: 'default', name: 'Default Voice', language: 'en-US' },
+  { identifier: 'com.apple.ttsbundle.Samantha-compact', name: 'Samantha (Clear)', language: 'en-US' },
+  { identifier: 'com.apple.ttsbundle.Alex-compact', name: 'Alex (Clear)', language: 'en-US' },
+  { identifier: 'com.apple.ttsbundle.Victoria-compact', name: 'Victoria (Clear)', language: 'en-US' },
+  { identifier: 'com.apple.ttsbundle.Daniel-compact', name: 'Daniel (British)', language: 'en-GB' },
+  { identifier: 'com.apple.ttsbundle.Karen-compact', name: 'Karen (Australian)', language: 'en-AU' },
+];
+
 export function useTTSSettings() {
   const [settings, setSettings] = useState<TTSSettings>(DEFAULT_TTS_SETTINGS);
-  const [availableVoices, setAvailableVoices] = useState<TTSVoice[]>([]);
+  const [availableVoices, setAvailableVoices] = useState<TTSVoice[]>(CLEAR_VOICES);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -51,43 +61,47 @@ export function useTTSSettings() {
       const voices = await Speech.getAvailableVoicesAsync();
       console.log('Raw TTS voices from Speech API:', voices);
       
-      const formattedVoices: TTSVoice[] = [
-        { identifier: 'default', name: 'Default Voice', language: 'en-US' },
-      ];
+      // Start with our curated clear voices
+      const formattedVoices: TTSVoice[] = [...CLEAR_VOICES];
 
-      // Add system voices if available
+      // Add system voices if available, but filter for clarity
       if (voices && voices.length > 0) {
-        voices.forEach(voice => {
-          formattedVoices.push({
-            identifier: voice.identifier,
-            name: voice.name,
-            language: voice.language,
-            quality: voice.quality,
-          });
+        const clearSystemVoices = voices.filter(voice => {
+          const name = voice.name.toLowerCase();
+          // Only include voices known to be clear and easy to understand
+          return (
+            name.includes('samantha') ||
+            name.includes('alex') ||
+            name.includes('victoria') ||
+            name.includes('daniel') ||
+            name.includes('karen') ||
+            name.includes('susan') ||
+            name.includes('allison') ||
+            name.includes('tom') ||
+            name.includes('enhanced') ||
+            (voice.quality === 'enhanced' || voice.quality === 'premium')
+          );
         });
-      } else {
-        // Fallback voices for different platforms
-        formattedVoices.push(
-          { identifier: 'com.apple.ttsbundle.Samantha-compact', name: 'Samantha', language: 'en-US' },
-          { identifier: 'com.apple.ttsbundle.Alex-compact', name: 'Alex', language: 'en-US' },
-          { identifier: 'com.apple.ttsbundle.Victoria-compact', name: 'Victoria', language: 'en-US' },
-          { identifier: 'com.apple.ttsbundle.Daniel-compact', name: 'Daniel', language: 'en-GB' },
-          { identifier: 'com.apple.ttsbundle.Karen-compact', name: 'Karen', language: 'en-AU' },
-          { identifier: 'com.apple.speech.synthesis.voice.Fred', name: 'Fred', language: 'en-US' },
-          { identifier: 'com.apple.speech.synthesis.voice.Princess', name: 'Princess', language: 'en-US' },
-        );
+
+        clearSystemVoices.forEach(voice => {
+          // Avoid duplicates
+          if (!formattedVoices.find(v => v.identifier === voice.identifier)) {
+            formattedVoices.push({
+              identifier: voice.identifier,
+              name: `${voice.name} (System)`,
+              language: voice.language,
+              quality: voice.quality,
+            });
+          }
+        });
       }
       
-      console.log('Formatted TTS voices:', formattedVoices);
+      console.log('Filtered clear TTS voices:', formattedVoices);
       setAvailableVoices(formattedVoices);
     } catch (err) {
       console.log('Error loading available voices:', err);
-      // Fallback to basic voices
-      setAvailableVoices([
-        { identifier: 'default', name: 'Default Voice', language: 'en-US' },
-        { identifier: 'system-voice-1', name: 'System Voice 1', language: 'en-US' },
-        { identifier: 'system-voice-2', name: 'System Voice 2', language: 'en-US' },
-      ]);
+      // Fallback to our curated list
+      setAvailableVoices(CLEAR_VOICES);
     }
   };
 

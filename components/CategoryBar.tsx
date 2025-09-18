@@ -46,9 +46,9 @@ export default function CategoryBar({ categories, selectedId, onSelect, style }:
                   styles.chip,
                   {
                     backgroundColor: active ? cat.color : colors.backgroundAlt,
-                    borderColor: active ? cat.color : colors.border,
-                    borderWidth: active ? 3 : 1,
-                    boxShadow: active ? `0px 0px 25px ${cat.color}` : '0px 2px 6px rgba(0,0,0,0.08)',
+                    borderColor: cat.color,
+                    borderWidth: active ? 3 : 2,
+                    boxShadow: `0px 0px ${active ? '25px' : '15px'} ${cat.color}`,
                   },
                 ]}
                 onPress={() => {

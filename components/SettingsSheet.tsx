@@ -43,7 +43,7 @@ export default function SettingsSheet({
   onEmotionChange,
 }: Props) {
   const sheetRef = useRef<BottomSheet>(null);
-  const snapPoints = useMemo(() => ['98%'], []);
+  const snapPoints = useMemo(() => ['95%'], []);
   const [phrase, setPhrase] = useState('');
   const [color, setColor] = useState('#FFFFFF');
   const [imageUri, setImageUri] = useState<string | undefined>(undefined);
@@ -199,8 +199,8 @@ export default function SettingsSheet({
                 </View>
                 
                 <View style={styles.voicesContainer}>
-                  <Text style={styles.voicesTitle}>Available Voices</Text>
-                  <View style={styles.voicesList}>
+                  <Text style={styles.voicesTitle}>Available Clear Voices</Text>
+                  <ScrollView style={styles.voicesList} nestedScrollEnabled={true}>
                     {availableVoices.map((voice) => (
                       <TouchableOpacity
                         key={voice.identifier}
@@ -220,7 +220,7 @@ export default function SettingsSheet({
                         )}
                       </TouchableOpacity>
                     ))}
-                  </View>
+                  </ScrollView>
                 </View>
               </View>
 
@@ -281,7 +281,7 @@ export default function SettingsSheet({
               </View>
 
               {/* Extra padding at bottom to ensure all content is accessible */}
-              <View style={{ height: 150 }} />
+              <View style={{ height: 200 }} />
             </>
           ) : (
             <View style={styles.section}>
@@ -343,7 +343,7 @@ export default function SettingsSheet({
               </TouchableOpacity>
 
               {/* Extra padding at bottom */}
-              <View style={{ height: 80 }} />
+              <View style={{ height: 120 }} />
             </View>
           )}
         </BottomSheetScrollView>
@@ -362,14 +362,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 60,
+    paddingBottom: 100,
     flexGrow: 1,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 24,
   },
   title: {
     fontSize: 24,
@@ -382,19 +382,20 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   section: {
-    marginBottom: 24,
+    marginBottom: 32,
   },
   sectionTitle: {
     fontSize: 18,
     fontFamily: 'Montserrat_600SemiBold',
     color: colors.text,
-    marginBottom: 12,
+    marginBottom: 16,
   },
   currentEmotionContainer: {
     alignItems: 'center',
     backgroundColor: '#F9FAFB',
     borderRadius: 20,
-    padding: 20,
+    padding: 24,
+    marginBottom: 8,
   },
   currentEmotionText: {
     fontSize: 18,
@@ -406,17 +407,18 @@ const styles = StyleSheet.create({
   emotionGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 10 as any,
+    gap: 12 as any,
     justifyContent: 'space-between',
   },
   emotionOption: {
     alignItems: 'center',
     backgroundColor: '#F9FAFB',
     borderRadius: 16,
-    padding: 10,
+    padding: 12,
     width: '23%',
     borderWidth: 3,
     borderColor: 'transparent',
+    marginBottom: 8,
   },
   emotionOptionSelected: {
     borderColor: colors.primary,
@@ -433,11 +435,11 @@ const styles = StyleSheet.create({
   currentVoiceContainer: {
     backgroundColor: '#F9FAFB',
     borderRadius: 16,
-    padding: 16,
+    padding: 20,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 20,
   },
   voiceInfoContainer: {
     flex: 1,
@@ -451,22 +453,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Montserrat_700Bold',
     color: colors.text,
-    marginTop: 2,
+    marginTop: 4,
   },
   currentVoiceLanguage: {
     fontSize: 12,
     fontFamily: 'Montserrat_400Regular',
     color: colors.textSecondary,
-    marginTop: 2,
+    marginTop: 4,
   },
   testVoiceBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.background,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderRadius: 12,
-    gap: 6 as any,
+    gap: 8 as any,
   },
   testVoiceText: {
     fontSize: 14,
@@ -476,25 +478,24 @@ const styles = StyleSheet.create({
   voicesContainer: {
     backgroundColor: '#F9FAFB',
     borderRadius: 16,
-    padding: 16,
-    maxHeight: 300,
+    padding: 20,
   },
   voicesTitle: {
     fontSize: 14,
     fontFamily: 'Montserrat_600SemiBold',
     color: colors.textSecondary,
-    marginBottom: 12,
+    marginBottom: 16,
   },
   voicesList: {
-    maxHeight: 220,
+    maxHeight: 280,
   },
   voiceOption: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 12,
+    padding: 16,
     borderRadius: 12,
-    marginBottom: 8,
+    marginBottom: 12,
     backgroundColor: colors.background,
   },
   voiceOptionSelected: {
@@ -514,16 +515,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Montserrat_400Regular',
     color: colors.textSecondary,
-    marginTop: 2,
+    marginTop: 4,
   },
   sliderContainer: {
     backgroundColor: '#F9FAFB',
     borderRadius: 16,
-    padding: 16,
+    padding: 20,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 16,
   },
   sliderLabel: {
     fontSize: 16,
@@ -532,13 +533,13 @@ const styles = StyleSheet.create({
   },
   sliderButtons: {
     flexDirection: 'row',
-    gap: 8 as any,
+    gap: 12 as any,
   },
   sliderBtn: {
     backgroundColor: colors.primary,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -549,12 +550,13 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
-    gap: 12 as any,
+    gap: 16 as any,
     alignItems: 'center',
+    marginBottom: 12,
   },
   action: {
-    paddingVertical: 14,
-    paddingHorizontal: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
     borderRadius: 14,
   },
   actionText: {
@@ -563,7 +565,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   helper: {
-    marginTop: 8,
+    marginTop: 12,
     color: '#6B7280',
     fontSize: 14,
   },
@@ -573,19 +575,21 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 14,
     paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingVertical: 16,
     color: colors.text,
     fontSize: 16,
+    marginBottom: 8,
   },
   colorsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12 as any,
+    gap: 16 as any,
+    marginBottom: 8,
   },
   colorDot: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
@@ -598,9 +602,9 @@ const styles = StyleSheet.create({
   },
   addBtn: {
     backgroundColor: colors.primary,
-    paddingVertical: 16,
+    paddingVertical: 18,
     borderRadius: 16,
-    marginTop: 16,
+    marginTop: 20,
     alignItems: 'center',
   },
   addBtnText: {
@@ -609,16 +613,17 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   catRow: {
-    gap: 10 as any,
+    gap: 12 as any,
     alignItems: 'center',
-    paddingVertical: 4,
+    paddingVertical: 8,
+    marginBottom: 8,
   },
   catChip: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8 as any,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderRadius: 16,
     borderWidth: 1,
   },

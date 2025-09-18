@@ -58,7 +58,15 @@ const TileItem = memo(function TileItem({
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         activeOpacity={0.8}
-        style={[styles.tile, { backgroundColor: bg }]}
+        style={[
+          styles.tile, 
+          { 
+            backgroundColor: bg,
+            borderColor: bg,
+            borderWidth: 2,
+            boxShadow: `0px 0px 15px ${bg}`,
+          }
+        ]}
       >
         <View style={styles.imageWrap}>
           {isAdd ? (
@@ -96,7 +104,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 6,
-    boxShadow: '0px 6px 12px rgba(0,0,0,0.06)',
   },
   imageWrap: {
     width: '100%',
