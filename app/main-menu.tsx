@@ -3,7 +3,7 @@ import Icon from '../components/Icon';
 import EmotionFace from '../components/EmotionFace';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { useEmotionSettings } from '../hooks/useEmotionSettings';
-import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, useWindowDimensions } from 'react-native';
 import { colors, commonStyles } from '../styles/commonStyles';
 import React, { useEffect, useState } from 'react';
 import LandscapeGuard from '../components/LandscapeGuard';
@@ -12,6 +12,7 @@ import { useRouter } from 'expo-router';
 export default function MainMenu() {
   const { settings } = useEmotionSettings();
   const router = useRouter();
+  const { height } = useWindowDimensions();
 
   useEffect(() => {
     // Lock orientation on native platforms only
@@ -30,26 +31,29 @@ export default function MainMenu() {
     router.push('/communication');
   };
 
+  // Calculate emotion face size to be 80% of screen height
+  const emotionSize = Math.min(height * 0.8, 400); // Cap at 400 for very large screens
+
   return (
     <LandscapeGuard>
       <View style={[commonStyles.container, styles.container]}>
         <View style={styles.content}>
-          {/* Large Emotion Face - No drop shadow, super large */}
+          {/* Large Emotion Face - 80% of screen height */}
           <View style={styles.emotionContainer}>
-            <EmotionFace emotion={settings.selectedEmotion} size={200} />
+            <EmotionFace emotion={settings.selectedEmotion} size={emotionSize} />
           </View>
 
           {/* App Title */}
-          <Text style={styles.title}>Speak Buddy</Text>
+          <Text style={styles.title}>ComPanion</Text>
           <Text style={styles.subtitle}>Tap to start communicating</Text>
 
-          {/* Start Button - Bigger */}
+          {/* Start Button - Smaller */}
           <TouchableOpacity 
             style={styles.startButton} 
             onPress={handleStartCommunication}
             activeOpacity={0.8}
           >
-            <Icon name="chatbubbles-outline" size={40} color="#FFFFFF" />
+            <Icon name="chatbubbles-outline" size={24} color="#FFFFFF" />
             <Text style={styles.startButtonText}>Start Communication</Text>
           </TouchableOpacity>
         </View>
@@ -66,13 +70,12 @@ const styles = StyleSheet.create({
   },
   content: {
     alignItems: 'center',
-    gap: 24 as any,
+    gap: 16 as any,
   },
   emotionContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 16,
-    // Removed drop shadow
+    marginBottom: 8,
   },
   title: {
     fontSize: 48,
@@ -92,17 +95,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 40,
-    paddingVertical: 20,
-    borderRadius: 24,
-    gap: 16 as any,
-    marginTop: 16,
-    minWidth: 280,
-    boxShadow: '0px 8px 20px rgba(59, 130, 246, 0.3)',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 16,
+    gap: 12 as any,
+    marginTop: 8,
+    minWidth: 200,
+    boxShadow: '0px 4px 12px rgba(59, 130, 246, 0.3)',
   },
   startButtonText: {
     color: '#FFFFFF',
-    fontSize: 24,
+    fontSize: 18,
     fontFamily: 'Montserrat_600SemiBold',
   },
 });

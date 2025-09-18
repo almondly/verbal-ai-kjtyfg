@@ -64,7 +64,7 @@ const TileItem = memo(function TileItem({
             backgroundColor: bg,
             borderColor: bg,
             borderWidth: 2,
-            boxShadow: `0px 0px 15px ${bg}`,
+            // Removed boxShadow glow - only keep neon color
           }
         ]}
       >
