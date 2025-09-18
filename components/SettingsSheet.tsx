@@ -43,7 +43,7 @@ export default function SettingsSheet({
   onEmotionChange,
 }: Props) {
   const sheetRef = useRef<BottomSheet>(null);
-  const snapPoints = useMemo(() => ['100%'], []);
+  const snapPoints = useMemo(() => ['98%'], []);
   const [phrase, setPhrase] = useState('');
   const [color, setColor] = useState('#FFFFFF');
   const [imageUri, setImageUri] = useState<string | undefined>(undefined);
@@ -58,11 +58,13 @@ export default function SettingsSheet({
   }, [open, mode, defaultCategoryId]);
 
   // Control opening/closing
-  if (open && sheetRef.current) {
-    setTimeout(() => sheetRef.current?.snapToIndex(0), 0);
-  } else if (!open && sheetRef.current) {
-    setTimeout(() => sheetRef.current?.close(), 0);
-  }
+  useEffect(() => {
+    if (open && sheetRef.current) {
+      setTimeout(() => sheetRef.current?.snapToIndex(0), 100);
+    } else if (!open && sheetRef.current) {
+      setTimeout(() => sheetRef.current?.close(), 0);
+    }
+  }, [open]);
 
   const pickImage = async () => {
     try {
@@ -110,6 +112,7 @@ export default function SettingsSheet({
   };
 
   const handleVoiceSelect = async (voiceIdentifier: string, voiceName: string, language: string) => {
+    console.log('Voice selected:', { voiceIdentifier, voiceName, language });
     await updateTTSSettings({
       voiceIdentifier,
       voiceName,
@@ -129,6 +132,8 @@ export default function SettingsSheet({
       onClose={closeAndReset}
       backgroundStyle={{ backgroundColor: colors.backgroundAlt, borderRadius: 0 }}
       handleIndicatorStyle={{ backgroundColor: '#CBD5E1' }}
+      keyboardBehavior="interactive"
+      keyboardBlurBehavior="restore"
     >
       <BottomSheetView style={styles.container}>
         <View style={styles.header}>
@@ -140,15 +145,17 @@ export default function SettingsSheet({
 
         <BottomSheetScrollView 
           style={styles.scrollView} 
-          showsVerticalScrollIndicator={false}
+          showsVerticalScrollIndicator={true}
           contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          nestedScrollEnabled={true}
         >
           {mode === 'settings' ? (
             <>
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Current Emotion</Text>
                 <View style={styles.currentEmotionContainer}>
-                  <EmotionFace emotion={currentEmotion} size={140} />
+                  <EmotionFace emotion={currentEmotion} size={120} />
                   <Text style={styles.currentEmotionText}>{currentEmotion}</Text>
                 </View>
               </View>
@@ -166,7 +173,7 @@ export default function SettingsSheet({
                       onPress={() => handleEmotionSelect(emotion)}
                       activeOpacity={0.8}
                     >
-                      <EmotionFace emotion={emotion} size={80} />
+                      <EmotionFace emotion={emotion} size={70} />
                       <Text style={styles.emotionOptionText}>{emotion}</Text>
                     </TouchableOpacity>
                   ))}
@@ -176,38 +183,45 @@ export default function SettingsSheet({
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Text-to-Speech Voice</Text>
                 <View style={styles.currentVoiceContainer}>
-                  <Text style={styles.currentVoiceText}>Current Voice: {ttsSettings.voiceName}</Text>
+                  <View style={styles.voiceInfoContainer}>
+                    <Text style={styles.currentVoiceText}>Current Voice</Text>
+                    <Text style={styles.currentVoiceSubtext}>{ttsSettings.voiceName}</Text>
+                    <Text style={styles.currentVoiceLanguage}>{ttsSettings.language}</Text>
+                  </View>
                   <TouchableOpacity 
                     style={styles.testVoiceBtn}
                     onPress={() => speak('Hello, this is how I sound!')}
                     activeOpacity={0.8}
                   >
                     <Icon name="volume-high-outline" size={20} color={colors.primary} />
-                    <Text style={styles.testVoiceText}>Test Voice</Text>
+                    <Text style={styles.testVoiceText}>Test</Text>
                   </TouchableOpacity>
                 </View>
                 
-                <ScrollView style={styles.voicesList} showsVerticalScrollIndicator={false}>
-                  {availableVoices.map((voice) => (
-                    <TouchableOpacity
-                      key={voice.identifier}
-                      style={[
-                        styles.voiceOption,
-                        ttsSettings.voiceIdentifier === voice.identifier && styles.voiceOptionSelected,
-                      ]}
-                      onPress={() => handleVoiceSelect(voice.identifier, voice.name, voice.language)}
-                      activeOpacity={0.8}
-                    >
-                      <View style={styles.voiceInfo}>
-                        <Text style={styles.voiceName}>{voice.name}</Text>
-                        <Text style={styles.voiceLanguage}>{voice.language}</Text>
-                      </View>
-                      {ttsSettings.voiceIdentifier === voice.identifier && (
-                        <Icon name="checkmark-circle" size={24} color={colors.primary} />
-                      )}
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
+                <View style={styles.voicesContainer}>
+                  <Text style={styles.voicesTitle}>Available Voices</Text>
+                  <View style={styles.voicesList}>
+                    {availableVoices.map((voice) => (
+                      <TouchableOpacity
+                        key={voice.identifier}
+                        style={[
+                          styles.voiceOption,
+                          ttsSettings.voiceIdentifier === voice.identifier && styles.voiceOptionSelected,
+                        ]}
+                        onPress={() => handleVoiceSelect(voice.identifier, voice.name, voice.language)}
+                        activeOpacity={0.8}
+                      >
+                        <View style={styles.voiceInfo}>
+                          <Text style={styles.voiceName}>{voice.name}</Text>
+                          <Text style={styles.voiceLanguage}>{voice.language}</Text>
+                        </View>
+                        {ttsSettings.voiceIdentifier === voice.identifier && (
+                          <Icon name="checkmark-circle" size={24} color={colors.primary} />
+                        )}
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
               </View>
 
               <View style={styles.section}>
@@ -265,6 +279,9 @@ export default function SettingsSheet({
                 </View>
                 <Text style={styles.helper}>Long-press a tile to remove it.</Text>
               </View>
+
+              {/* Extra padding at bottom to ensure all content is accessible */}
+              <View style={{ height: 150 }} />
             </>
           ) : (
             <View style={styles.section}>
@@ -324,6 +341,9 @@ export default function SettingsSheet({
               <TouchableOpacity style={styles.addBtn} onPress={handleAddTile} activeOpacity={0.9}>
                 <Text style={styles.addBtnText}>Add Tile</Text>
               </TouchableOpacity>
+
+              {/* Extra padding at bottom */}
+              <View style={{ height: 80 }} />
             </View>
           )}
         </BottomSheetScrollView>
@@ -343,12 +363,13 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: 60,
+    flexGrow: 1,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 20,
   },
   title: {
     fontSize: 24,
@@ -361,39 +382,38 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   section: {
-    marginTop: 16,
-    gap: 16 as any,
+    marginBottom: 24,
   },
   sectionTitle: {
     fontSize: 18,
     fontFamily: 'Montserrat_600SemiBold',
     color: colors.text,
-    marginTop: 8,
+    marginBottom: 12,
   },
   currentEmotionContainer: {
     alignItems: 'center',
     backgroundColor: '#F9FAFB',
     borderRadius: 20,
-    padding: 24,
+    padding: 20,
   },
   currentEmotionText: {
-    fontSize: 20,
+    fontSize: 18,
     fontFamily: 'Montserrat_600SemiBold',
     color: colors.text,
-    marginTop: 16,
+    marginTop: 12,
     textTransform: 'capitalize',
   },
   emotionGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12 as any,
+    gap: 10 as any,
     justifyContent: 'space-between',
   },
   emotionOption: {
     alignItems: 'center',
     backgroundColor: '#F9FAFB',
     borderRadius: 16,
-    padding: 12,
+    padding: 10,
     width: '23%',
     borderWidth: 3,
     borderColor: 'transparent',
@@ -403,10 +423,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#EEF2FF',
   },
   emotionOptionText: {
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: 'Montserrat_600SemiBold',
     color: colors.text,
-    marginTop: 8,
+    marginTop: 6,
     textAlign: 'center',
     textTransform: 'capitalize',
   },
@@ -417,11 +437,27 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 16,
+  },
+  voiceInfoContainer: {
+    flex: 1,
   },
   currentVoiceText: {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: 'Montserrat_600SemiBold',
+    color: colors.textSecondary,
+  },
+  currentVoiceSubtext: {
+    fontSize: 16,
+    fontFamily: 'Montserrat_700Bold',
     color: colors.text,
+    marginTop: 2,
+  },
+  currentVoiceLanguage: {
+    fontSize: 12,
+    fontFamily: 'Montserrat_400Regular',
+    color: colors.textSecondary,
+    marginTop: 2,
   },
   testVoiceBtn: {
     flexDirection: 'row',
@@ -437,11 +473,20 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat_600SemiBold',
     color: colors.primary,
   },
-  voicesList: {
-    maxHeight: 200,
+  voicesContainer: {
     backgroundColor: '#F9FAFB',
     borderRadius: 16,
-    padding: 8,
+    padding: 16,
+    maxHeight: 300,
+  },
+  voicesTitle: {
+    fontSize: 14,
+    fontFamily: 'Montserrat_600SemiBold',
+    color: colors.textSecondary,
+    marginBottom: 12,
+  },
+  voicesList: {
+    maxHeight: 220,
   },
   voiceOption: {
     flexDirection: 'row',
@@ -449,7 +494,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 12,
     borderRadius: 12,
-    marginBottom: 4,
+    marginBottom: 8,
     backgroundColor: colors.background,
   },
   voiceOptionSelected: {
@@ -478,6 +523,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 12,
   },
   sliderLabel: {
     fontSize: 16,

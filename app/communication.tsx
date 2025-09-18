@@ -197,7 +197,8 @@ export default function CommunicationScreen() {
   return (
     <LandscapeGuard>
       <View style={[commonStyles.container, { paddingHorizontal: 8 }]} onTouchStart={handleUserActivity}>
-        <View style={[styles.topBar]}>
+        {/* Top Bar - Minimal padding */}
+        <View style={styles.topBar}>
           <TouchableOpacity onPress={handleBackToMenu} style={styles.iconBtn} activeOpacity={0.8}>
             <Icon name="home-outline" size={32} color={colors.text} />
           </TouchableOpacity>
@@ -214,14 +215,16 @@ export default function CommunicationScreen() {
           </View>
         </View>
 
-        {/* Phrase Bar */}
-        <PhraseBar
-          sentence={sentence}
-          onClear={handleClear}
-          onSpeak={handleSpeak}
-        />
+        {/* Phrase Bar - Minimal margin */}
+        <View style={styles.phraseBarContainer}>
+          <PhraseBar
+            sentence={sentence}
+            onClear={handleClear}
+            onSpeak={handleSpeak}
+          />
+        </View>
 
-        {/* Suggestions Row - moved directly under phrase bar */}
+        {/* Suggestions Row - Tight spacing */}
         <View style={styles.suggestionsContainer}>
           {advancedSuggestions.length > 0 ? (
             <AdvancedSuggestionsRow
@@ -237,7 +240,7 @@ export default function CommunicationScreen() {
           )}
         </View>
 
-        {/* Category Bar - only show when settings is not open */}
+        {/* Category Bar - Compact and only show when settings is not open */}
         {!settingsOpen && (
           <View style={styles.categoryContainer}>
             <CategoryBar
@@ -251,14 +254,15 @@ export default function CommunicationScreen() {
           </View>
         )}
 
-        {/* Communication Grid with proper spacing */}
+        {/* Communication Grid - Moved much higher up */}
         <View style={styles.gridContainer}>
           <ScrollView
             style={{ flex: 1 }}
-            contentContainerStyle={{ paddingTop: 8, paddingBottom: 16 }}
+            contentContainerStyle={styles.gridScrollContent}
             contentInsetAdjustmentBehavior="never"
             keyboardShouldPersistTaps="handled"
             onTouchStart={handleUserActivity}
+            showsVerticalScrollIndicator={false}
           >
             <CommunicationGrid
               tiles={visibleTiles}
@@ -323,12 +327,12 @@ const styles = StyleSheet.create({
   },
   topBar: {
     width: '100%',
-    paddingTop: 4,
-    paddingBottom: 4,
+    paddingTop: 1,
+    paddingBottom: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    marginBottom: 2,
   },
   iconBtn: {
     backgroundColor: colors.backgroundAlt,
@@ -348,16 +352,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  phraseBarContainer: {
+    marginBottom: 2,
+  },
   suggestionsContainer: {
-    marginBottom: 8,
+    marginBottom: 2,
     minHeight: 40,
   },
   categoryContainer: {
-    marginBottom: 8,
-    height: 100,
+    marginBottom: 2,
+    height: 70,
   },
   gridContainer: {
     flex: 1,
-    marginTop: 8,
+    marginTop: 0,
+  },
+  gridScrollContent: {
+    paddingTop: 2,
+    paddingBottom: 8,
+    flexGrow: 1,
   },
 });

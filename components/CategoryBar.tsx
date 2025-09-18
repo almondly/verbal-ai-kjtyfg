@@ -45,10 +45,10 @@ export default function CategoryBar({ categories, selectedId, onSelect, style }:
                 style={[
                   styles.chip,
                   {
-                    backgroundColor: active ? colors.backgroundAlt : colors.backgroundAlt,
+                    backgroundColor: active ? cat.color : colors.backgroundAlt,
                     borderColor: active ? cat.color : colors.border,
                     borderWidth: active ? 3 : 1,
-                    boxShadow: active ? `0px 0px 20px ${cat.color}80` : '0px 2px 6px rgba(0,0,0,0.08)',
+                    boxShadow: active ? `0px 0px 25px ${cat.color}` : '0px 2px 6px rgba(0,0,0,0.08)',
                   },
                 ]}
                 onPress={() => {
@@ -59,7 +59,7 @@ export default function CategoryBar({ categories, selectedId, onSelect, style }:
               >
                 <Icon 
                   name={cat.icon as any} 
-                  size={28} 
+                  size={24} 
                   color={colors.text} 
                 />
                 <Text style={[
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
   wrapper: {
     width: '100%',
     paddingHorizontal: 8,
-    paddingVertical: 8,
+    paddingVertical: 6,
     backgroundColor: colors.background,
     borderRadius: 16,
     boxShadow: '0px 2px 8px rgba(0,0,0,0.06)',
@@ -91,16 +91,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   chip: {
-    width: 80,
-    height: 80,
+    width: 70,
+    height: 70,
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
   },
   chipText: {
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: 'Montserrat_600SemiBold',
-    marginTop: 4,
+    marginTop: 3,
     textAlign: 'center',
   },
 });
