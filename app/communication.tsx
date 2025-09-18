@@ -9,7 +9,6 @@ import CommunicationGrid from '../components/CommunicationGrid';
 import PhraseBar from '../components/PhraseBar';
 import SuggestionsRow from '../components/SuggestionsRow';
 import SettingsSheet from '../components/SettingsSheet';
-import DonutProgress from '../components/DonutProgress';
 import IdleOverlay from '../components/IdleOverlay';
 import { useLibrary } from '../hooks/useLibrary';
 import { useAI } from '../hooks/useAI';
@@ -159,28 +158,15 @@ export default function CommunicationScreen() {
       <View style={[commonStyles.container, { paddingHorizontal: 8 }]} onTouchStart={handleUserActivity}>
         <View style={[styles.topBar]}>
           <TouchableOpacity onPress={handleBackToMenu} style={styles.iconBtn} activeOpacity={0.8}>
-            <Icon name="home-outline" size={22} color={colors.text} />
+            <Icon name="home-outline" size={26} color={colors.text} />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => setSettingsOpen(true)} style={styles.iconBtn} activeOpacity={0.8}>
-            <Icon name="settings-outline" size={22} color={colors.text} />
-          </TouchableOpacity>
+          
           <Text style={styles.appTitle}>Speak Buddy</Text>
-          <View style={styles.progressWrap}>
-            <DonutProgress size={34} strokeWidth={6} progress={Math.min(1, dailySentenceCount / 10)} />
-          </View>
+          
+          <TouchableOpacity onPress={() => setSettingsOpen(true)} style={styles.iconBtn} activeOpacity={0.8}>
+            <Icon name="settings-outline" size={26} color={colors.text} />
+          </TouchableOpacity>
         </View>
-
-        <PhraseBar
-          sentence={sentence}
-          onClear={handleClear}
-          onSpeak={handleSpeak}
-        />
-
-        <SuggestionsRow
-          suggestions={suggestions}
-          onPressSuggestion={onSuggestionPress}
-          style={{ marginTop: -10, marginBottom: -14 }}
-        />
 
         <CategoryBar
           categories={categories}
@@ -189,12 +175,18 @@ export default function CommunicationScreen() {
             setSelectedCategory(id);
             handleUserActivity();
           }}
-          style={{ marginTop: -14, marginBottom: -12 }}
+          style={{ marginTop: 8, marginBottom: 8 }}
+        />
+
+        <SuggestionsRow
+          suggestions={suggestions}
+          onPressSuggestion={onSuggestionPress}
+          style={{ marginTop: 8, marginBottom: 8 }}
         />
 
         <ScrollView
-          style={{ flex: 1, marginTop: -12 }}
-          contentContainerStyle={{ paddingTop: 0, paddingBottom: 0 }}
+          style={{ flex: 1, marginTop: 8 }}
+          contentContainerStyle={{ paddingTop: 0, paddingBottom: 16 }}
           contentInsetAdjustmentBehavior="never"
           keyboardShouldPersistTaps="handled"
           onTouchStart={handleUserActivity}
@@ -212,6 +204,12 @@ export default function CommunicationScreen() {
             }}
           />
         </ScrollView>
+
+        <PhraseBar
+          sentence={sentence}
+          onClear={handleClear}
+          onSpeak={handleSpeak}
+        />
 
         <SettingsSheet
           open={settingsOpen}
@@ -253,29 +251,28 @@ export default function CommunicationScreen() {
 
 const styles = StyleSheet.create({
   appTitle: {
-    fontSize: 19,
+    fontSize: 22,
     fontFamily: 'Montserrat_700Bold',
     color: colors.text,
+    flex: 1,
+    textAlign: 'center',
   },
   topBar: {
     width: '100%',
-    paddingTop: 2,
-    paddingBottom: 2,
+    paddingTop: 4,
+    paddingBottom: 4,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 0,
+    marginBottom: 8,
   },
   iconBtn: {
     backgroundColor: colors.backgroundAlt,
-    padding: 8,
-    borderRadius: 10,
+    padding: 12,
+    borderRadius: 14,
     boxShadow: '0px 6px 14px rgba(0,0,0,0.08)',
-  },
-  progressWrap: {
-    backgroundColor: colors.backgroundAlt,
-    padding: 4,
-    borderRadius: 18,
-    boxShadow: '0px 6px 14px rgba(0,0,0,0.08)',
+    minWidth: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

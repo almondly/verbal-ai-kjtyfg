@@ -76,7 +76,7 @@ export default function MainMenu() {
 
         <View style={styles.emotionContainer}>
           <Animated.View style={[styles.emotionWrapper, { transform: [{ scale: bounceAnim }] }]}>
-            <EmotionFace emotion={settings.selectedEmotion} size={180} />
+            <EmotionFace emotion={settings.selectedEmotion} size={240} />
           </Animated.View>
           <Text style={styles.emotionLabel}>
             I&apos;m feeling {settings.selectedEmotion}
@@ -89,7 +89,7 @@ export default function MainMenu() {
             onPress={handleStartCommunication}
             activeOpacity={0.8}
           >
-            <Icon name="chatbubbles-outline" size={24} color="#FFFFFF" />
+            <Icon name="chatbubbles-outline" size={28} color="#FFFFFF" />
             <Text style={styles.startButtonText}>Start Communicating</Text>
           </TouchableOpacity>
         </View>
@@ -163,17 +163,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    borderRadius: 20,
-    minWidth: 280,
+    paddingVertical: 20,
+    paddingHorizontal: 40,
+    borderRadius: 24,
+    minWidth: 320,
     boxShadow: '0px 6px 16px rgba(77, 158, 255, 0.3)',
   },
   startButtonText: {
     color: '#FFFFFF',
-    fontSize: 18,
+    fontSize: 20,
     fontFamily: 'Montserrat_700Bold',
-    marginLeft: 12,
+    marginLeft: 16,
   },
   footer: {
     alignItems: 'center',

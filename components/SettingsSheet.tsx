@@ -42,7 +42,8 @@ export default function SettingsSheet({
   onEmotionChange,
 }: Props) {
   const sheetRef = useRef<BottomSheet>(null);
-  const snapPoints = useMemo(() => ['25%', '80%'], []);
+  // Make it full screen by using 100% as the only snap point
+  const snapPoints = useMemo(() => ['100%'], []);
   const [phrase, setPhrase] = useState('');
   const [color, setColor] = useState('#FFFFFF');
   const [imageUri, setImageUri] = useState<string | undefined>(undefined);
@@ -54,9 +55,9 @@ export default function SettingsSheet({
     }
   }, [open, mode, defaultCategoryId]);
 
-  // Control opening/closing
+  // Control opening/closing - snap to index 0 since we only have one snap point
   if (open && sheetRef.current) {
-    setTimeout(() => sheetRef.current?.snapToIndex(1), 0);
+    setTimeout(() => sheetRef.current?.snapToIndex(0), 0);
   } else if (!open && sheetRef.current) {
     setTimeout(() => sheetRef.current?.close(), 0);
   }
@@ -110,17 +111,17 @@ export default function SettingsSheet({
     <BottomSheet
       ref={sheetRef}
       snapPoints={snapPoints}
-      index={open ? 1 : -1}
+      index={open ? 0 : -1}
       enablePanDownToClose
       onClose={closeAndReset}
-      backgroundStyle={{ backgroundColor: colors.backgroundAlt, borderRadius: 24 }}
+      backgroundStyle={{ backgroundColor: colors.backgroundAlt, borderRadius: 0 }}
       handleIndicatorStyle={{ backgroundColor: '#CBD5E1' }}
     >
       <BottomSheetView style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.title}>{title || (mode === 'add' ? 'Add Tile' : 'Settings')}</Text>
           <TouchableOpacity onPress={closeAndReset} style={styles.closeBtn} activeOpacity={0.8}>
-            <Icon name="close-outline" size={24} color={colors.text} />
+            <Icon name="close-outline" size={28} color={colors.text} />
           </TouchableOpacity>
         </View>
 
@@ -130,7 +131,7 @@ export default function SettingsSheet({
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Current Emotion</Text>
                 <View style={styles.currentEmotionContainer}>
-                  <EmotionFace emotion={currentEmotion} size={80} />
+                  <EmotionFace emotion={currentEmotion} size={140} />
                   <Text style={styles.currentEmotionText}>{currentEmotion}</Text>
                 </View>
               </View>
@@ -148,7 +149,7 @@ export default function SettingsSheet({
                       onPress={() => handleEmotionSelect(emotion)}
                       activeOpacity={0.8}
                     >
-                      <EmotionFace emotion={emotion} size={50} />
+                      <EmotionFace emotion={emotion} size={80} />
                       <Text style={styles.emotionOptionText}>{emotion}</Text>
                     </TouchableOpacity>
                   ))}
@@ -236,36 +237,36 @@ export default function SettingsSheet({
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 16,
-    paddingTop: 6,
-    paddingBottom: 24,
+    paddingHorizontal: 24,
+    paddingTop: 16,
+    paddingBottom: 32,
     flex: 1,
   },
   scrollView: {
     flex: 1,
   },
   header: {
-    display: 'contents' as any,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 24,
   },
   title: {
-    fontSize: 18,
+    fontSize: 24,
     fontFamily: 'Montserrat_700Bold',
     color: colors.text,
-    marginBottom: 12,
   },
   closeBtn: {
-    position: 'absolute',
-    right: 0,
-    top: 0,
     backgroundColor: '#F3F4F6',
-    padding: 6,
-    borderRadius: 10,
+    padding: 10,
+    borderRadius: 12,
   },
   section: {
-    marginTop: 8,
-    gap: 10 as any,
+    marginTop: 16,
+    gap: 16 as any,
   },
   sectionTitle: {
+    fontSize: 18,
     fontFamily: 'Montserrat_600SemiBold',
     color: colors.text,
     marginTop: 8,
@@ -273,29 +274,29 @@ const styles = StyleSheet.create({
   currentEmotionContainer: {
     alignItems: 'center',
     backgroundColor: '#F9FAFB',
-    borderRadius: 16,
-    padding: 16,
+    borderRadius: 20,
+    padding: 24,
   },
   currentEmotionText: {
-    fontSize: 16,
+    fontSize: 20,
     fontFamily: 'Montserrat_600SemiBold',
     color: colors.text,
-    marginTop: 8,
+    marginTop: 16,
     textTransform: 'capitalize',
   },
   emotionGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8 as any,
+    gap: 12 as any,
     justifyContent: 'space-between',
   },
   emotionOption: {
     alignItems: 'center',
     backgroundColor: '#F9FAFB',
-    borderRadius: 12,
-    padding: 8,
+    borderRadius: 16,
+    padding: 12,
     width: '23%',
-    borderWidth: 2,
+    borderWidth: 3,
     borderColor: 'transparent',
   },
   emotionOptionSelected: {
@@ -303,87 +304,91 @@ const styles = StyleSheet.create({
     backgroundColor: '#EEF2FF',
   },
   emotionOptionText: {
-    fontSize: 10,
+    fontSize: 12,
     fontFamily: 'Montserrat_600SemiBold',
     color: colors.text,
-    marginTop: 4,
+    marginTop: 8,
     textAlign: 'center',
     textTransform: 'capitalize',
   },
   row: {
     flexDirection: 'row',
-    gap: 10 as any,
+    gap: 12 as any,
     alignItems: 'center',
   },
   action: {
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 14,
   },
   actionText: {
     fontFamily: 'Montserrat_600SemiBold',
     color: colors.text,
+    fontSize: 16,
   },
   helper: {
     marginTop: 8,
     color: '#6B7280',
+    fontSize: 14,
   },
   input: {
     backgroundColor: '#F9FAFB',
     borderColor: '#E5E7EB',
     borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
     color: colors.text,
+    fontSize: 16,
   },
   colorsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8 as any,
+    gap: 12 as any,
   },
   colorDot: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
   colorDotInner: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
     backgroundColor: '#111827',
   },
   addBtn: {
     backgroundColor: colors.primary,
-    paddingVertical: 12,
-    borderRadius: 14,
-    marginTop: 8,
+    paddingVertical: 16,
+    borderRadius: 16,
+    marginTop: 16,
     alignItems: 'center',
   },
   addBtnText: {
     color: '#fff',
     fontFamily: 'Montserrat_600SemiBold',
+    fontSize: 18,
   },
   catRow: {
-    gap: 8 as any,
+    gap: 10 as any,
     alignItems: 'center',
-    paddingVertical: 2,
+    paddingVertical: 4,
   },
   catChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6 as any,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    borderRadius: 14,
+    gap: 8 as any,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 16,
     borderWidth: 1,
   },
   catChipText: {
     color: colors.text,
     fontFamily: 'Montserrat_600SemiBold',
-    fontSize: 12,
+    fontSize: 14,
   },
 });

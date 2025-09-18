@@ -23,10 +23,10 @@ export default function PhraseBar({ sentence, onSpeak, onClear }: Props) {
       </ScrollView>
       <View style={styles.actions}>
         <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.secondary }]} onPress={onSpeak} activeOpacity={0.9}>
-          <Icon name="volume-high-outline" size={18} color="#fff" />
+          <Icon name="volume-high-outline" size={22} color="#fff" />
         </TouchableOpacity>
         <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.accent }]} onPress={onClear} activeOpacity={0.9}>
-          <Icon name="close-outline" size={22} color={colors.text} />
+          <Icon name="close-outline" size={26} color={colors.text} />
         </TouchableOpacity>
       </View>
     </View>
@@ -37,28 +37,29 @@ const styles = StyleSheet.create({
   bar: {
     width: '100%',
     backgroundColor: colors.backgroundAlt,
-    borderRadius: 12,
-    paddingVertical: 2,
-    paddingHorizontal: 8,
+    borderRadius: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
     boxShadow: '0px 6px 12px rgba(0,0,0,0.06)',
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: -12, // tighter collapse with suggestions row
+    marginBottom: 16,
+    marginTop: 16,
   },
   text: {
     fontFamily: 'Montserrat_600SemiBold',
     color: colors.text,
-    fontSize: 14,
+    fontSize: 16,
   },
   actions: {
     marginLeft: 'auto',
     flexDirection: 'row',
-    gap: 6 as any,
+    gap: 8 as any,
   },
   actionBtn: {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
+    width: 44,
+    height: 44,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
