@@ -5,7 +5,7 @@ import { supabase } from '../app/integrations/supabase/client';
 export interface AdvancedSuggestion {
   text: string;
   confidence: number;
-  type: 'completion' | 'next_word' | 'common_phrase' | 'contextual';
+  type: 'completion' | 'next_word' | 'common_phrase' | 'contextual' | 'temporal';
   context?: string;
 }
 
@@ -18,10 +18,12 @@ export function useAdvancedAI() {
     phrases: Map<string, number>;
     transitions: Map<string, Map<string, number>>;
     contexts: Map<string, string[]>;
+    temporalPatterns: Map<string, { hour: number; count: number }[]>;
   }>({
     phrases: new Map(),
     transitions: new Map(),
     contexts: new Map(),
+    temporalPatterns: new Map(),
   });
 
   // Initialize patterns from Supabase
@@ -46,6 +48,7 @@ export function useAdvancedAI() {
       const phrases = new Map();
       const transitions = new Map();
       const contexts = new Map();
+      const temporalPatterns = new Map();
 
       data?.forEach(pattern => {
         if (pattern.pattern_type === 'phrase') {
@@ -58,14 +61,17 @@ export function useAdvancedAI() {
           transitions.get(from)!.set(to, pattern.frequency);
         } else if (pattern.pattern_type === 'context') {
           contexts.set(pattern.pattern_key, pattern.metadata?.related_words || []);
+        } else if (pattern.pattern_type === 'temporal') {
+          temporalPatterns.set(pattern.pattern_key, pattern.metadata?.time_data || []);
         }
       });
 
-      setUserPatterns({ phrases, transitions, contexts });
+      setUserPatterns({ phrases, transitions, contexts, temporalPatterns });
       console.log('Loaded user patterns:', { 
         phrases: phrases.size, 
         transitions: transitions.size, 
-        contexts: contexts.size 
+        contexts: contexts.size,
+        temporal: temporalPatterns.size
       });
     } catch (err) {
       console.log('Error in loadUserPatterns:', err);
@@ -78,6 +84,7 @@ export function useAdvancedAI() {
   const recordUserInput = useCallback(async (sentence: string, context?: string) => {
     try {
       const words = sentence.toLowerCase().trim().split(/\s+/).filter(Boolean);
+      const currentHour = new Date().getHours();
       
       // Record the full phrase
       const { error: phraseError } = await supabase
@@ -86,7 +93,7 @@ export function useAdvancedAI() {
           pattern_type: 'phrase',
           pattern_key: sentence.toLowerCase(),
           frequency: 1,
-          metadata: { word_count: words.length, context },
+          metadata: { word_count: words.length, context, hour: currentHour },
           updated_at: new Date().toISOString()
         }, {
           onConflict: 'pattern_type,pattern_key'
@@ -115,12 +122,74 @@ export function useAdvancedAI() {
         }
       }
 
+      // Record temporal patterns
+      const { error: temporalError } = await supabase
+        .from('user_patterns')
+        .upsert({
+          pattern_type: 'temporal',
+          pattern_key: sentence.toLowerCase(),
+          frequency: 1,
+          metadata: { hour: currentHour, time_data: [{ hour: currentHour, count: 1 }] },
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'pattern_type,pattern_key'
+        });
+
+      if (temporalError) {
+        console.log('Error recording temporal pattern:', temporalError);
+      }
+
       // Update local patterns
       await loadUserPatterns();
     } catch (err) {
       console.log('Error recording user input:', err);
     }
   }, []);
+
+  const removeDuplicateWords = (words: string[]): string[] => {
+    const seen = new Set<string>();
+    return words.filter(word => {
+      const lowerWord = word.toLowerCase();
+      if (seen.has(lowerWord)) {
+        return false;
+      }
+      seen.add(lowerWord);
+      return true;
+    });
+  };
+
+  const findAlternativeWords = (word: string, availableWords: string[]): string[] => {
+    const alternatives: string[] = [];
+    const lowerWord = word.toLowerCase();
+    
+    // Simple synonym mapping for common words
+    const synonyms: { [key: string]: string[] } = {
+      'want': ['need', 'like', 'wish'],
+      'need': ['want', 'require', 'must have'],
+      'like': ['love', 'enjoy', 'want'],
+      'good': ['great', 'nice', 'awesome'],
+      'bad': ['terrible', 'awful', 'not good'],
+      'happy': ['glad', 'excited', 'joyful'],
+      'sad': ['upset', 'unhappy', 'down'],
+      'big': ['large', 'huge', 'giant'],
+      'small': ['little', 'tiny', 'mini'],
+      'go': ['move', 'travel', 'walk'],
+      'come': ['arrive', 'visit', 'approach'],
+      'eat': ['consume', 'have', 'taste'],
+      'drink': ['sip', 'have', 'consume'],
+    };
+
+    if (synonyms[lowerWord]) {
+      synonyms[lowerWord].forEach(synonym => {
+        const matchingWord = availableWords.find(w => w.toLowerCase() === synonym);
+        if (matchingWord && !alternatives.includes(matchingWord)) {
+          alternatives.push(matchingWord);
+        }
+      });
+    }
+
+    return alternatives.slice(0, 2); // Return max 2 alternatives
+  };
 
   const getAdvancedSuggestions = useCallback(async (
     currentWords: string[],
@@ -132,7 +201,11 @@ export function useAdvancedAI() {
       
       const currentText = currentWords.join(' ').toLowerCase();
       const lastWord = currentWords[currentWords.length - 1]?.toLowerCase();
+      const currentHour = new Date().getHours();
 
+      // Remove duplicate words from current sentence
+      const uniqueCurrentWords = removeDuplicateWords(currentWords);
+      
       // 1. Look for phrase completions
       if (currentText) {
         userPatterns.phrases.forEach((frequency, phrase) => {
@@ -140,12 +213,15 @@ export function useAdvancedAI() {
             const completion = phrase.substring(currentText.length).trim();
             if (completion) {
               const nextWord = completion.split(' ')[0];
-              suggestions.push({
-                text: nextWord,
-                confidence: Math.min(0.9, frequency / 10),
-                type: 'completion',
-                context: phrase
-              });
+              // Check if this word would create a duplicate
+              if (!uniqueCurrentWords.some(w => w.toLowerCase() === nextWord.toLowerCase())) {
+                suggestions.push({
+                  text: nextWord,
+                  confidence: Math.min(0.9, frequency / 10),
+                  type: 'completion',
+                  context: phrase
+                });
+              }
             }
           }
         });
@@ -155,7 +231,9 @@ export function useAdvancedAI() {
       if (lastWord && userPatterns.transitions.has(lastWord)) {
         const nextWords = userPatterns.transitions.get(lastWord)!;
         nextWords.forEach((frequency, nextWord) => {
-          if (!suggestions.some(s => s.text === nextWord)) {
+          // Check for duplicates and existing suggestions
+          if (!suggestions.some(s => s.text.toLowerCase() === nextWord.toLowerCase()) &&
+              !uniqueCurrentWords.some(w => w.toLowerCase() === nextWord.toLowerCase())) {
             suggestions.push({
               text: nextWord,
               confidence: Math.min(0.8, frequency / 5),
@@ -166,14 +244,33 @@ export function useAdvancedAI() {
         });
       }
 
-      // 3. Add common phrases from patterns
+      // 3. Add temporal suggestions based on current time
+      userPatterns.temporalPatterns.forEach((timeData, phrase) => {
+        const relevantTimes = timeData.filter(t => Math.abs(t.hour - currentHour) <= 2);
+        if (relevantTimes.length > 0) {
+          const firstWord = phrase.split(' ')[0];
+          if (!suggestions.some(s => s.text.toLowerCase() === firstWord.toLowerCase()) &&
+              !uniqueCurrentWords.some(w => w.toLowerCase() === firstWord.toLowerCase())) {
+            const totalCount = relevantTimes.reduce((sum, t) => sum + t.count, 0);
+            suggestions.push({
+              text: firstWord,
+              confidence: Math.min(0.75, totalCount / 5),
+              type: 'temporal',
+              context: `Common at ${currentHour}:00`
+            });
+          }
+        }
+      });
+
+      // 4. Add common phrases from patterns
       const commonPhrases = Array.from(userPatterns.phrases.entries())
         .sort((a, b) => b[1] - a[1])
         .slice(0, 3);
 
       commonPhrases.forEach(([phrase, frequency]) => {
         const firstWord = phrase.split(' ')[0];
-        if (!suggestions.some(s => s.text === firstWord)) {
+        if (!suggestions.some(s => s.text.toLowerCase() === firstWord.toLowerCase()) &&
+            !uniqueCurrentWords.some(w => w.toLowerCase() === firstWord.toLowerCase())) {
           suggestions.push({
             text: firstWord,
             confidence: Math.min(0.7, frequency / 8),
@@ -183,9 +280,10 @@ export function useAdvancedAI() {
         }
       });
 
-      // 4. Add contextual suggestions from available words
+      // 5. Add contextual suggestions from available words (avoiding duplicates)
       availableWords.slice(0, 3).forEach(word => {
-        if (!suggestions.some(s => s.text.toLowerCase() === word.toLowerCase())) {
+        if (!suggestions.some(s => s.text.toLowerCase() === word.toLowerCase()) &&
+            !uniqueCurrentWords.some(w => w.toLowerCase() === word.toLowerCase())) {
           suggestions.push({
             text: word,
             confidence: 0.3,
@@ -193,6 +291,22 @@ export function useAdvancedAI() {
           });
         }
       });
+
+      // 6. Add alternative words for the last word if it exists
+      if (lastWord) {
+        const alternatives = findAlternativeWords(lastWord, availableWords);
+        alternatives.forEach(alt => {
+          if (!suggestions.some(s => s.text.toLowerCase() === alt.toLowerCase()) &&
+              !uniqueCurrentWords.some(w => w.toLowerCase() === alt.toLowerCase())) {
+            suggestions.push({
+              text: alt,
+              confidence: 0.4,
+              type: 'contextual',
+              context: `Alternative to "${lastWord}"`
+            });
+          }
+        });
+      }
 
       // Sort by confidence and return top suggestions
       return suggestions

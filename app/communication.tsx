@@ -1,7 +1,6 @@
 
 import { useCallback, useMemo, useState, useEffect } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Platform } from 'react-native';
-import * as Speech from 'expo-speech';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import Icon from '../components/Icon';
 import { commonStyles, colors } from '../styles/commonStyles';
@@ -16,6 +15,7 @@ import { useAI } from '../hooks/useAI';
 import { useAdvancedAI } from '../hooks/useAdvancedAI';
 import { useIdleDetection } from '../hooks/useIdleDetection';
 import { useEmotionSettings } from '../hooks/useEmotionSettings';
+import { useTTSSettings } from '../hooks/useTTSSettings';
 import { Tile } from '../types';
 import CategoryBar from '../components/CategoryBar';
 import { categories } from '../data/categories';
@@ -49,6 +49,7 @@ export default function CommunicationScreen() {
   } = useAdvancedAI();
 
   const { settings, updateEmotion } = useEmotionSettings();
+  const { speak } = useTTSSettings();
   
   const [sentence, setSentence] = useState<Tile[]>([]);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -98,12 +99,20 @@ export default function CommunicationScreen() {
         const suggestions = await getAdvancedSuggestions(currentWords, availableWords);
         setAdvancedSuggestions(suggestions);
       } else {
-        setAdvancedSuggestions([]);
+        // Get temporal suggestions when no sentence is started
+        const timeBasedSuggestions = await getTimeBasedSuggestions();
+        const temporalSuggestions = timeBasedSuggestions.slice(0, 3).map(phrase => ({
+          text: phrase.split(' ')[0],
+          confidence: 0.6,
+          type: 'temporal' as const,
+          context: `Common now: ${phrase}`
+        }));
+        setAdvancedSuggestions(temporalSuggestions);
       }
     };
 
     updateSuggestions();
-  }, [sentence, tiles, getAdvancedSuggestions]);
+  }, [sentence, tiles, getAdvancedSuggestions, getTimeBasedSuggestions]);
 
   console.log('Tiles loaded:', tiles.length);
   console.log('Categories loaded:', categories.length);
@@ -130,8 +139,9 @@ export default function CommunicationScreen() {
     }
     const ttsText = normalizeForTTS(text);
     console.log('Speaking sentence:', ttsText);
-    Speech.stop();
-    Speech.speak(ttsText, { language: 'en-US', pitch: 1, rate: 0.9 });
+    
+    // Use the custom TTS settings
+    await speak(ttsText);
     
     // Record in both AI systems
     recordSentence(sentence.map(t => t.id), text);
@@ -139,7 +149,7 @@ export default function CommunicationScreen() {
     
     setSentence([]);
     handleUserActivity();
-  }, [sentence, recordSentence, recordUserInput, settings.selectedEmotion, handleUserActivity]);
+  }, [sentence, recordSentence, recordUserInput, settings.selectedEmotion, handleUserActivity, speak]);
 
   const handleClear = useCallback(() => {
     console.log('Clearing sentence');

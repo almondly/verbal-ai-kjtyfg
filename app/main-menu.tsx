@@ -54,7 +54,7 @@ export default function MainMenu() {
 
         <View style={styles.emotionContainer}>
           <View style={styles.emotionWrapper}>
-            <EmotionFace emotion={settings.selectedEmotion} size={280} />
+            <EmotionFace emotion={settings.selectedEmotion} size={320} />
           </View>
           <Text style={styles.emotionLabel}>
             I&apos;m feeling {settings.selectedEmotion}
@@ -122,7 +122,6 @@ const styles = StyleSheet.create({
   },
   emotionWrapper: {
     marginBottom: 24,
-    boxShadow: '0px 8px 20px rgba(0,0,0,0.1)',
   },
   emotionLabel: {
     fontSize: 20,

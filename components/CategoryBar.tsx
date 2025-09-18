@@ -45,10 +45,10 @@ export default function CategoryBar({ categories, selectedId, onSelect, style }:
                 style={[
                   styles.chip,
                   {
-                    backgroundColor: active ? cat.color : colors.backgroundAlt,
+                    backgroundColor: active ? colors.backgroundAlt : colors.backgroundAlt,
                     borderColor: active ? cat.color : colors.border,
-                    borderWidth: active ? 2 : 1,
-                    boxShadow: active ? `0px 4px 12px ${cat.color}40` : '0px 2px 6px rgba(0,0,0,0.08)',
+                    borderWidth: active ? 3 : 1,
+                    boxShadow: active ? `0px 0px 20px ${cat.color}80` : '0px 2px 6px rgba(0,0,0,0.08)',
                   },
                 ]}
                 onPress={() => {
@@ -60,11 +60,11 @@ export default function CategoryBar({ categories, selectedId, onSelect, style }:
                 <Icon 
                   name={cat.icon as any} 
                   size={28} 
-                  color={active ? '#FFFFFF' : colors.text} 
+                  color={colors.text} 
                 />
                 <Text style={[
                   styles.chipText, 
-                  { color: active ? '#FFFFFF' : colors.text }
+                  { color: colors.text }
                 ]}>
                   {cat.label}
                 </Text>

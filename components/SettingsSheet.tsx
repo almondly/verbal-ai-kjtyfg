@@ -9,6 +9,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { Tile } from '../types';
 import { categories } from '../data/categories';
 import { defaultTiles } from '../data/defaultTiles';
+import { useTTSSettings } from '../hooks/useTTSSettings';
 
 interface Props {
   open: boolean;
@@ -42,12 +43,13 @@ export default function SettingsSheet({
   onEmotionChange,
 }: Props) {
   const sheetRef = useRef<BottomSheet>(null);
-  // Make it full screen by using 100% as the only snap point
   const snapPoints = useMemo(() => ['100%'], []);
   const [phrase, setPhrase] = useState('');
   const [color, setColor] = useState('#FFFFFF');
   const [imageUri, setImageUri] = useState<string | undefined>(undefined);
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>(defaultCategoryId);
+  
+  const { settings: ttsSettings, availableVoices, updateSettings: updateTTSSettings, speak } = useTTSSettings();
 
   useEffect(() => {
     if (open && mode === 'add') {
@@ -55,7 +57,7 @@ export default function SettingsSheet({
     }
   }, [open, mode, defaultCategoryId]);
 
-  // Control opening/closing - snap to index 0 since we only have one snap point
+  // Control opening/closing
   if (open && sheetRef.current) {
     setTimeout(() => sheetRef.current?.snapToIndex(0), 0);
   } else if (!open && sheetRef.current) {
@@ -105,6 +107,17 @@ export default function SettingsSheet({
   const handleEmotionSelect = (emotion: string) => {
     console.log('Emotion selected:', emotion);
     onEmotionChange?.(emotion);
+  };
+
+  const handleVoiceSelect = async (voiceIdentifier: string, voiceName: string, language: string) => {
+    await updateTTSSettings({
+      voiceIdentifier,
+      voiceName,
+      language,
+    });
+    
+    // Test the voice
+    await speak('Hello, this is how I sound!');
   };
 
   return (
@@ -157,6 +170,86 @@ export default function SettingsSheet({
                       <Text style={styles.emotionOptionText}>{emotion}</Text>
                     </TouchableOpacity>
                   ))}
+                </View>
+              </View>
+
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Text-to-Speech Voice</Text>
+                <View style={styles.currentVoiceContainer}>
+                  <Text style={styles.currentVoiceText}>Current Voice: {ttsSettings.voiceName}</Text>
+                  <TouchableOpacity 
+                    style={styles.testVoiceBtn}
+                    onPress={() => speak('Hello, this is how I sound!')}
+                    activeOpacity={0.8}
+                  >
+                    <Icon name="volume-high-outline" size={20} color={colors.primary} />
+                    <Text style={styles.testVoiceText}>Test Voice</Text>
+                  </TouchableOpacity>
+                </View>
+                
+                <ScrollView style={styles.voicesList} showsVerticalScrollIndicator={false}>
+                  {availableVoices.map((voice) => (
+                    <TouchableOpacity
+                      key={voice.identifier}
+                      style={[
+                        styles.voiceOption,
+                        ttsSettings.voiceIdentifier === voice.identifier && styles.voiceOptionSelected,
+                      ]}
+                      onPress={() => handleVoiceSelect(voice.identifier, voice.name, voice.language)}
+                      activeOpacity={0.8}
+                    >
+                      <View style={styles.voiceInfo}>
+                        <Text style={styles.voiceName}>{voice.name}</Text>
+                        <Text style={styles.voiceLanguage}>{voice.language}</Text>
+                      </View>
+                      {ttsSettings.voiceIdentifier === voice.identifier && (
+                        <Icon name="checkmark-circle" size={24} color={colors.primary} />
+                      )}
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Voice Settings</Text>
+                <View style={styles.sliderContainer}>
+                  <Text style={styles.sliderLabel}>Speech Rate: {ttsSettings.rate.toFixed(1)}</Text>
+                  <View style={styles.sliderButtons}>
+                    <TouchableOpacity 
+                      style={styles.sliderBtn}
+                      onPress={() => updateTTSSettings({ rate: Math.max(0.1, ttsSettings.rate - 0.1) })}
+                      activeOpacity={0.8}
+                    >
+                      <Text style={styles.sliderBtnText}>-</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                      style={styles.sliderBtn}
+                      onPress={() => updateTTSSettings({ rate: Math.min(2.0, ttsSettings.rate + 0.1) })}
+                      activeOpacity={0.8}
+                    >
+                      <Text style={styles.sliderBtnText}>+</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+                
+                <View style={styles.sliderContainer}>
+                  <Text style={styles.sliderLabel}>Pitch: {ttsSettings.pitch.toFixed(1)}</Text>
+                  <View style={styles.sliderButtons}>
+                    <TouchableOpacity 
+                      style={styles.sliderBtn}
+                      onPress={() => updateTTSSettings({ pitch: Math.max(0.5, ttsSettings.pitch - 0.1) })}
+                      activeOpacity={0.8}
+                    >
+                      <Text style={styles.sliderBtnText}>-</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                      style={styles.sliderBtn}
+                      onPress={() => updateTTSSettings({ pitch: Math.min(2.0, ttsSettings.pitch + 0.1) })}
+                      activeOpacity={0.8}
+                    >
+                      <Text style={styles.sliderBtnText}>+</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
               </View>
 
@@ -249,7 +342,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 40,
+    paddingBottom: 60,
   },
   header: {
     flexDirection: 'row',
@@ -316,6 +409,97 @@ const styles = StyleSheet.create({
     marginTop: 8,
     textAlign: 'center',
     textTransform: 'capitalize',
+  },
+  currentVoiceContainer: {
+    backgroundColor: '#F9FAFB',
+    borderRadius: 16,
+    padding: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  currentVoiceText: {
+    fontSize: 16,
+    fontFamily: 'Montserrat_600SemiBold',
+    color: colors.text,
+  },
+  testVoiceBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.background,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 12,
+    gap: 6 as any,
+  },
+  testVoiceText: {
+    fontSize: 14,
+    fontFamily: 'Montserrat_600SemiBold',
+    color: colors.primary,
+  },
+  voicesList: {
+    maxHeight: 200,
+    backgroundColor: '#F9FAFB',
+    borderRadius: 16,
+    padding: 8,
+  },
+  voiceOption: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 12,
+    marginBottom: 4,
+    backgroundColor: colors.background,
+  },
+  voiceOptionSelected: {
+    backgroundColor: '#EEF2FF',
+    borderWidth: 2,
+    borderColor: colors.primary,
+  },
+  voiceInfo: {
+    flex: 1,
+  },
+  voiceName: {
+    fontSize: 16,
+    fontFamily: 'Montserrat_600SemiBold',
+    color: colors.text,
+  },
+  voiceLanguage: {
+    fontSize: 14,
+    fontFamily: 'Montserrat_400Regular',
+    color: colors.textSecondary,
+    marginTop: 2,
+  },
+  sliderContainer: {
+    backgroundColor: '#F9FAFB',
+    borderRadius: 16,
+    padding: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  sliderLabel: {
+    fontSize: 16,
+    fontFamily: 'Montserrat_600SemiBold',
+    color: colors.text,
+  },
+  sliderButtons: {
+    flexDirection: 'row',
+    gap: 8 as any,
+  },
+  sliderBtn: {
+    backgroundColor: colors.primary,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  sliderBtnText: {
+    fontSize: 20,
+    fontFamily: 'Montserrat_700Bold',
+    color: '#FFFFFF',
   },
   row: {
     flexDirection: 'row',
