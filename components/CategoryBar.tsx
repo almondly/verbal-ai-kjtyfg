@@ -3,6 +3,7 @@ import { ScrollView, Text, TouchableOpacity, StyleSheet, View, Animated } from '
 import { useRef } from 'react';
 import Icon from './Icon';
 import { Category } from '../types';
+import { colors } from '../styles/commonStyles';
 
 interface Props {
   categories: Category[];
@@ -23,7 +24,6 @@ export default function CategoryBar({ categories, selectedId, onSelect, style }:
 
   return (
     <View style={[styles.wrapper, style]}>
-      <View style={styles.backgroundBox} />
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -38,19 +38,17 @@ export default function CategoryBar({ categories, selectedId, onSelect, style }:
               key={cat.id}
               style={{
                 transform: [{ scale: active ? scaleAnim : 1 }],
-                marginRight: index < categories.length - 1 ? 10 : 0,
+                marginRight: index < categories.length - 1 ? 12 : 0,
               }}
             >
               <TouchableOpacity
                 style={[
                   styles.chip,
                   {
-                    backgroundColor: active ? cat.color : '#FFFFFF',
-                    borderColor: cat.color,
-                    shadowColor: active ? cat.color : 'transparent',
-                    shadowOpacity: active ? 0.8 : 0,
-                    shadowRadius: active ? 10 : 0,
-                    elevation: active ? 10 : 0,
+                    backgroundColor: active ? cat.color : colors.backgroundAlt,
+                    borderColor: active ? cat.color : colors.border,
+                    borderWidth: active ? 2 : 1,
+                    boxShadow: active ? `0px 4px 12px ${cat.color}40` : '0px 2px 6px rgba(0,0,0,0.08)',
                   },
                 ]}
                 onPress={() => {
@@ -59,8 +57,17 @@ export default function CategoryBar({ categories, selectedId, onSelect, style }:
                 }}
                 activeOpacity={0.8}
               >
-                <Icon name={cat.icon as any} size={28} color="#000" />
-                <Text style={[styles.chipText, { color: '#000' }]}>{cat.label}</Text>
+                <Icon 
+                  name={cat.icon as any} 
+                  size={28} 
+                  color={active ? '#FFFFFF' : colors.text} 
+                />
+                <Text style={[
+                  styles.chipText, 
+                  { color: active ? '#FFFFFF' : colors.text }
+                ]}>
+                  {cat.label}
+                </Text>
               </TouchableOpacity>
             </Animated.View>
           );
@@ -72,39 +79,28 @@ export default function CategoryBar({ categories, selectedId, onSelect, style }:
 
 const styles = StyleSheet.create({
   wrapper: {
-    position: 'absolute',
-    top: 280,
-    left: 0,
-    right: 0,
-    zIndex: 2,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-  },
-  backgroundBox: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: '#FFFFFF',
+    width: '100%',
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+    backgroundColor: colors.background,
     borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 5,
+    boxShadow: '0px 2px 8px rgba(0,0,0,0.06)',
   },
   row: {
     alignItems: 'center',
+    paddingHorizontal: 4,
   },
   chip: {
     width: 80,
     height: 80,
     borderRadius: 16,
-    borderWidth: 2,
     justifyContent: 'center',
     alignItems: 'center',
   },
   chipText: {
     fontSize: 12,
-    fontWeight: '600',
-    marginTop: 6,
+    fontFamily: 'Montserrat_600SemiBold',
+    marginTop: 4,
     textAlign: 'center',
   },
 });

@@ -204,59 +204,66 @@ export default function CommunicationScreen() {
           </View>
         </View>
 
+        {/* Phrase Bar */}
         <PhraseBar
           sentence={sentence}
           onClear={handleClear}
           onSpeak={handleSpeak}
         />
 
-        {advancedSuggestions.length > 0 ? (
-          <AdvancedSuggestionsRow
-            suggestions={advancedSuggestions}
-            onPressSuggestion={onSuggestionPress}
-            style={{ marginTop: 8, marginBottom: 8 }}
-            showDetails={false}
-          />
-        ) : (
-          <SuggestionsRow
-            suggestions={suggestions}
-            onPressSuggestion={onSuggestionPress}
-            style={{ marginTop: 8, marginBottom: 8 }}
-          />
-        )}
+        {/* Suggestions Row - moved directly under phrase bar */}
+        <View style={styles.suggestionsContainer}>
+          {advancedSuggestions.length > 0 ? (
+            <AdvancedSuggestionsRow
+              suggestions={advancedSuggestions}
+              onPressSuggestion={onSuggestionPress}
+              showDetails={false}
+            />
+          ) : (
+            <SuggestionsRow
+              suggestions={suggestions}
+              onPressSuggestion={onSuggestionPress}
+            />
+          )}
+        </View>
 
+        {/* Category Bar - only show when settings is not open */}
         {!settingsOpen && (
-          <CategoryBar
-            categories={categories}
-            selectedId={selectedCategory}
-            onSelect={(id) => {
-              setSelectedCategory(id);
-              handleUserActivity();
-            }}
-            style={{ marginTop: 8, marginBottom: 8 }}
-          />
+          <View style={styles.categoryContainer}>
+            <CategoryBar
+              categories={categories}
+              selectedId={selectedCategory}
+              onSelect={(id) => {
+                setSelectedCategory(id);
+                handleUserActivity();
+              }}
+            />
+          </View>
         )}
 
-        <ScrollView
-          style={{ flex: 1, marginTop: 8 }}
-          contentContainerStyle={{ paddingTop: 0, paddingBottom: 16 }}
-          contentInsetAdjustmentBehavior="never"
-          keyboardShouldPersistTaps="handled"
-          onTouchStart={handleUserActivity}
-        >
-          <CommunicationGrid
-            tiles={visibleTiles}
-            onPressTile={handleTilePress}
-            onPressAdd={() => {
-              setAddOpen(true);
-              handleUserActivity();
-            }}
-            onRemoveTile={(id) => {
-              removeTile(id);
-              handleUserActivity();
-            }}
-          />
-        </ScrollView>
+        {/* Communication Grid with proper spacing */}
+        <View style={styles.gridContainer}>
+          <ScrollView
+            style={{ flex: 1 }}
+            contentContainerStyle={{ paddingTop: 8, paddingBottom: 16 }}
+            contentInsetAdjustmentBehavior="never"
+            keyboardShouldPersistTaps="handled"
+            onTouchStart={handleUserActivity}
+          >
+            <CommunicationGrid
+              tiles={visibleTiles}
+              onPressTile={handleTilePress}
+              onPressAdd={() => {
+                setAddOpen(true);
+                handleUserActivity();
+              }}
+              onRemoveTile={(id) => {
+                removeTile(id);
+                handleUserActivity();
+              }}
+            />
+          </ScrollView>
+        </View>
 
         <SettingsSheet
           open={settingsOpen}
@@ -330,5 +337,17 @@ const styles = StyleSheet.create({
   emotionContainer: {
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  suggestionsContainer: {
+    marginBottom: 8,
+    minHeight: 40,
+  },
+  categoryContainer: {
+    marginBottom: 8,
+    height: 100,
+  },
+  gridContainer: {
+    flex: 1,
+    marginTop: 8,
   },
 });

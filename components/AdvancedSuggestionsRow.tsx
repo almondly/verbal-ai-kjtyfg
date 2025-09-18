@@ -12,90 +12,16 @@ interface Props {
   showDetails?: boolean;
 }
 
-const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  suggestion: {
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    marginRight: 12,
-    minWidth: 120,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  suggestionText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text,
-    marginBottom: 4,
-  },
-  confidenceContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  confidenceBar: {
-    height: 3,
-    backgroundColor: colors.border,
-    borderRadius: 2,
-    flex: 1,
-    marginRight: 8,
-  },
-  confidenceFill: {
-    height: '100%',
-    borderRadius: 2,
-  },
-  confidenceText: {
-    fontSize: 11,
-    color: colors.textSecondary,
-    fontWeight: '500',
-  },
-  typeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  typeIcon: {
-    marginRight: 4,
-  },
-  typeText: {
-    fontSize: 11,
-    color: colors.textSecondary,
-    fontWeight: '500',
-    textTransform: 'capitalize',
-  },
-  reasoning: {
-    fontSize: 10,
-    color: colors.textSecondary,
-    fontStyle: 'italic',
-    marginTop: 2,
-  },
-  emptyContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 20,
-  },
-  emptyText: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    textAlign: 'center',
-  },
-});
-
 const getTypeIcon = (type: string) => {
   switch (type) {
     case 'temporal':
-      return 'clock';
+      return 'time-outline';
     case 'pattern':
-      return 'trending-up';
+      return 'trending-up-outline';
     case 'contextual':
-      return 'search';
+      return 'search-outline';
     default:
-      return 'lightbulb';
+      return 'bulb-outline';
   }
 };
 
@@ -109,75 +35,113 @@ export default function AdvancedSuggestionsRow({
   suggestions, 
   onPressSuggestion, 
   style,
-  showDetails = true 
+  showDetails = false 
 }: Props) {
   if (suggestions.length === 0) {
     return (
-      <View style={[styles.container, style]}>
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>
-            Start typing to see AI-powered suggestions based on your patterns
-          </Text>
-        </View>
+      <View style={[styles.emptyContainer, style]}>
+        <Text style={styles.emptyText}>
+          AI suggestions will appear as you build sentences
+        </Text>
       </View>
     );
   }
 
   return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={[styles.container, style]}
-    >
-      {suggestions.map((suggestion, index) => (
-        <TouchableOpacity
-          key={index}
-          style={styles.suggestion}
-          onPress={() => onPressSuggestion(suggestion.text)}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.suggestionText} numberOfLines={2}>
-            {suggestion.text}
-          </Text>
-          
-          {showDetails && (
-            <>
-              <View style={styles.confidenceContainer}>
-                <View style={styles.confidenceBar}>
-                  <View
-                    style={[
-                      styles.confidenceFill,
-                      {
-                        width: `${suggestion.confidence * 100}%`,
-                        backgroundColor: getConfidenceColor(suggestion.confidence),
-                      },
-                    ]}
-                  />
-                </View>
-                <Text style={styles.confidenceText}>
-                  {Math.round(suggestion.confidence * 100)}%
-                </Text>
-              </View>
-
-              <View style={styles.typeContainer}>
-                <Icon
-                  name={getTypeIcon(suggestion.type)}
-                  size={12}
-                  color={colors.textSecondary}
-                  style={styles.typeIcon}
-                />
-                <Text style={styles.typeText}>{suggestion.type}</Text>
-              </View>
-
-              {suggestion.reasoning && (
-                <Text style={styles.reasoning} numberOfLines={2}>
-                  {suggestion.reasoning}
-                </Text>
-              )}
-            </>
-          )}
-        </TouchableOpacity>
-      ))}
-    </ScrollView>
+    <View style={[styles.container, style]}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.row}
+        keyboardShouldPersistTaps="handled"
+      >
+        {suggestions.slice(0, 6).map((suggestion, index) => (
+          <TouchableOpacity
+            key={`${suggestion.text}-${index}`}
+            style={[
+              styles.suggestion,
+              { borderLeftColor: getConfidenceColor(suggestion.confidence) }
+            ]}
+            onPress={() => onPressSuggestion(suggestion.text)}
+            activeOpacity={0.8}
+          >
+            <View style={styles.suggestionHeader}>
+              <Icon
+                name={getTypeIcon(suggestion.type)}
+                size={14}
+                color={colors.textSecondary}
+                style={styles.typeIcon}
+              />
+              <Text style={styles.confidenceText}>
+                {Math.round(suggestion.confidence * 100)}%
+              </Text>
+            </View>
+            <Text style={styles.suggestionText} numberOfLines={2}>
+              {suggestion.text}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: colors.backgroundAlt,
+    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    boxShadow: '0px 2px 6px rgba(0,0,0,0.06)',
+  },
+  row: {
+    alignItems: 'center',
+    gap: 8 as any,
+    paddingHorizontal: 4,
+  },
+  suggestion: {
+    backgroundColor: colors.surface,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    minWidth: 100,
+    maxWidth: 140,
+    borderLeftWidth: 3,
+    boxShadow: '0px 2px 4px rgba(0,0,0,0.08)',
+  },
+  suggestionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  typeIcon: {
+    marginRight: 4,
+  },
+  confidenceText: {
+    fontSize: 10,
+    color: colors.textSecondary,
+    fontFamily: 'Montserrat_600SemiBold',
+  },
+  suggestionText: {
+    fontSize: 13,
+    fontFamily: 'Montserrat_600SemiBold',
+    color: colors.text,
+    lineHeight: 16,
+  },
+  emptyContainer: {
+    backgroundColor: colors.backgroundAlt,
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: '0px 2px 6px rgba(0,0,0,0.06)',
+  },
+  emptyText: {
+    color: colors.textSecondary,
+    fontFamily: 'Montserrat_400Regular',
+    fontSize: 12,
+    textAlign: 'center',
+  },
+});

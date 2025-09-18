@@ -7,12 +7,14 @@ export const colors = {
   accent: '#00FFA5',
   background: '#FFFFFF',
   backgroundAlt: '#F8FAFC',
+  surface: '#FFFFFF',
   text: '#1F2937',
   textSecondary: '#6B7280',
   border: '#E5E7EB',
   success: '#10B981',
   warning: '#F59E0B',
   danger: '#EF4444',
+  error: '#EF4444',
   info: '#3B82F6',
 };
 

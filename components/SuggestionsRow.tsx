@@ -10,54 +10,79 @@ interface Props {
 
 export default function SuggestionsRow({ suggestions, onPressSuggestion, style }: Props) {
   if (!suggestions || suggestions.length === 0) {
-    return null;
+    return (
+      <View style={[styles.emptyContainer, style]}>
+        <Text style={styles.emptyText}>Start building a sentence to see suggestions</Text>
+      </View>
+    );
   }
+
   return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      style={[styles.container, style]}
-      contentContainerStyle={styles.row}
-      keyboardShouldPersistTaps="handled"
-    >
-      {suggestions.slice(0, 7).map((s) => (
-        <TouchableOpacity
-          key={s}
-          style={styles.suggestion}
-          onPress={() => onPressSuggestion(s)}
-          activeOpacity={0.9}
-        >
-          <Text style={styles.text} numberOfLines={1}>{s}</Text>
-        </TouchableOpacity>
-      ))}
-    </ScrollView>
+    <View style={[styles.container, style]}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.row}
+        keyboardShouldPersistTaps="handled"
+      >
+        {suggestions.slice(0, 8).map((s, index) => (
+          <TouchableOpacity
+            key={`${s}-${index}`}
+            style={styles.suggestion}
+            onPress={() => onPressSuggestion(s)}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.text} numberOfLines={1}>{s}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 0,
-    marginBottom: 0,
-    paddingVertical: 0,
+    backgroundColor: colors.backgroundAlt,
+    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    boxShadow: '0px 2px 6px rgba(0,0,0,0.06)',
   },
   row: {
-    paddingVertical: 0,
-    gap: 4 as any,
     alignItems: 'center',
+    gap: 8 as any,
+    paddingHorizontal: 4,
   },
   suggestion: {
-    backgroundColor: colors.backgroundAlt,
+    backgroundColor: colors.primary,
     borderRadius: 8,
-    paddingHorizontal: 8,
-    height: 26,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    minWidth: 60,
     alignItems: 'center',
     justifyContent: 'center',
-    boxShadow: '0px 2px 4px rgba(0,0,0,0.03)',
+    boxShadow: '0px 2px 4px rgba(0,0,0,0.08)',
   },
   text: {
-    color: colors.text,
+    color: '#FFFFFF',
     fontFamily: 'Montserrat_600SemiBold',
+    fontSize: 13,
+    lineHeight: 16,
+    textAlign: 'center',
+  },
+  emptyContainer: {
+    backgroundColor: colors.backgroundAlt,
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: '0px 2px 6px rgba(0,0,0,0.06)',
+  },
+  emptyText: {
+    color: colors.textSecondary,
+    fontFamily: 'Montserrat_400Regular',
     fontSize: 12,
-    lineHeight: 14,
+    textAlign: 'center',
   },
 });
