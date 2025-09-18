@@ -1,6 +1,6 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
+import BottomSheet, { BottomSheetView, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, ScrollView } from 'react-native';
 import { colors } from '../styles/commonStyles';
 import Icon from './Icon';
@@ -125,7 +125,11 @@ export default function SettingsSheet({
           </TouchableOpacity>
         </View>
 
-        <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        <BottomSheetScrollView 
+          style={styles.scrollView} 
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
           {mode === 'settings' ? (
             <>
               <View style={styles.section}>
@@ -229,7 +233,7 @@ export default function SettingsSheet({
               </TouchableOpacity>
             </View>
           )}
-        </ScrollView>
+        </BottomSheetScrollView>
       </BottomSheetView>
     </BottomSheet>
   );
@@ -239,11 +243,13 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 24,
     paddingTop: 16,
-    paddingBottom: 32,
     flex: 1,
   },
   scrollView: {
     flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 40,
   },
   header: {
     flexDirection: 'row',

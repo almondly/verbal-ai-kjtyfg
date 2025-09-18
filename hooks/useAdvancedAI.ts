@@ -5,239 +5,243 @@ import { supabase } from '../app/integrations/supabase/client';
 export interface AdvancedSuggestion {
   text: string;
   confidence: number;
-  type: 'temporal' | 'pattern' | 'contextual';
-  reasoning?: string;
-}
-
-export interface TemporalContext {
-  hourOfDay: number;
-  dayOfWeek: number;
-  commonAtThisTime: string[];
-}
-
-export interface PredictionResponse {
-  suggestions: AdvancedSuggestion[];
-  temporalContext: TemporalContext;
+  type: 'completion' | 'next_word' | 'common_phrase' | 'contextual';
+  context?: string;
 }
 
 export function useAdvancedAI() {
   const [isLoading, setIsLoading] = useState(false);
-  const [lastPredictions, setLastPredictions] = useState<AdvancedSuggestion[]>([]);
-  const [temporalContext, setTemporalContext] = useState<TemporalContext | null>(null);
-  const [dailySentenceCount, setDailySentenceCount] = useState(0);
+  const [error, setError] = useState<string | null>(null);
 
-  // Get daily sentence count
+  // Store user patterns locally for faster access
+  const [userPatterns, setUserPatterns] = useState<{
+    phrases: Map<string, number>;
+    transitions: Map<string, Map<string, number>>;
+    contexts: Map<string, string[]>;
+  }>({
+    phrases: new Map(),
+    transitions: new Map(),
+    contexts: new Map(),
+  });
+
+  // Initialize patterns from Supabase
   useEffect(() => {
-    const fetchDailyCount = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        
-        const { data, error } = await supabase
-          .from('sentences')
-          .select('usage_count')
-          .eq('user_id', user.id)
-          .gte('created_at', today.toISOString());
-
-        if (!error && data) {
-          const count = data.reduce((sum, item) => sum + item.usage_count, 0);
-          setDailySentenceCount(count);
-        }
-      } catch (error) {
-        console.log('Error fetching daily count:', error);
-      }
-    };
-
-    fetchDailyCount();
+    loadUserPatterns();
   }, []);
 
-  const recordSentence = useCallback(async (sentence: string, wordIds: string[] = []) => {
+  const loadUserPatterns = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        console.log('No user found for recording sentence');
+      setIsLoading(true);
+      
+      const { data, error } = await supabase
+        .from('user_patterns')
+        .select('*')
+        .order('frequency', { ascending: false });
+
+      if (error) {
+        console.log('Error loading patterns:', error);
         return;
       }
 
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        console.log('No session found for recording sentence');
-        return;
-      }
+      const phrases = new Map();
+      const transitions = new Map();
+      const contexts = new Map();
 
-      console.log('Recording sentence:', sentence);
-
-      const response = await fetch(`${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/store-sentence`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({
-          sentence: sentence.trim(),
-          wordIds
-        }),
+      data?.forEach(pattern => {
+        if (pattern.pattern_type === 'phrase') {
+          phrases.set(pattern.pattern_key, pattern.frequency);
+        } else if (pattern.pattern_type === 'transition') {
+          const [from, to] = pattern.pattern_key.split('->');
+          if (!transitions.has(from)) {
+            transitions.set(from, new Map());
+          }
+          transitions.get(from)!.set(to, pattern.frequency);
+        } else if (pattern.pattern_type === 'context') {
+          contexts.set(pattern.pattern_key, pattern.metadata?.related_words || []);
+        }
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Failed to record sentence:', errorText);
-        return;
+      setUserPatterns({ phrases, transitions, contexts });
+      console.log('Loaded user patterns:', { 
+        phrases: phrases.size, 
+        transitions: transitions.size, 
+        contexts: contexts.size 
+      });
+    } catch (err) {
+      console.log('Error in loadUserPatterns:', err);
+      setError('Failed to load user patterns');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const recordUserInput = useCallback(async (sentence: string, context?: string) => {
+    try {
+      const words = sentence.toLowerCase().trim().split(/\s+/).filter(Boolean);
+      
+      // Record the full phrase
+      const { error: phraseError } = await supabase
+        .from('user_patterns')
+        .upsert({
+          pattern_type: 'phrase',
+          pattern_key: sentence.toLowerCase(),
+          frequency: 1,
+          metadata: { word_count: words.length, context },
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'pattern_type,pattern_key'
+        });
+
+      if (phraseError) {
+        console.log('Error recording phrase:', phraseError);
       }
 
-      const result = await response.json();
-      console.log('Sentence recorded successfully:', result);
-      
-      // Update daily count
-      setDailySentenceCount(prev => prev + 1);
+      // Record word transitions
+      for (let i = 0; i < words.length - 1; i++) {
+        const transition = `${words[i]}->${words[i + 1]}`;
+        const { error: transitionError } = await supabase
+          .from('user_patterns')
+          .upsert({
+            pattern_type: 'transition',
+            pattern_key: transition,
+            frequency: 1,
+            updated_at: new Date().toISOString()
+          }, {
+            onConflict: 'pattern_type,pattern_key'
+          });
 
-    } catch (error) {
-      console.error('Error recording sentence:', error);
+        if (transitionError) {
+          console.log('Error recording transition:', transitionError);
+        }
+      }
+
+      // Update local patterns
+      await loadUserPatterns();
+    } catch (err) {
+      console.log('Error recording user input:', err);
     }
   }, []);
 
   const getAdvancedSuggestions = useCallback(async (
-    currentSentence: string,
-    contextSentences: string[] = [],
+    currentWords: string[],
+    availableWords: string[],
     maxSuggestions: number = 6
   ): Promise<AdvancedSuggestion[]> => {
-    if (!currentSentence.trim()) {
-      return [];
-    }
-
-    setIsLoading(true);
-    
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        console.log('No user found for predictions');
-        return [];
+      const suggestions: AdvancedSuggestion[] = [];
+      
+      const currentText = currentWords.join(' ').toLowerCase();
+      const lastWord = currentWords[currentWords.length - 1]?.toLowerCase();
+
+      // 1. Look for phrase completions
+      if (currentText) {
+        userPatterns.phrases.forEach((frequency, phrase) => {
+          if (phrase.startsWith(currentText) && phrase !== currentText) {
+            const completion = phrase.substring(currentText.length).trim();
+            if (completion) {
+              const nextWord = completion.split(' ')[0];
+              suggestions.push({
+                text: nextWord,
+                confidence: Math.min(0.9, frequency / 10),
+                type: 'completion',
+                context: phrase
+              });
+            }
+          }
+        });
       }
 
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        console.log('No session found for predictions');
-        return [];
+      // 2. Look for word transitions
+      if (lastWord && userPatterns.transitions.has(lastWord)) {
+        const nextWords = userPatterns.transitions.get(lastWord)!;
+        nextWords.forEach((frequency, nextWord) => {
+          if (!suggestions.some(s => s.text === nextWord)) {
+            suggestions.push({
+              text: nextWord,
+              confidence: Math.min(0.8, frequency / 5),
+              type: 'next_word',
+              context: `${lastWord} -> ${nextWord}`
+            });
+          }
+        });
       }
 
-      console.log('Getting advanced suggestions for:', currentSentence);
+      // 3. Add common phrases from patterns
+      const commonPhrases = Array.from(userPatterns.phrases.entries())
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3);
 
-      const response = await fetch(`${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/advanced-sentence-predictor`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({
-          currentSentence: currentSentence.trim(),
-          contextSentences,
-          maxSuggestions
-        }),
+      commonPhrases.forEach(([phrase, frequency]) => {
+        const firstWord = phrase.split(' ')[0];
+        if (!suggestions.some(s => s.text === firstWord)) {
+          suggestions.push({
+            text: firstWord,
+            confidence: Math.min(0.7, frequency / 8),
+            type: 'common_phrase',
+            context: phrase
+          });
+        }
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Failed to get predictions:', errorText);
-        return [];
-      }
-
-      const result: PredictionResponse = await response.json();
-      console.log('Advanced predictions received:', result);
-      
-      setLastPredictions(result.suggestions);
-      setTemporalContext(result.temporalContext);
-      
-      return result.suggestions;
-
-    } catch (error) {
-      console.error('Error getting advanced suggestions:', error);
-      return [];
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  const suggestNextWords = useCallback(async (
-    currentWords: string[],
-    libraryWords: string[] = [],
-    maxSuggestions: number = 6
-  ): Promise<string[]> => {
-    const currentSentence = currentWords.join(' ');
-    const suggestions = await getAdvancedSuggestions(currentSentence, [], maxSuggestions);
-    
-    // Extract just the next words from the suggestions
-    const nextWords: string[] = [];
-    
-    for (const suggestion of suggestions) {
-      if (suggestion.text.startsWith(currentSentence)) {
-        const remainingText = suggestion.text.slice(currentSentence.length).trim();
-        const nextWord = remainingText.split(' ')[0];
-        if (nextWord && !nextWords.includes(nextWord)) {
-          nextWords.push(nextWord);
+      // 4. Add contextual suggestions from available words
+      availableWords.slice(0, 3).forEach(word => {
+        if (!suggestions.some(s => s.text.toLowerCase() === word.toLowerCase())) {
+          suggestions.push({
+            text: word,
+            confidence: 0.3,
+            type: 'contextual'
+          });
         }
-      }
-    }
-    
-    // Fill remaining slots with library words if needed
-    for (const word of libraryWords) {
-      if (nextWords.length >= maxSuggestions) break;
-      if (!nextWords.includes(word.toLowerCase())) {
-        nextWords.push(word);
-      }
-    }
-    
-    return nextWords.slice(0, maxSuggestions);
-  }, [getAdvancedSuggestions]);
+      });
 
-  const getTemporalInsights = useCallback(() => {
-    if (!temporalContext) return null;
-    
-    const { hourOfDay, dayOfWeek, commonAtThisTime } = temporalContext;
-    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    const timeOfDay = hourOfDay < 12 ? 'morning' : hourOfDay < 17 ? 'afternoon' : 'evening';
-    
-    return {
-      currentTime: `${timeOfDay} on ${dayNames[dayOfWeek]}`,
-      commonSentences: commonAtThisTime,
-      hourOfDay,
-      dayOfWeek
-    };
-  }, [temporalContext]);
+      // Sort by confidence and return top suggestions
+      return suggestions
+        .sort((a, b) => b.confidence - a.confidence)
+        .slice(0, maxSuggestions);
 
-  const resetLearning = useCallback(async () => {
+    } catch (err) {
+      console.log('Error getting advanced suggestions:', err);
+      setError('Failed to get suggestions');
+      return [];
+    }
+  }, [userPatterns]);
+
+  const getTimeBasedSuggestions = useCallback(async (): Promise<string[]> => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      // Clear all user data
-      await Promise.all([
-        supabase.from('sentences').delete().eq('user_id', user.id),
-        supabase.from('sentence_patterns').delete().eq('user_id', user.id),
-        supabase.from('temporal_patterns').delete().eq('user_id', user.id)
-      ]);
-
-      setLastPredictions([]);
-      setTemporalContext(null);
-      setDailySentenceCount(0);
+      const hour = new Date().getHours();
+      let timeContext = '';
       
-      console.log('Learning data reset successfully');
-    } catch (error) {
-      console.error('Error resetting learning data:', error);
+      if (hour >= 6 && hour < 12) {
+        timeContext = 'morning';
+      } else if (hour >= 12 && hour < 17) {
+        timeContext = 'afternoon';
+      } else if (hour >= 17 && hour < 21) {
+        timeContext = 'evening';
+      } else {
+        timeContext = 'night';
+      }
+
+      const { data } = await supabase
+        .from('user_patterns')
+        .select('pattern_key, frequency')
+        .eq('pattern_type', 'phrase')
+        .contains('metadata', { context: timeContext })
+        .order('frequency', { ascending: false })
+        .limit(5);
+
+      return data?.map(d => d.pattern_key) || [];
+    } catch (err) {
+      console.log('Error getting time-based suggestions:', err);
+      return [];
     }
   }, []);
 
   return {
-    recordSentence,
-    getAdvancedSuggestions,
-    suggestNextWords,
-    getTemporalInsights,
-    resetLearning,
     isLoading,
-    lastPredictions,
-    temporalContext,
-    dailySentenceCount,
+    error,
+    recordUserInput,
+    getAdvancedSuggestions,
+    getTimeBasedSuggestions,
+    userPatterns
   };
 }

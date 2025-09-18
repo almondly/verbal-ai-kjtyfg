@@ -8,10 +8,12 @@ import { commonStyles, colors } from '../styles/commonStyles';
 import CommunicationGrid from '../components/CommunicationGrid';
 import PhraseBar from '../components/PhraseBar';
 import SuggestionsRow from '../components/SuggestionsRow';
+import AdvancedSuggestionsRow from '../components/AdvancedSuggestionsRow';
 import SettingsSheet from '../components/SettingsSheet';
 import IdleOverlay from '../components/IdleOverlay';
 import { useLibrary } from '../hooks/useLibrary';
 import { useAI } from '../hooks/useAI';
+import { useAdvancedAI } from '../hooks/useAdvancedAI';
 import { useIdleDetection } from '../hooks/useIdleDetection';
 import { useEmotionSettings } from '../hooks/useEmotionSettings';
 import { Tile } from '../types';
@@ -19,6 +21,7 @@ import CategoryBar from '../components/CategoryBar';
 import { categories } from '../data/categories';
 import LandscapeGuard from '../components/LandscapeGuard';
 import { useRouter } from 'expo-router';
+import EmotionFace from '../components/EmotionFace';
 
 export default function CommunicationScreen() {
   console.log('CommunicationScreen rendering...');
@@ -38,6 +41,13 @@ export default function CommunicationScreen() {
     resetLearning,
   } = useAI();
 
+  const {
+    recordUserInput,
+    getAdvancedSuggestions,
+    getTimeBasedSuggestions,
+    isLoading: aiLoading
+  } = useAdvancedAI();
+
   const { settings, updateEmotion } = useEmotionSettings();
   
   const [sentence, setSentence] = useState<Tile[]>([]);
@@ -45,6 +55,7 @@ export default function CommunicationScreen() {
   const [addOpen, setAddOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('core');
   const [showIdleOverlay, setShowIdleOverlay] = useState(false);
+  const [advancedSuggestions, setAdvancedSuggestions] = useState<any[]>([]);
 
   const { resetTimer } = useIdleDetection({
     timeout: settings.idleTimeout,
@@ -78,6 +89,22 @@ export default function CommunicationScreen() {
     handleUserActivity();
   }, [handleUserActivity]);
 
+  // Update advanced suggestions when sentence changes
+  useEffect(() => {
+    const updateSuggestions = async () => {
+      if (sentence.length > 0) {
+        const currentWords = sentence.map(t => t.text);
+        const availableWords = tiles.map(t => t.text);
+        const suggestions = await getAdvancedSuggestions(currentWords, availableWords);
+        setAdvancedSuggestions(suggestions);
+      } else {
+        setAdvancedSuggestions([]);
+      }
+    };
+
+    updateSuggestions();
+  }, [sentence, tiles, getAdvancedSuggestions]);
+
   console.log('Tiles loaded:', tiles.length);
   console.log('Categories loaded:', categories.length);
   console.log('Selected category:', selectedCategory);
@@ -95,7 +122,7 @@ export default function CommunicationScreen() {
     return cleaned;
   };
 
-  const handleSpeak = useCallback(() => {
+  const handleSpeak = useCallback(async () => {
     const text = sentence.map(t => t.text).join(' ');
     if (!text.trim()) {
       console.log('No text to speak');
@@ -105,10 +132,14 @@ export default function CommunicationScreen() {
     console.log('Speaking sentence:', ttsText);
     Speech.stop();
     Speech.speak(ttsText, { language: 'en-US', pitch: 1, rate: 0.9 });
+    
+    // Record in both AI systems
     recordSentence(sentence.map(t => t.id), text);
+    await recordUserInput(text, settings.selectedEmotion);
+    
     setSentence([]);
     handleUserActivity();
-  }, [sentence, recordSentence, handleUserActivity]);
+  }, [sentence, recordSentence, recordUserInput, settings.selectedEmotion, handleUserActivity]);
 
   const handleClear = useCallback(() => {
     console.log('Clearing sentence');
@@ -158,31 +189,53 @@ export default function CommunicationScreen() {
       <View style={[commonStyles.container, { paddingHorizontal: 8 }]} onTouchStart={handleUserActivity}>
         <View style={[styles.topBar]}>
           <TouchableOpacity onPress={handleBackToMenu} style={styles.iconBtn} activeOpacity={0.8}>
-            <Icon name="home-outline" size={26} color={colors.text} />
+            <Icon name="home-outline" size={32} color={colors.text} />
           </TouchableOpacity>
           
           <Text style={styles.appTitle}>Speak Buddy</Text>
           
-          <TouchableOpacity onPress={() => setSettingsOpen(true)} style={styles.iconBtn} activeOpacity={0.8}>
-            <Icon name="settings-outline" size={26} color={colors.text} />
-          </TouchableOpacity>
+          <View style={styles.rightSection}>
+            <View style={styles.emotionContainer}>
+              <EmotionFace emotion={settings.selectedEmotion} size={60} />
+            </View>
+            <TouchableOpacity onPress={() => setSettingsOpen(true)} style={styles.iconBtn} activeOpacity={0.8}>
+              <Icon name="settings-outline" size={32} color={colors.text} />
+            </TouchableOpacity>
+          </View>
         </View>
 
-        <CategoryBar
-          categories={categories}
-          selectedId={selectedCategory}
-          onSelect={(id) => {
-            setSelectedCategory(id);
-            handleUserActivity();
-          }}
-          style={{ marginTop: 8, marginBottom: 8 }}
+        <PhraseBar
+          sentence={sentence}
+          onClear={handleClear}
+          onSpeak={handleSpeak}
         />
 
-        <SuggestionsRow
-          suggestions={suggestions}
-          onPressSuggestion={onSuggestionPress}
-          style={{ marginTop: 8, marginBottom: 8 }}
-        />
+        {advancedSuggestions.length > 0 ? (
+          <AdvancedSuggestionsRow
+            suggestions={advancedSuggestions}
+            onPressSuggestion={onSuggestionPress}
+            style={{ marginTop: 8, marginBottom: 8 }}
+            showDetails={false}
+          />
+        ) : (
+          <SuggestionsRow
+            suggestions={suggestions}
+            onPressSuggestion={onSuggestionPress}
+            style={{ marginTop: 8, marginBottom: 8 }}
+          />
+        )}
+
+        {!settingsOpen && (
+          <CategoryBar
+            categories={categories}
+            selectedId={selectedCategory}
+            onSelect={(id) => {
+              setSelectedCategory(id);
+              handleUserActivity();
+            }}
+            style={{ marginTop: 8, marginBottom: 8 }}
+          />
+        )}
 
         <ScrollView
           style={{ flex: 1, marginTop: 8 }}
@@ -204,12 +257,6 @@ export default function CommunicationScreen() {
             }}
           />
         </ScrollView>
-
-        <PhraseBar
-          sentence={sentence}
-          onClear={handleClear}
-          onSpeak={handleSpeak}
-        />
 
         <SettingsSheet
           open={settingsOpen}
@@ -268,10 +315,19 @@ const styles = StyleSheet.create({
   },
   iconBtn: {
     backgroundColor: colors.backgroundAlt,
-    padding: 12,
-    borderRadius: 14,
+    padding: 16,
+    borderRadius: 16,
     boxShadow: '0px 6px 14px rgba(0,0,0,0.08)',
-    minWidth: 50,
+    minWidth: 64,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rightSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12 as any,
+  },
+  emotionContainer: {
     alignItems: 'center',
     justifyContent: 'center',
   },

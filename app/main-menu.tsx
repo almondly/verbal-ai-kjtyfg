@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { colors, commonStyles } from '../styles/commonStyles';
 import EmotionFace from '../components/EmotionFace';
@@ -12,7 +12,6 @@ import * as ScreenOrientation from 'expo-screen-orientation';
 export default function MainMenu() {
   const router = useRouter();
   const { settings, isLoading } = useEmotionSettings();
-  const [bounceAnim] = useState(new Animated.Value(1));
 
   useEffect(() => {
     console.log('MainMenu mounted');
@@ -28,27 +27,6 @@ export default function MainMenu() {
     } else {
       console.log('Skipping screen orientation lock on web platform');
     }
-    
-    // Start bounce animation
-    const bounce = () => {
-      Animated.sequence([
-        Animated.timing(bounceAnim, {
-          toValue: 1.1,
-          duration: 1000,
-          useNativeDriver: true,
-        }),
-        Animated.timing(bounceAnim, {
-          toValue: 1,
-          duration: 1000,
-          useNativeDriver: true,
-        }),
-      ]).start(() => {
-        // Repeat the animation
-        setTimeout(bounce, 2000);
-      });
-    };
-    
-    bounce();
   }, []);
 
   const handleStartCommunication = () => {
@@ -75,9 +53,9 @@ export default function MainMenu() {
         </View>
 
         <View style={styles.emotionContainer}>
-          <Animated.View style={[styles.emotionWrapper, { transform: [{ scale: bounceAnim }] }]}>
-            <EmotionFace emotion={settings.selectedEmotion} size={240} />
-          </Animated.View>
+          <View style={styles.emotionWrapper}>
+            <EmotionFace emotion={settings.selectedEmotion} size={280} />
+          </View>
           <Text style={styles.emotionLabel}>
             I&apos;m feeling {settings.selectedEmotion}
           </Text>
@@ -89,7 +67,7 @@ export default function MainMenu() {
             onPress={handleStartCommunication}
             activeOpacity={0.8}
           >
-            <Icon name="chatbubbles-outline" size={28} color="#FFFFFF" />
+            <Icon name="chatbubbles-outline" size={32} color="#FFFFFF" />
             <Text style={styles.startButtonText}>Start Communicating</Text>
           </TouchableOpacity>
         </View>
@@ -163,15 +141,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 20,
-    paddingHorizontal: 40,
-    borderRadius: 24,
-    minWidth: 320,
+    paddingVertical: 24,
+    paddingHorizontal: 48,
+    borderRadius: 28,
+    minWidth: 360,
     boxShadow: '0px 6px 16px rgba(77, 158, 255, 0.3)',
   },
   startButtonText: {
     color: '#FFFFFF',
-    fontSize: 20,
+    fontSize: 22,
     fontFamily: 'Montserrat_700Bold',
     marginLeft: 16,
   },
