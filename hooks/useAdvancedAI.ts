@@ -1,17 +1,19 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '../app/integrations/supabase/client';
+import { useAIPreferences } from './useAIPreferences';
 
 export interface AdvancedSuggestion {
   text: string;
   confidence: number;
-  type: 'completion' | 'next_word' | 'common_phrase' | 'contextual' | 'temporal' | 'synonym';
+  type: 'completion' | 'next_word' | 'common_phrase' | 'contextual' | 'temporal' | 'synonym' | 'preference';
   context?: string;
 }
 
 export function useAdvancedAI() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { getContextualSuggestions, getPreference } = useAIPreferences();
 
   // Store user patterns locally for faster access
   const [userPatterns, setUserPatterns] = useState<{
@@ -26,97 +28,84 @@ export function useAdvancedAI() {
     temporalPatterns: new Map(),
   });
 
-  // Massively enhanced synonym database for maximum AI capabilities
+  // Massively enhanced synonym database for maximum AI capabilities with Australian English
   const synonymDatabase: { [key: string]: string[] } = {
-    // Basic needs and wants
-    'want': ['need', 'like', 'wish', 'desire', 'crave', 'require', 'seek', 'long for'],
-    'need': ['want', 'require', 'must have', 'demand', 'lack', 'desire', 'call for'],
-    'like': ['love', 'enjoy', 'want', 'prefer', 'adore', 'fancy', 'appreciate', 'favor'],
-    'love': ['like', 'adore', 'enjoy', 'cherish', 'treasure', 'worship', 'value'],
+    // Basic needs and wants - Australian English
+    'want': ['need', 'like', 'wish', 'desire', 'crave', 'require', 'seek', 'fancy', 'reckon I need'],
+    'need': ['want', 'require', 'must have', 'demand', 'lack', 'desire', 'call for', 'gotta have'],
+    'like': ['love', 'enjoy', 'want', 'prefer', 'adore', 'fancy', 'appreciate', 'favour', 'reckon'],
+    'love': ['like', 'adore', 'enjoy', 'cherish', 'treasure', 'worship', 'value', 'absolutely love'],
     
-    // Emotions - comprehensive set
-    'happy': ['glad', 'excited', 'joyful', 'cheerful', 'pleased', 'delighted', 'thrilled', 'elated'],
-    'sad': ['upset', 'unhappy', 'down', 'blue', 'disappointed', 'gloomy', 'dejected', 'melancholy'],
-    'angry': ['mad', 'furious', 'upset', 'irritated', 'annoyed', 'livid', 'enraged', 'cross'],
-    'scared': ['afraid', 'frightened', 'terrified', 'worried', 'anxious', 'nervous', 'fearful'],
-    'excited': ['thrilled', 'eager', 'enthusiastic', 'pumped', 'animated', 'energetic'],
-    'calm': ['peaceful', 'relaxed', 'serene', 'tranquil', 'quiet', 'still', 'composed'],
-    'tired': ['sleepy', 'exhausted', 'weary', 'fatigued', 'drowsy', 'worn out'],
+    // Emotions - comprehensive set with Australian expressions
+    'happy': ['glad', 'excited', 'joyful', 'cheerful', 'pleased', 'delighted', 'thrilled', 'elated', 'chuffed', 'stoked'],
+    'sad': ['upset', 'unhappy', 'down', 'blue', 'disappointed', 'gloomy', 'dejected', 'melancholy', 'gutted'],
+    'angry': ['mad', 'furious', 'upset', 'irritated', 'annoyed', 'livid', 'enraged', 'cross', 'cranky', 'shirty'],
+    'scared': ['afraid', 'frightened', 'terrified', 'worried', 'anxious', 'nervous', 'fearful', 'spooked'],
+    'excited': ['thrilled', 'eager', 'enthusiastic', 'pumped', 'animated', 'energetic', 'stoked', 'chuffed'],
+    'calm': ['peaceful', 'relaxed', 'serene', 'tranquil', 'quiet', 'still', 'composed', 'chilled'],
+    'tired': ['sleepy', 'exhausted', 'weary', 'fatigued', 'drowsy', 'worn out', 'knackered', 'buggered'],
     
-    // Descriptive words
-    'good': ['great', 'nice', 'awesome', 'excellent', 'wonderful', 'fantastic', 'amazing', 'superb'],
-    'bad': ['terrible', 'awful', 'not good', 'horrible', 'poor', 'dreadful', 'nasty'],
-    'big': ['large', 'huge', 'giant', 'enormous', 'massive', 'gigantic', 'immense', 'vast'],
-    'small': ['little', 'tiny', 'mini', 'petite', 'compact', 'minute', 'miniature'],
-    'hot': ['warm', 'heated', 'burning', 'scorching', 'boiling', 'blazing', 'sweltering'],
-    'cold': ['cool', 'chilly', 'freezing', 'icy', 'frigid', 'frosty', 'arctic'],
-    'fast': ['quick', 'rapid', 'speedy', 'swift', 'hasty', 'brisk', 'lightning'],
-    'slow': ['gradual', 'leisurely', 'unhurried', 'sluggish', 'dawdling'],
+    // Descriptive words - Australian flavour
+    'good': ['great', 'nice', 'awesome', 'excellent', 'wonderful', 'fantastic', 'amazing', 'superb', 'bonzer', 'ripper', 'beaut'],
+    'bad': ['terrible', 'awful', 'not good', 'horrible', 'poor', 'dreadful', 'nasty', 'crook', 'dodgy'],
+    'big': ['large', 'huge', 'giant', 'enormous', 'massive', 'gigantic', 'immense', 'vast', 'whopping'],
+    'small': ['little', 'tiny', 'mini', 'petite', 'compact', 'minute', 'miniature', 'wee'],
+    'hot': ['warm', 'heated', 'burning', 'scorching', 'boiling', 'blazing', 'sweltering', 'roasting'],
+    'cold': ['cool', 'chilly', 'freezing', 'icy', 'frigid', 'frosty', 'arctic', 'brass monkeys'],
+    'fast': ['quick', 'rapid', 'speedy', 'swift', 'hasty', 'brisk', 'lightning', 'like the clappers'],
+    'slow': ['gradual', 'leisurely', 'unhurried', 'sluggish', 'dawdling', 'like a wet week'],
     
-    // Actions - extensive coverage
-    'go': ['move', 'travel', 'walk', 'head', 'proceed', 'advance', 'journey', 'depart'],
-    'come': ['arrive', 'visit', 'approach', 'return', 'reach', 'get here', 'show up'],
-    'eat': ['consume', 'have', 'taste', 'devour', 'munch', 'bite', 'chew', 'swallow'],
-    'drink': ['sip', 'have', 'consume', 'gulp', 'swallow', 'taste', 'imbibe'],
-    'play': ['have fun', 'enjoy', 'game', 'sport', 'activity', 'entertain', 'amuse'],
-    'work': ['job', 'task', 'labor', 'effort', 'occupation', 'employment', 'duty'],
-    'help': ['assist', 'aid', 'support', 'guide', 'serve', 'back up', 'lend a hand'],
-    'stop': ['halt', 'cease', 'end', 'quit', 'pause', 'finish', 'terminate', 'discontinue'],
-    'start': ['begin', 'commence', 'initiate', 'launch', 'open', 'kick off', 'embark'],
-    'run': ['jog', 'sprint', 'dash', 'race', 'hurry', 'rush', 'bolt'],
-    'walk': ['stroll', 'step', 'pace', 'march', 'hike', 'wander', 'amble'],
-    'sit': ['rest', 'settle', 'perch', 'be seated', 'take a seat'],
-    'stand': ['rise', 'get up', 'be upright', 'stand up'],
-    'sleep': ['rest', 'nap', 'slumber', 'doze', 'snooze', 'lie down'],
-    'wake': ['get up', 'rise', 'awaken', 'rouse', 'stir'],
+    // Actions - extensive coverage with Australian expressions
+    'go': ['move', 'travel', 'walk', 'head', 'proceed', 'advance', 'journey', 'depart', 'rock up', 'head off'],
+    'come': ['arrive', 'visit', 'approach', 'return', 'reach', 'get here', 'show up', 'rock up', 'pitch up'],
+    'eat': ['consume', 'have', 'taste', 'devour', 'munch', 'bite', 'chew', 'swallow', 'scoff', 'tuck in'],
+    'drink': ['sip', 'have', 'consume', 'gulp', 'swallow', 'taste', 'imbibe', 'skull', 'down'],
+    'play': ['have fun', 'enjoy', 'game', 'sport', 'activity', 'entertain', 'amuse', 'muck about'],
+    'work': ['job', 'task', 'labour', 'effort', 'occupation', 'employment', 'duty', 'graft', 'yakka'],
+    'help': ['assist', 'aid', 'support', 'guide', 'serve', 'back up', 'lend a hand', 'give a hand'],
+    'stop': ['halt', 'cease', 'end', 'quit', 'pause', 'finish', 'terminate', 'discontinue', 'pull up'],
+    'start': ['begin', 'commence', 'initiate', 'launch', 'open', 'kick off', 'embark', 'get cracking'],
     
-    // Communication
-    'say': ['tell', 'speak', 'talk', 'express', 'voice', 'utter', 'mention'],
-    'ask': ['question', 'inquire', 'request', 'wonder', 'query', 'demand'],
-    'listen': ['hear', 'pay attention', 'focus', 'concentrate'],
-    'look': ['see', 'watch', 'observe', 'view', 'gaze', 'stare', 'glance'],
+    // Communication - Australian style
+    'say': ['tell', 'speak', 'talk', 'express', 'voice', 'utter', 'mention', 'reckon', 'yarn'],
+    'hello': ['hi', 'hey', 'g\'day', 'howdy', 'good morning', 'good day', 'hiya'],
+    'goodbye': ['bye', 'see ya', 'cheerio', 'catch ya later', 'hooroo', 'see you later'],
+    'thanks': ['thank you', 'cheers', 'ta', 'much obliged', 'appreciate it'],
     
-    // Agreement/disagreement
-    'yes': ['okay', 'sure', 'absolutely', 'definitely', 'certainly', 'of course', 'right'],
-    'no': ['nope', 'never', 'not really', 'negative', 'absolutely not', 'refuse'],
-    'maybe': ['perhaps', 'possibly', 'might be', 'could be', 'uncertain'],
+    // Agreement/disagreement - Australian expressions
+    'yes': ['yeah', 'yep', 'sure', 'absolutely', 'definitely', 'certainly', 'of course', 'right', 'too right', 'fair dinkum'],
+    'no': ['nah', 'nope', 'never', 'not really', 'negative', 'absolutely not', 'refuse', 'no way'],
+    'maybe': ['perhaps', 'possibly', 'might be', 'could be', 'uncertain', 'dunno'],
     
     // Time expressions
-    'now': ['currently', 'right now', 'at present', 'immediately', 'today'],
-    'later': ['afterwards', 'soon', 'eventually', 'in a while', 'tomorrow'],
-    'before': ['earlier', 'previously', 'prior', 'in the past', 'ago'],
-    'after': ['following', 'next', 'subsequently', 'then', 'later on'],
+    'now': ['currently', 'right now', 'at present', 'immediately', 'today', 'this arvo'],
+    'later': ['afterwards', 'soon', 'eventually', 'in a while', 'tomorrow', 'this arvo'],
+    'morning': ['this morning', 'early', 'dawn', 'sunrise', 'AM'],
+    'afternoon': ['this arvo', 'this afternoon', 'PM', 'after lunch'],
+    'evening': ['tonight', 'this evening', 'after tea', 'nighttime'],
     
-    // Places
-    'home': ['house', 'residence', 'place', 'dwelling', 'abode'],
-    'school': ['class', 'education', 'learning', 'academy', 'institution'],
-    'outside': ['outdoors', 'exterior', 'open air', 'outdoor'],
-    'inside': ['indoors', 'interior', 'within', 'indoor'],
+    // Places - Australian context
+    'home': ['house', 'place', 'dwelling', 'abode', 'joint'],
+    'school': ['class', 'education', 'learning', 'academy', 'institution', 'kindy', 'uni'],
+    'shop': ['store', 'market', 'supermarket', 'deli', 'bottle-o'],
+    'park': ['playground', 'reserve', 'gardens', 'oval'],
     
-    // Food and drink
+    // Food and drink - Australian favourites
     'water': ['drink', 'liquid', 'beverage', 'fluid', 'H2O'],
-    'food': ['meal', 'snack', 'nutrition', 'sustenance', 'nourishment'],
-    'hungry': ['starving', 'famished', 'peckish', 'craving food'],
-    'thirsty': ['parched', 'dehydrated', 'needing drink'],
+    'food': ['tucker', 'meal', 'snack', 'nutrition', 'sustenance', 'nourishment', 'grub'],
+    'hungry': ['starving', 'famished', 'peckish', 'craving food', 'could eat a horse'],
+    'thirsty': ['parched', 'dehydrated', 'needing drink', 'dry as a bone'],
     
-    // Family and people
-    'mom': ['mother', 'mama', 'mommy', 'parent'],
-    'dad': ['father', 'papa', 'daddy', 'parent'],
-    'friend': ['buddy', 'pal', 'companion', 'mate', 'peer'],
-    'teacher': ['instructor', 'educator', 'tutor', 'professor'],
+    // Family and people - Australian terms
+    'mum': ['mummy', 'mother', 'mama', 'parent', 'old lady'],
+    'dad': ['daddy', 'father', 'papa', 'parent', 'old man'],
+    'mate': ['friend', 'buddy', 'pal', 'companion', 'cobber'],
     
-    // Common objects
-    'phone': ['mobile', 'cell', 'device', 'smartphone'],
-    'book': ['story', 'novel', 'text', 'reading material'],
-    'toy': ['plaything', 'game', 'fun item'],
-    'car': ['vehicle', 'automobile', 'transport'],
-    
-    // Quantities
-    'more': ['additional', 'extra', 'further', 'increased', 'greater'],
-    'less': ['fewer', 'reduced', 'decreased', 'smaller amount'],
-    'all': ['everything', 'complete', 'entire', 'whole', 'total'],
-    'some': ['a few', 'several', 'part of', 'portion'],
-    'many': ['lots', 'numerous', 'plenty', 'multiple', 'various'],
+    // Weather - Australian context
+    'hot': ['warm', 'scorching', 'boiling', 'sweltering', 'stinking hot'],
+    'cold': ['chilly', 'freezing', 'brass monkeys', 'bloody cold'],
+    'rain': ['shower', 'drizzle', 'downpour', 'bucketing down'],
+    'sunny': ['bright', 'clear', 'beautiful day', 'lovely weather'],
   };
 
   // Initialize patterns from Supabase
@@ -437,17 +426,19 @@ export function useAdvancedAI() {
   // Advanced semantic similarity with comprehensive categories
   const areAdvancedSemanticallySimilar = (word1: string, word2: string): boolean => {
     const semanticCategories = {
-      emotions: ['happy', 'sad', 'angry', 'excited', 'calm', 'worried', 'scared', 'glad', 'upset', 'mad'],
-      actions: ['go', 'come', 'run', 'walk', 'move', 'travel', 'sit', 'stand', 'play', 'work'],
-      sizes: ['big', 'small', 'large', 'tiny', 'huge', 'little', 'giant', 'mini'],
-      foods: ['eat', 'drink', 'food', 'water', 'hungry', 'thirsty', 'meal', 'snack'],
-      family: ['mom', 'dad', 'parent', 'family', 'brother', 'sister', 'friend'],
-      places: ['home', 'school', 'outside', 'inside', 'here', 'there'],
-      time: ['now', 'later', 'before', 'after', 'today', 'tomorrow', 'yesterday'],
-      qualities: ['good', 'bad', 'nice', 'great', 'awful', 'excellent', 'terrible'],
+      emotions: ['happy', 'sad', 'angry', 'excited', 'calm', 'worried', 'scared', 'glad', 'upset', 'mad', 'chuffed', 'stoked'],
+      actions: ['go', 'come', 'run', 'walk', 'move', 'travel', 'sit', 'stand', 'play', 'work', 'head', 'rock'],
+      sizes: ['big', 'small', 'large', 'tiny', 'huge', 'little', 'giant', 'mini', 'whopping', 'wee'],
+      foods: ['eat', 'drink', 'food', 'water', 'hungry', 'thirsty', 'meal', 'snack', 'tucker', 'grub'],
+      family: ['mum', 'dad', 'parent', 'family', 'brother', 'sister', 'friend', 'mate', 'cobber'],
+      places: ['home', 'school', 'outside', 'inside', 'here', 'there', 'park', 'shop'],
+      time: ['now', 'later', 'before', 'after', 'today', 'tomorrow', 'yesterday', 'arvo'],
+      qualities: ['good', 'bad', 'nice', 'great', 'awful', 'excellent', 'terrible', 'bonzer', 'ripper'],
       quantities: ['more', 'less', 'all', 'some', 'many', 'few', 'lots'],
-      communication: ['say', 'tell', 'ask', 'listen', 'talk', 'speak', 'hear'],
-      agreement: ['yes', 'no', 'okay', 'sure', 'maybe', 'never', 'always'],
+      communication: ['say', 'tell', 'ask', 'listen', 'talk', 'speak', 'hear', 'yarn', 'reckon'],
+      agreement: ['yes', 'no', 'okay', 'sure', 'maybe', 'never', 'always', 'yeah', 'nah', 'yep'],
+      greetings: ['hello', 'hi', 'goodbye', 'bye', 'gday', 'hiya', 'cheerio', 'hooroo'],
+      thanks: ['thanks', 'thank you', 'cheers', 'ta', 'appreciate'],
     };
     
     for (const category of Object.values(semanticCategories)) {
@@ -479,7 +470,20 @@ export function useAdvancedAI() {
 
       console.log('Getting ultra-advanced suggestions for:', { currentWords, lastWord, currentText });
 
-      // 1. Enhanced phrase completions with better scoring
+      // 1. AI Preference-based suggestions (NEW!)
+      const contextualPreferenceSuggestions = getContextualSuggestions(currentText, currentHour);
+      contextualPreferenceSuggestions.forEach((suggestion, index) => {
+        if (!suggestions.some(s => areSimilarWords(s.text.toLowerCase(), suggestion.toLowerCase()))) {
+          suggestions.push({
+            text: suggestion,
+            confidence: Math.max(0.85, 0.95 - index * 0.05),
+            type: 'preference',
+            context: 'Based on your preferences'
+          });
+        }
+      });
+
+      // 2. Enhanced phrase completions with better scoring
       if (currentText) {
         userPatterns.phrases.forEach((frequency, phrase) => {
           if (phrase.startsWith(currentText) && phrase !== currentText) {
@@ -488,7 +492,7 @@ export function useAdvancedAI() {
               const nextWords = completion.split(' ');
               nextWords.slice(0, 2).forEach((nextWord, index) => {
                 if (!currentWords.some(w => areSimilarWords(w.toLowerCase(), nextWord.toLowerCase()))) {
-                  const confidence = Math.min(0.95, (frequency / 6) * (1 - index * 0.2));
+                  const confidence = Math.min(0.90, (frequency / 6) * (1 - index * 0.2));
                   suggestions.push({
                     text: nextWord,
                     confidence,
@@ -502,7 +506,7 @@ export function useAdvancedAI() {
         });
       }
 
-      // 2. Enhanced word transitions with context scoring
+      // 3. Enhanced word transitions with context scoring
       if (lastWord && userPatterns.transitions.has(lastWord)) {
         const nextWords = userPatterns.transitions.get(lastWord)!;
         nextWords.forEach((frequency, nextWord) => {
@@ -510,11 +514,11 @@ export function useAdvancedAI() {
               !currentWords.some(w => areSimilarWords(w.toLowerCase(), nextWord.toLowerCase()))) {
             
             // Boost confidence based on recent usage and context
-            let confidence = Math.min(0.90, frequency / 3);
+            let confidence = Math.min(0.85, frequency / 3);
             
             // Boost if it's a common transition at this time
             const timeBoost = getTimeBasedBoost(nextWord, currentHour);
-            confidence = Math.min(0.95, confidence + timeBoost);
+            confidence = Math.min(0.90, confidence + timeBoost);
             
             suggestions.push({
               text: nextWord,
@@ -526,7 +530,7 @@ export function useAdvancedAI() {
         });
       }
 
-      // 3. Enhanced temporal suggestions with day/time awareness
+      // 4. Enhanced temporal suggestions with day/time awareness
       userPatterns.temporalPatterns.forEach((timeData, phrase) => {
         const relevantTimes = timeData.filter(t => Math.abs(t.hour - currentHour) <= 1);
         if (relevantTimes.length > 0) {
@@ -535,7 +539,7 @@ export function useAdvancedAI() {
             if (!suggestions.some(s => areSimilarWords(s.text.toLowerCase(), word.toLowerCase())) &&
                 !currentWords.some(w => areSimilarWords(w.toLowerCase(), word.toLowerCase()))) {
               const totalCount = relevantTimes.reduce((sum, t) => sum + t.count, 0);
-              const confidence = Math.min(0.85, (totalCount / 3) * (1 - index * 0.15));
+              const confidence = Math.min(0.80, (totalCount / 3) * (1 - index * 0.15));
               suggestions.push({
                 text: word,
                 confidence,
@@ -547,7 +551,7 @@ export function useAdvancedAI() {
         }
       });
 
-      // 4. Enhanced common phrases with frequency weighting
+      // 5. Enhanced common phrases with frequency weighting
       const commonPhrases = Array.from(userPatterns.phrases.entries())
         .sort((a, b) => b[1] - a[1])
         .slice(0, 6);
@@ -557,7 +561,7 @@ export function useAdvancedAI() {
         words.slice(0, 2).forEach((word, index) => {
           if (!suggestions.some(s => areSimilarWords(s.text.toLowerCase(), word.toLowerCase())) &&
               !currentWords.some(w => areSimilarWords(w.toLowerCase(), word.toLowerCase()))) {
-            const confidence = Math.min(0.80, (frequency / 5) * (1 - index * 0.1));
+            const confidence = Math.min(0.75, (frequency / 5) * (1 - index * 0.1));
             suggestions.push({
               text: word,
               confidence,
@@ -568,12 +572,12 @@ export function useAdvancedAI() {
         });
       });
 
-      // 5. Enhanced synonym suggestions with multiple alternatives
+      // 6. Enhanced synonym suggestions with multiple alternatives
       if (lastWord) {
         const synonyms = findAlternativeWords(lastWord, availableWords, currentWords);
         synonyms.forEach((synonym, index) => {
           if (!suggestions.some(s => areSimilarWords(s.text.toLowerCase(), synonym.toLowerCase()))) {
-            const confidence = Math.max(0.4, 0.7 - index * 0.1);
+            const confidence = Math.max(0.4, 0.65 - index * 0.1);
             suggestions.push({
               text: synonym,
               confidence,
@@ -584,7 +588,7 @@ export function useAdvancedAI() {
         });
       }
 
-      // 6. Enhanced contextual suggestions with smart filtering
+      // 7. Enhanced contextual suggestions with smart filtering
       const filteredAvailableWords = removeDuplicateWords(availableWords, currentWords);
       const contextualWords = filteredAvailableWords
         .filter(word => {
@@ -601,7 +605,7 @@ export function useAdvancedAI() {
 
       contextualWords.forEach((word, index) => {
         if (!suggestions.some(s => areSimilarWords(s.text.toLowerCase(), word.toLowerCase()))) {
-          const confidence = Math.max(0.3, 0.5 - index * 0.05);
+          const confidence = Math.max(0.3, 0.45 - index * 0.05);
           suggestions.push({
             text: word,
             confidence,
@@ -611,7 +615,7 @@ export function useAdvancedAI() {
         }
       });
 
-      // 7. Add high-frequency words as fallback
+      // 8. Add high-frequency words as fallback
       if (suggestions.length < maxSuggestions) {
         const fallbackWords = filteredAvailableWords
           .filter(word => !suggestions.some(s => areSimilarWords(s.text.toLowerCase(), word.toLowerCase())))
@@ -642,6 +646,7 @@ export function useAdvancedAI() {
           }
           // Secondary sort by type priority
           const typePriority = {
+            'preference': 6,
             'completion': 5,
             'next_word': 4,
             'temporal': 3,
@@ -661,18 +666,18 @@ export function useAdvancedAI() {
       setError('Failed to get suggestions');
       return [];
     }
-  }, [userPatterns]);
+  }, [userPatterns, getContextualSuggestions]);
 
-  // Helper function for time-based confidence boosting
+  // Helper function for time-based confidence boosting with Australian context
   const getTimeBasedBoost = (word: string, currentHour: number): number => {
-    // Morning words (6-12)
-    const morningWords = ['breakfast', 'morning', 'wake', 'start', 'school', 'work'];
-    // Afternoon words (12-17)
-    const afternoonWords = ['lunch', 'afternoon', 'play', 'outside', 'friend'];
-    // Evening words (17-21)
-    const eveningWords = ['dinner', 'evening', 'home', 'family', 'tired'];
-    // Night words (21-6)
-    const nightWords = ['sleep', 'bed', 'night', 'rest', 'quiet'];
+    // Morning words (6-12) - Australian breakfast and morning routine
+    const morningWords = ['brekkie', 'breakfast', 'morning', 'wake', 'start', 'school', 'work', 'cuppa', 'coffee'];
+    // Afternoon words (12-17) - Australian lunch and arvo activities
+    const afternoonWords = ['lunch', 'arvo', 'afternoon', 'play', 'outside', 'mate', 'sport'];
+    // Evening words (17-21) - Australian dinner and evening
+    const eveningWords = ['tea', 'dinner', 'evening', 'home', 'family', 'tired', 'telly'];
+    // Night words (21-6) - Australian bedtime
+    const nightWords = ['sleep', 'bed', 'night', 'rest', 'quiet', 'knackered'];
     
     const lowerWord = word.toLowerCase();
     
@@ -692,7 +697,7 @@ export function useAdvancedAI() {
       if (hour >= 6 && hour < 12) {
         timeContext = 'morning';
       } else if (hour >= 12 && hour < 17) {
-        timeContext = 'afternoon';
+        timeContext = 'arvo'; // Australian afternoon
       } else if (hour >= 17 && hour < 21) {
         timeContext = 'evening';
       } else {

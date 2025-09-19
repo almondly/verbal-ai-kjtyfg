@@ -8,7 +8,7 @@ import CommunicationGrid from '../components/CommunicationGrid';
 import PhraseBar from '../components/PhraseBar';
 import SuggestionsRow from '../components/SuggestionsRow';
 import AdvancedSuggestionsRow from '../components/AdvancedSuggestionsRow';
-import SettingsSheet from '../components/SettingsSheet';
+import TabbedSettingsSheet from '../components/TabbedSettingsSheet';
 import { useLibrary } from '../hooks/useLibrary';
 import { useAI } from '../hooks/useAI';
 import { useAdvancedAI } from '../hooks/useAdvancedAI';
@@ -54,19 +54,6 @@ export default function CommunicationScreen() {
   const [addOpen, setAddOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('core');
   const [advancedSuggestions, setAdvancedSuggestions] = useState<any[]>([]);
-
-  // Removed idle detection to prevent flickering issues
-  // const { resetTimer } = useIdleDetection({
-  //   timeout: settings.idleTimeout,
-  //   onIdle: () => {
-  //     console.log('Device went idle, showing emotion overlay');
-  //     setShowIdleOverlay(true);
-  //   },
-  //   onActive: () => {
-  //     console.log('Device became active');
-  //     setShowIdleOverlay(false);
-  //   },
-  // });
 
   // Simple user activity handler without idle detection
   const handleUserActivity = useCallback(() => {
@@ -139,7 +126,7 @@ export default function CommunicationScreen() {
     const ttsText = normalizeForTTS(text);
     console.log('Speaking sentence:', ttsText);
     
-    // Use the custom TTS settings
+    // Use the custom TTS settings with Australian greeting
     await speak(ttsText);
     
     // Record in both AI systems
@@ -272,7 +259,7 @@ export default function CommunicationScreen() {
           </ScrollView>
         </View>
 
-        <SettingsSheet
+        <TabbedSettingsSheet
           open={settingsOpen}
           onClose={() => setSettingsOpen(false)}
           onResetLearning={() => {
@@ -287,7 +274,7 @@ export default function CommunicationScreen() {
           onEmotionChange={updateEmotion}
         />
 
-        <SettingsSheet
+        <TabbedSettingsSheet
           open={addOpen}
           title="Add Tile"
           mode="add"
@@ -299,13 +286,6 @@ export default function CommunicationScreen() {
             handleUserActivity();
           }}
         />
-
-        {/* Removed IdleOverlay to prevent flickering */}
-        {/* <IdleOverlay
-          visible={showIdleOverlay}
-          emotion={settings.selectedEmotion}
-          onDismiss={handleDismissIdle}
-        /> */}
       </View>
     </LandscapeGuard>
   );

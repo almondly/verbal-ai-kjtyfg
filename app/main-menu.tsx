@@ -1,18 +1,18 @@
 
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, useWindowDimensions } from 'react-native';
+import { useRouter } from 'expo-router';
+import * as ScreenOrientation from 'expo-screen-orientation';
 import Icon from '../components/Icon';
 import EmotionFace from '../components/EmotionFace';
-import * as ScreenOrientation from 'expo-screen-orientation';
-import { useEmotionSettings } from '../hooks/useEmotionSettings';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, useWindowDimensions } from 'react-native';
-import { colors, commonStyles } from '../styles/commonStyles';
-import React, { useEffect, useState } from 'react';
 import LandscapeGuard from '../components/LandscapeGuard';
-import { useRouter } from 'expo-router';
+import { colors, commonStyles } from '../styles/commonStyles';
+import { useEmotionSettings } from '../hooks/useEmotionSettings';
 
 export default function MainMenu() {
-  const { settings } = useEmotionSettings();
   const router = useRouter();
-  const { height } = useWindowDimensions();
+  const { settings } = useEmotionSettings();
+  const { width, height } = useWindowDimensions();
 
   useEffect(() => {
     // Lock orientation on native platforms only
@@ -27,35 +27,52 @@ export default function MainMenu() {
   }, []);
 
   const handleStartCommunication = () => {
-    console.log('Starting communication screen');
+    console.log('Starting communication');
     router.push('/communication');
   };
-
-  // Calculate emotion face size to be 80% of screen height
-  const emotionSize = Math.min(height * 0.8, 400); // Cap at 400 for very large screens
 
   return (
     <LandscapeGuard>
       <View style={[commonStyles.container, styles.container]}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.title}>ComPanion</Text>
+          <Text style={styles.subtitle}>Your Communication Mate</Text>
+        </View>
+
+        {/* Main Content */}
         <View style={styles.content}>
-          {/* Large Emotion Face - 80% of screen height */}
-          <View style={styles.emotionContainer}>
-            <EmotionFace emotion={settings.selectedEmotion} size={emotionSize} />
+          {/* Emotion Display - Takes up 80% of screen height as requested */}
+          <View style={[styles.emotionSection, { height: height * 0.8 }]}>
+            <View style={styles.emotionContainer}>
+              <EmotionFace emotion={settings.selectedEmotion} size={Math.min(width * 0.4, height * 0.6)} />
+              <Text style={styles.emotionText}>
+                Feeling {settings.selectedEmotion} today, mate!
+              </Text>
+              <Text style={styles.emotionSubtext}>
+                Ready to have a yarn?
+              </Text>
+            </View>
           </View>
 
-          {/* App Title */}
-          <Text style={styles.title}>ComPanion</Text>
-          <Text style={styles.subtitle}>Tap to start communicating</Text>
+          {/* Start Button - Made smaller as requested */}
+          <View style={styles.buttonSection}>
+            <TouchableOpacity 
+              style={styles.startButton} 
+              onPress={handleStartCommunication}
+              activeOpacity={0.9}
+            >
+              <Icon name="chatbubble-outline" size={32} color="#FFFFFF" />
+              <Text style={styles.startButtonText}>Start Chatting</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
 
-          {/* Start Button - Smaller */}
-          <TouchableOpacity 
-            style={styles.startButton} 
-            onPress={handleStartCommunication}
-            activeOpacity={0.8}
-          >
-            <Icon name="chatbubbles-outline" size={24} color="#FFFFFF" />
-            <Text style={styles.startButtonText}>Start Communication</Text>
-          </TouchableOpacity>
+        {/* Footer */}
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>
+            G'day! Tap the button above to start communicating
+          </Text>
         </View>
       </View>
     </LandscapeGuard>
@@ -64,48 +81,88 @@ export default function MainMenu() {
 
 const styles = StyleSheet.create({
   container: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 40,
+    paddingHorizontal: 32,
+    paddingVertical: 24,
   },
-  content: {
+  header: {
     alignItems: 'center',
-    gap: 16 as any,
-  },
-  emotionContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 8,
+    marginBottom: 20,
   },
   title: {
     fontSize: 48,
     fontFamily: 'Montserrat_700Bold',
-    color: colors.text,
+    color: colors.primary,
     textAlign: 'center',
+    marginBottom: 8,
   },
   subtitle: {
-    fontSize: 20,
-    fontFamily: 'Montserrat_400Regular',
+    fontSize: 18,
+    fontFamily: 'Montserrat_600SemiBold',
     color: colors.textSecondary,
     textAlign: 'center',
-    marginTop: -8,
+  },
+  content: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emotionSection: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+  },
+  emotionContainer: {
+    alignItems: 'center',
+    backgroundColor: colors.backgroundAlt,
+    borderRadius: 32,
+    padding: 40,
+    boxShadow: '0px 8px 24px rgba(0,0,0,0.1)',
+    minWidth: 400,
+  },
+  emotionText: {
+    fontSize: 28,
+    fontFamily: 'Montserrat_700Bold',
+    color: colors.text,
+    textAlign: 'center',
+    marginTop: 24,
+    textTransform: 'capitalize',
+  },
+  emotionSubtext: {
+    fontSize: 18,
+    fontFamily: 'Montserrat_600SemiBold',
+    color: colors.textSecondary,
+    textAlign: 'center',
+    marginTop: 12,
+  },
+  buttonSection: {
+    marginTop: 20,
+    alignItems: 'center',
   },
   startButton: {
     backgroundColor: colors.primary,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 16,
-    gap: 12 as any,
-    marginTop: 8,
+    gap: 16 as any,
+    paddingHorizontal: 32,
+    paddingVertical: 16,
+    borderRadius: 20,
+    boxShadow: '0px 6px 20px rgba(77, 158, 255, 0.3)',
     minWidth: 200,
-    boxShadow: '0px 4px 12px rgba(59, 130, 246, 0.3)',
+    justifyContent: 'center',
   },
   startButtonText: {
+    fontSize: 20,
+    fontFamily: 'Montserrat_700Bold',
     color: '#FFFFFF',
-    fontSize: 18,
-    fontFamily: 'Montserrat_600SemiBold',
+  },
+  footer: {
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  footerText: {
+    fontSize: 14,
+    fontFamily: 'Montserrat_400Regular',
+    color: colors.textSecondary,
+    textAlign: 'center',
   },
 });
