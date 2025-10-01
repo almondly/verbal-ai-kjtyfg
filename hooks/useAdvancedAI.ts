@@ -2,6 +2,20 @@
 import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '../app/integrations/supabase/client';
 import { useAIPreferences } from './useAIPreferences';
+import { 
+  generateWordVariations, 
+  detectTenseContext, 
+  getVerbFormForContext,
+  getBaseForm,
+  isLikelyVerb
+} from '../utils/wordVariations';
+import {
+  findSentenceCompletions,
+  generateCompleteSentences,
+  predictNextWords,
+  analyzeSentenceStructure,
+  scoreSuggestions
+} from '../utils/sentenceCompletion';
 
 export interface AdvancedSuggestion {
   text: string;
@@ -267,6 +281,7 @@ export function useAdvancedAI() {
     try {
       const words = sentence.toLowerCase().trim().split(/\s+/).filter(Boolean);
       const currentHour = new Date().getHours();
+      const dayOfWeek = new Date().getDay();
       
       // Record the full phrase
       const { error: phraseError } = await supabase
@@ -275,7 +290,13 @@ export function useAdvancedAI() {
           pattern_type: 'phrase',
           pattern_key: sentence.toLowerCase(),
           frequency: 1,
-          metadata: { word_count: words.length, context, hour: currentHour },
+          metadata: { 
+            word_count: words.length, 
+            context, 
+            hour: currentHour,
+            dayOfWeek,
+            lastUsed: new Date().toISOString()
+          },
           updated_at: new Date().toISOString()
         }, {
           onConflict: 'pattern_type,pattern_key'
@@ -283,6 +304,32 @@ export function useAdvancedAI() {
 
       if (phraseError) {
         console.log('Error recording phrase:', phraseError);
+      }
+
+      // Record individual word usage
+      for (let i = 0; i < words.length; i++) {
+        const { error: wordError } = await supabase
+          .from('user_patterns')
+          .upsert({
+            pattern_type: 'word',
+            pattern_key: words[i],
+            frequency: 1,
+            metadata: {
+              context,
+              hour: currentHour,
+              dayOfWeek,
+              position: i,
+              sentenceLength: words.length,
+              lastUsed: new Date().toISOString()
+            },
+            updated_at: new Date().toISOString()
+          }, {
+            onConflict: 'pattern_type,pattern_key'
+          });
+
+        if (wordError) {
+          console.log('Error recording word:', wordError);
+        }
       }
 
       // Record word transitions with enhanced context
@@ -294,7 +341,15 @@ export function useAdvancedAI() {
             pattern_type: 'transition',
             pattern_key: transition,
             frequency: 1,
-            metadata: { context, hour: currentHour, position: i },
+            metadata: { 
+              from: words[i],
+              to: words[i + 1],
+              context, 
+              hour: currentHour,
+              dayOfWeek,
+              position: i,
+              lastUsed: new Date().toISOString()
+            },
             updated_at: new Date().toISOString()
           }, {
             onConflict: 'pattern_type,pattern_key'
@@ -315,8 +370,9 @@ export function useAdvancedAI() {
           metadata: { 
             hour: currentHour, 
             time_data: [{ hour: currentHour, count: 1 }],
-            day_of_week: new Date().getDay(),
-            context
+            day_of_week: dayOfWeek,
+            context,
+            lastUsed: new Date().toISOString()
           },
           updated_at: new Date().toISOString()
         }, {
@@ -329,6 +385,8 @@ export function useAdvancedAI() {
 
       // Update local patterns
       await loadUserPatterns();
+      
+      console.log('Recorded user input:', { sentence, words: words.length, context });
     } catch (err) {
       console.log('Error recording user input:', err);
     }
@@ -567,8 +625,18 @@ export function useAdvancedAI() {
       const currentText = currentWords.join(' ').toLowerCase();
       const lastWord = currentWords[currentWords.length - 1]?.toLowerCase();
       const currentHour = new Date().getHours();
+      
+      // Detect sentence context for tense-aware suggestions
+      const tenseContext = detectTenseContext(currentWords);
+      const sentenceStructure = analyzeSentenceStructure(currentWords);
 
-      console.log('Getting ChatGPT-style suggestions for:', { currentWords, lastWord, currentText });
+      console.log('Getting ChatGPT-style suggestions for:', { 
+        currentWords, 
+        lastWord, 
+        currentText, 
+        tenseContext,
+        sentenceStructure 
+      });
 
       // 1. ChatGPT-style common phrase completions (HIGHEST PRIORITY)
       if (lastWord && commonPhrases[lastWord]) {
@@ -704,6 +772,80 @@ export function useAdvancedAI() {
           }
         });
       }
+      
+      // 7.5. Word variation suggestions (tenses, plurals, etc.)
+      if (lastWord) {
+        const variations = generateWordVariations(lastWord);
+        
+        // Apply tense context to verb variations
+        if (isLikelyVerb(lastWord)) {
+          const baseForm = getBaseForm(lastWord);
+          const contextualForm = getVerbFormForContext(baseForm, tenseContext);
+          
+          if (contextualForm && contextualForm !== lastWord && 
+              !suggestions.some(s => areSimilarWords(s.text.toLowerCase(), contextualForm.toLowerCase()))) {
+            suggestions.push({
+              text: contextualForm,
+              confidence: 0.75,
+              type: 'synonym',
+              context: `${tenseContext} tense of "${lastWord}"`
+            });
+          }
+        }
+        
+        // Add other variations
+        variations.slice(0, 3).forEach((variation, index) => {
+          if (!suggestions.some(s => areSimilarWords(s.text.toLowerCase(), variation.toLowerCase())) &&
+              !currentWords.some(w => areSimilarWords(w.toLowerCase(), variation.toLowerCase()))) {
+            const confidence = Math.max(0.35, 0.55 - index * 0.1);
+            suggestions.push({
+              text: variation,
+              confidence,
+              type: 'synonym',
+              context: `Variation of "${lastWord}"`
+            });
+          }
+        });
+      }
+      
+      // 7.6. Complete sentence suggestions from partial input
+      if (currentWords.length >= 1 && currentWords.length <= 3) {
+        const completeSentences = generateCompleteSentences(currentWords, userPatterns.phrases, 2);
+        
+        completeSentences.forEach((sentence, index) => {
+          // Extract the next word(s) from the complete sentence
+          const sentenceWords = sentence.split(' ');
+          const nextWord = sentenceWords[currentWords.length];
+          
+          if (nextWord && !suggestions.some(s => areSimilarWords(s.text.toLowerCase(), nextWord.toLowerCase()))) {
+            const confidence = Math.max(0.7, 0.85 - index * 0.1);
+            suggestions.push({
+              text: nextWord,
+              confidence,
+              type: 'completion',
+              context: `Completes: "${sentence}"`
+            });
+          }
+        });
+      }
+      
+      // 7.7. N-gram based predictions
+      if (currentWords.length > 0) {
+        const ngramPredictions = predictNextWords(currentWords, userPatterns.transitions, 3);
+        
+        ngramPredictions.forEach(({ word, confidence: freq }) => {
+          if (!suggestions.some(s => areSimilarWords(s.text.toLowerCase(), word.toLowerCase())) &&
+              !currentWords.some(w => areSimilarWords(w.toLowerCase(), word.toLowerCase()))) {
+            const confidence = Math.min(0.8, freq / 5);
+            suggestions.push({
+              text: word,
+              confidence,
+              type: 'next_word',
+              context: 'Based on your patterns'
+            });
+          }
+        });
+      }
 
       // 8. Enhanced contextual suggestions with smart filtering
       const filteredAvailableWords = removeDuplicateWords(availableWords, currentWords);
@@ -755,11 +897,21 @@ export function useAdvancedAI() {
         )
       );
 
-      const finalSuggestions = uniqueSuggestions
+      // Score suggestions based on multiple factors
+      const wordFrequency = new Map<string, number>();
+      userPatterns.phrases.forEach((freq, phrase) => {
+        phrase.split(' ').forEach(word => {
+          wordFrequency.set(word, (wordFrequency.get(word) || 0) + freq);
+        });
+      });
+      
+      const scoredSuggestions = scoreSuggestions(uniqueSuggestions, currentWords, wordFrequency);
+
+      const finalSuggestions = scoredSuggestions
         .sort((a, b) => {
-          // Primary sort by confidence
-          if (Math.abs(a.confidence - b.confidence) > 0.05) {
-            return b.confidence - a.confidence;
+          // Primary sort by score
+          if (Math.abs(a.score - b.score) > 0.05) {
+            return b.score - a.score;
           }
           // Secondary sort by type priority
           const typePriority = {
@@ -773,7 +925,8 @@ export function useAdvancedAI() {
           };
           return (typePriority[b.type] || 0) - (typePriority[a.type] || 0);
         })
-        .slice(0, maxSuggestions);
+        .slice(0, maxSuggestions)
+        .map(({ text, confidence, type, context }) => ({ text, confidence, type, context })); // Remove score from output
 
       console.log('Generated ChatGPT-style suggestions:', finalSuggestions);
       return finalSuggestions;

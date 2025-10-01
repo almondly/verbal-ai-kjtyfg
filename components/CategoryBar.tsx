@@ -1,53 +1,80 @@
-
-import React from 'react';
-import { View, ScrollView, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { ScrollView, Text, TouchableOpacity, StyleSheet, View, Animated } from 'react-native';
+import { useRef } from 'react';
+import Icon from './Icon';
 import { Category } from '../types';
 import { colors } from '../styles/commonStyles';
-import Icon from './Icon';
 
 interface Props {
   categories: Category[];
   selectedId: string;
   onSelect: (id: string) => void;
+  style?: any;
 }
 
-export default function CategoryBar({ categories, selectedId, onSelect }: Props) {
+export default function CategoryBar({ categories, selectedId, onSelect, style }: Props) {
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  const animatePop = () => {
+    Animated.sequence([
+      Animated.timing(scaleAnim, { toValue: 1.5, duration: 100, useNativeDriver: true }),
+      Animated.timing(scaleAnim, { toValue: 1, duration: 100, useNativeDriver: true }),
+    ]).start();
+  };
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.wrapper, style]}>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-        style={styles.scrollView}
+        contentContainerStyle={styles.row}
+        keyboardShouldPersistTaps="handled"
       >
-        {categories.map((category) => {
-          const isSelected = category.id === selectedId;
+        {categories.map((cat, index) => {
+          const active = cat.id === selectedId;
+
           return (
-            <TouchableOpacity
-              key={category.id}
-              style={[
-                styles.categoryButton,
-                isSelected && styles.categoryButtonSelected,
-                isSelected && { 
-                  backgroundColor: category.color,
-                  boxShadow: `0px 0px 20px ${category.color}`,
-                }
-              ]}
-              onPress={() => onSelect(category.id)}
-              activeOpacity={0.8}
+            <Animated.View
+              key={cat.id}
+              style={{
+                transform: [{ scale: active ? scaleAnim : 1 }],
+                marginRight: index < categories.length - 1 ? 14 : 0, // a bit more spacing
+              }}
             >
-              <Icon 
-                name={category.icon} 
-                size={24} 
-                color={isSelected ? '#FFFFFF' : colors.text} 
-              />
-              <Text style={[
-                styles.categoryLabel,
-                isSelected && styles.categoryLabelSelected
-              ]}>
-                {category.label}
-              </Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.chip,
+                  {
+                    backgroundColor: active ? cat.color : colors.backgroundAlt,
+                    borderColor: cat.color,
+                    borderWidth: active ? 3 : 2,
+
+                    // ✅ Glow all around (spread more vertically too)
+                    shadowColor: cat.color,
+                    shadowOffset: { width: 0, height: 0 },
+                    shadowOpacity: active ? 0.35 : 0.15,
+                    shadowRadius: active ? 14 : 7,
+                    elevation: active ? 8 : 3,
+                  },
+                ]}
+                onPress={() => {
+                  onSelect(cat.id);
+                  animatePop();
+                }}
+                activeOpacity={0.8}
+              >
+                <Icon 
+                  name={cat.icon as any} 
+                  size={24} 
+                  color={colors.text} 
+                />
+                <Text style={[
+                  styles.chipText, 
+                  { color: colors.text }
+                ]}>
+                  {cat.label}
+                </Text>
+              </TouchableOpacity>
+            </Animated.View>
           );
         })}
       </ScrollView>
@@ -56,42 +83,36 @@ export default function CategoryBar({ categories, selectedId, onSelect }: Props)
 }
 
 const styles = StyleSheet.create({
-  container: {
+  wrapper: {
     width: '100%',
+    paddingHorizontal: 14,
+    paddingVertical: 16, // ✅ more vertical breathing space
     backgroundColor: colors.background,
-    paddingVertical: 4,
-    borderBottomWidth: 2,
-    borderBottomColor: colors.backgroundAlt,
+    borderRadius: 16, // ✅ slightly rounder frame
+
+    // subtle wrapper shadow (so chip glow dominates)
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 1,
   },
-  scrollView: {
-    flexGrow: 0,
-  },
-  scrollContent: {
-    paddingHorizontal: 8,
-    gap: 8 as any,
+  row: {
     alignItems: 'center',
+    paddingHorizontal: 6,
+    paddingVertical: 6, // ✅ stop clipping vertical glow
   },
-  categoryButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8 as any,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+  chip: {
+    width: 72,
+    height: 72,
     borderRadius: 12,
-    backgroundColor: colors.backgroundAlt,
-    minWidth: 100,
     justifyContent: 'center',
+    alignItems: 'center',
   },
-  categoryButtonSelected: {
-    transform: [{ scale: 1.05 }],
-  },
-  categoryLabel: {
+  chipText: {
+    fontSize: 11,
     fontFamily: 'Montserrat_600SemiBold',
-    fontSize: 14,
-    color: colors.text,
-  },
-  categoryLabelSelected: {
-    color: '#FFFFFF',
-    fontFamily: 'Montserrat_700Bold',
+    marginTop: 3,
+    textAlign: 'center',
   },
 });
