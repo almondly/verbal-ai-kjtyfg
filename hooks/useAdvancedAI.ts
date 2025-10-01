@@ -28,6 +28,108 @@ export function useAdvancedAI() {
     temporalPatterns: new Map(),
   });
 
+  // ChatGPT-style common phrases database - Australian English
+  const commonPhrases: { [key: string]: string[] } = {
+    // Greetings and social
+    'hello': ['mate', 'how are you', 'good morning', 'g\'day'],
+    'hi': ['there', 'mate', 'how are you', 'everyone'],
+    'g\'day': ['mate', 'how are you', 'everyone'],
+    'good': ['morning', 'afternoon', 'evening', 'day', 'night'],
+    'how': ['are you', 'are you going', 'was your day', 'do you feel'],
+    'nice': ['to see you', 'to meet you', 'day', 'weather'],
+    
+    // Questions - comprehensive
+    'what': ['is your name', 'time is it', 'are you doing', 'do you want', 'is that', 'happened', 'is your favourite', 'colour do you like'],
+    'what\'s': ['your name', 'that', 'happening', 'for lunch', 'for tea', 'the time', 'your favourite'],
+    'where': ['are you', 'is it', 'are we going', 'do you live', 'is the toilet', 'is mum', 'is dad'],
+    'when': ['are we going', 'is lunch', 'is tea', 'can we go', 'will you be back'],
+    'why': ['are you sad', 'are you happy', 'not', 'is that', 'do we have to'],
+    'who': ['is that', 'are you', 'is coming', 'wants to play'],
+    'can': ['I have', 'I go', 'you help me', 'we play', 'I please', 'you please'],
+    'could': ['I have', 'you help me', 'we go', 'you please'],
+    'would': ['you like', 'you please', 'you help me'],
+    'do': ['you want', 'you like', 'you have', 'you know', 'I have to'],
+    
+    // Needs and wants
+    'I': ['want', 'need', 'like', 'love', 'am hungry', 'am thirsty', 'am tired', 'feel', 'think', 'can', 'would like'],
+    'I\'m': ['hungry', 'thirsty', 'tired', 'happy', 'sad', 'excited', 'ready', 'finished', 'sorry'],
+    'want': ['to go', 'to play', 'to eat', 'to drink', 'some water', 'some food', 'that', 'more'],
+    'need': ['help', 'the toilet', 'water', 'food', 'a break', 'to go', 'to rest'],
+    'like': ['to play', 'to eat', 'this', 'that', 'it', 'you'],
+    'love': ['you', 'this', 'that', 'it', 'playing', 'eating'],
+    
+    // Food and drink - Australian
+    'I\'m': ['hungry', 'thirsty', 'starving', 'peckish'],
+    'want': ['some tucker', 'some water', 'a drink', 'a snack', 'lunch', 'tea'],
+    'can': ['I have water', 'I have food', 'I have a snack', 'I have lunch', 'I have tea'],
+    'what\'s': ['for lunch', 'for tea', 'for brekkie', 'for dinner'],
+    'time': ['for lunch', 'for tea', 'for brekkie', 'to eat', 'to go'],
+    
+    // Feelings and emotions
+    'I': ['feel happy', 'feel sad', 'feel tired', 'feel excited', 'feel scared', 'feel angry'],
+    'feel': ['happy', 'sad', 'tired', 'excited', 'scared', 'angry', 'good', 'bad', 'sick'],
+    'am': ['happy', 'sad', 'tired', 'excited', 'scared', 'angry', 'hungry', 'thirsty'],
+    
+    // Actions
+    'want': ['to go home', 'to play outside', 'to watch telly', 'to read', 'to draw', 'to sleep'],
+    'can': ['we go', 'we play', 'I play', 'I go', 'you help'],
+    'let\'s': ['go', 'play', 'eat', 'have fun', 'do it'],
+    'time': ['to go', 'to play', 'to eat', 'to sleep', 'to leave'],
+    
+    // Places
+    'go': ['home', 'outside', 'to school', 'to the park', 'to the shop', 'to bed'],
+    'at': ['home', 'school', 'the park', 'the shop'],
+    'in': ['the house', 'the car', 'my room', 'the garden'],
+    
+    // Family and people
+    'where': ['is mum', 'is dad', 'is my mate', 'are you'],
+    'I': ['love mum', 'love dad', 'miss you', 'want mum', 'want dad'],
+    'my': ['mum', 'dad', 'mate', 'friend', 'family', 'favourite'],
+    
+    // Colours - Australian spelling
+    'my': ['favourite colour', 'favourite color'],
+    'what': ['colour is it', 'colour do you like'],
+    'favourite': ['colour', 'food', 'toy', 'game', 'animal'],
+    'like': ['red', 'blue', 'green', 'yellow', 'purple', 'pink', 'orange'],
+    
+    // Time expressions
+    'in': ['the morning', 'the arvo', 'the evening', 'the night'],
+    'this': ['morning', 'arvo', 'afternoon', 'evening', 'night'],
+    'right': ['now', 'here', 'there'],
+    
+    // Politeness - Australian style
+    'please': ['can I', 'help me', 'thank you'],
+    'thank': ['you', 'you very much', 'you mate'],
+    'thanks': ['mate', 'very much', 'a lot'],
+    'excuse': ['me', 'me please'],
+    'sorry': ['about that', 'mate', 'I didn\'t mean to'],
+    
+    // Common responses
+    'yes': ['please', 'I do', 'I can', 'I will', 'that\'s right'],
+    'no': ['thank you', 'I don\'t', 'I can\'t', 'not now'],
+    'maybe': ['later', 'tomorrow', 'next time'],
+    
+    // Activities
+    'play': ['outside', 'with toys', 'games', 'with mates', 'at the park'],
+    'watch': ['telly', 'TV', 'a movie', 'cartoons'],
+    'read': ['a book', 'a story', 'with me'],
+    'draw': ['a picture', 'with me', 'something'],
+    
+    // Help and assistance
+    'help': ['me please', 'me with this', 'I need help'],
+    'can': ['you help me', 'you show me', 'you teach me'],
+    'show': ['me', 'me how', 'me please'],
+    
+    // Weather - Australian context
+    'it\'s': ['hot', 'cold', 'raining', 'sunny', 'beautiful', 'stinking hot'],
+    'the': ['weather is nice', 'weather is bad', 'sun is out'],
+    
+    // School
+    'at': ['school', 'kindy', 'uni'],
+    'go': ['to school', 'to kindy', 'to class'],
+    'time': ['for school', 'for class', 'for learning'],
+  };
+
   // Massively enhanced synonym database for maximum AI capabilities with Australian English
   const synonymDatabase: { [key: string]: string[] } = {
     // Basic needs and wants - Australian English
@@ -80,7 +182,7 @@ export function useAdvancedAI() {
     // Time expressions
     'now': ['currently', 'right now', 'at present', 'immediately', 'today', 'this arvo'],
     'later': ['afterwards', 'soon', 'eventually', 'in a while', 'tomorrow', 'this arvo'],
-    'morning': ['this morning', 'early', 'dawn', 'sunrise', 'AM'],
+    'morning': ['this morning', 'early', 'dawn', 'sunrise', 'AM', 'brekkie time'],
     'afternoon': ['this arvo', 'this afternoon', 'PM', 'after lunch'],
     'evening': ['tonight', 'this evening', 'after tea', 'nighttime'],
     
@@ -102,8 +204,6 @@ export function useAdvancedAI() {
     'mate': ['friend', 'buddy', 'pal', 'companion', 'cobber'],
     
     // Weather - Australian context
-    'hot': ['warm', 'scorching', 'boiling', 'sweltering', 'stinking hot'],
-    'cold': ['chilly', 'freezing', 'brass monkeys', 'bloody cold'],
     'rain': ['shower', 'drizzle', 'downpour', 'bucketing down'],
     'sunny': ['bright', 'clear', 'beautiful day', 'lovely weather'],
   };
@@ -468,22 +568,60 @@ export function useAdvancedAI() {
       const lastWord = currentWords[currentWords.length - 1]?.toLowerCase();
       const currentHour = new Date().getHours();
 
-      console.log('Getting ultra-advanced suggestions for:', { currentWords, lastWord, currentText });
+      console.log('Getting ChatGPT-style suggestions for:', { currentWords, lastWord, currentText });
 
-      // 1. AI Preference-based suggestions (NEW!)
+      // 1. ChatGPT-style common phrase completions (HIGHEST PRIORITY)
+      if (lastWord && commonPhrases[lastWord]) {
+        const phraseCompletions = commonPhrases[lastWord];
+        phraseCompletions.forEach((completion, index) => {
+          const nextWord = completion.split(' ')[0];
+          if (!suggestions.some(s => areSimilarWords(s.text.toLowerCase(), nextWord.toLowerCase())) &&
+              !currentWords.some(w => areSimilarWords(w.toLowerCase(), nextWord.toLowerCase()))) {
+            suggestions.push({
+              text: nextWord,
+              confidence: Math.max(0.92, 0.98 - index * 0.02),
+              type: 'common_phrase',
+              context: `"${lastWord} ${completion}"`
+            });
+          }
+        });
+      }
+
+      // 2. Multi-word phrase matching for better context
+      if (currentWords.length >= 2) {
+        const lastTwoWords = currentWords.slice(-2).join(' ').toLowerCase();
+        Object.entries(commonPhrases).forEach(([key, completions]) => {
+          if (lastTwoWords.includes(key)) {
+            completions.forEach((completion, index) => {
+              const nextWord = completion.split(' ')[0];
+              if (!suggestions.some(s => areSimilarWords(s.text.toLowerCase(), nextWord.toLowerCase())) &&
+                  !currentWords.some(w => areSimilarWords(w.toLowerCase(), nextWord.toLowerCase()))) {
+                suggestions.push({
+                  text: nextWord,
+                  confidence: Math.max(0.88, 0.95 - index * 0.02),
+                  type: 'common_phrase',
+                  context: `Completes phrase`
+                });
+              }
+            });
+          }
+        });
+      }
+
+      // 3. AI Preference-based suggestions
       const contextualPreferenceSuggestions = getContextualSuggestions(currentText, currentHour);
       contextualPreferenceSuggestions.forEach((suggestion, index) => {
         if (!suggestions.some(s => areSimilarWords(s.text.toLowerCase(), suggestion.toLowerCase()))) {
           suggestions.push({
             text: suggestion,
-            confidence: Math.max(0.85, 0.95 - index * 0.05),
+            confidence: Math.max(0.85, 0.90 - index * 0.03),
             type: 'preference',
             context: 'Based on your preferences'
           });
         }
       });
 
-      // 2. Enhanced phrase completions with better scoring
+      // 4. Enhanced phrase completions from user patterns
       if (currentText) {
         userPatterns.phrases.forEach((frequency, phrase) => {
           if (phrase.startsWith(currentText) && phrase !== currentText) {
@@ -492,7 +630,7 @@ export function useAdvancedAI() {
               const nextWords = completion.split(' ');
               nextWords.slice(0, 2).forEach((nextWord, index) => {
                 if (!currentWords.some(w => areSimilarWords(w.toLowerCase(), nextWord.toLowerCase()))) {
-                  const confidence = Math.min(0.90, (frequency / 6) * (1 - index * 0.2));
+                  const confidence = Math.min(0.87, (frequency / 6) * (1 - index * 0.2));
                   suggestions.push({
                     text: nextWord,
                     confidence,
@@ -506,7 +644,7 @@ export function useAdvancedAI() {
         });
       }
 
-      // 3. Enhanced word transitions with context scoring
+      // 5. Enhanced word transitions with context scoring
       if (lastWord && userPatterns.transitions.has(lastWord)) {
         const nextWords = userPatterns.transitions.get(lastWord)!;
         nextWords.forEach((frequency, nextWord) => {
@@ -514,11 +652,11 @@ export function useAdvancedAI() {
               !currentWords.some(w => areSimilarWords(w.toLowerCase(), nextWord.toLowerCase()))) {
             
             // Boost confidence based on recent usage and context
-            let confidence = Math.min(0.85, frequency / 3);
+            let confidence = Math.min(0.82, frequency / 3);
             
             // Boost if it's a common transition at this time
             const timeBoost = getTimeBasedBoost(nextWord, currentHour);
-            confidence = Math.min(0.90, confidence + timeBoost);
+            confidence = Math.min(0.87, confidence + timeBoost);
             
             suggestions.push({
               text: nextWord,
@@ -530,7 +668,7 @@ export function useAdvancedAI() {
         });
       }
 
-      // 4. Enhanced temporal suggestions with day/time awareness
+      // 6. Enhanced temporal suggestions with day/time awareness
       userPatterns.temporalPatterns.forEach((timeData, phrase) => {
         const relevantTimes = timeData.filter(t => Math.abs(t.hour - currentHour) <= 1);
         if (relevantTimes.length > 0) {
@@ -539,7 +677,7 @@ export function useAdvancedAI() {
             if (!suggestions.some(s => areSimilarWords(s.text.toLowerCase(), word.toLowerCase())) &&
                 !currentWords.some(w => areSimilarWords(w.toLowerCase(), word.toLowerCase()))) {
               const totalCount = relevantTimes.reduce((sum, t) => sum + t.count, 0);
-              const confidence = Math.min(0.80, (totalCount / 3) * (1 - index * 0.15));
+              const confidence = Math.min(0.78, (totalCount / 3) * (1 - index * 0.15));
               suggestions.push({
                 text: word,
                 confidence,
@@ -551,28 +689,7 @@ export function useAdvancedAI() {
         }
       });
 
-      // 5. Enhanced common phrases with frequency weighting
-      const commonPhrases = Array.from(userPatterns.phrases.entries())
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 6);
-
-      commonPhrases.forEach(([phrase, frequency]) => {
-        const words = phrase.split(' ');
-        words.slice(0, 2).forEach((word, index) => {
-          if (!suggestions.some(s => areSimilarWords(s.text.toLowerCase(), word.toLowerCase())) &&
-              !currentWords.some(w => areSimilarWords(w.toLowerCase(), word.toLowerCase()))) {
-            const confidence = Math.min(0.75, (frequency / 5) * (1 - index * 0.1));
-            suggestions.push({
-              text: word,
-              confidence,
-              type: 'common_phrase',
-              context: `From: "${phrase}"`
-            });
-          }
-        });
-      });
-
-      // 6. Enhanced synonym suggestions with multiple alternatives
+      // 7. Enhanced synonym suggestions with multiple alternatives
       if (lastWord) {
         const synonyms = findAlternativeWords(lastWord, availableWords, currentWords);
         synonyms.forEach((synonym, index) => {
@@ -588,7 +705,7 @@ export function useAdvancedAI() {
         });
       }
 
-      // 7. Enhanced contextual suggestions with smart filtering
+      // 8. Enhanced contextual suggestions with smart filtering
       const filteredAvailableWords = removeDuplicateWords(availableWords, currentWords);
       const contextualWords = filteredAvailableWords
         .filter(word => {
@@ -615,7 +732,7 @@ export function useAdvancedAI() {
         }
       });
 
-      // 8. Add high-frequency words as fallback
+      // 9. Add high-frequency words as fallback
       if (suggestions.length < maxSuggestions) {
         const fallbackWords = filteredAvailableWords
           .filter(word => !suggestions.some(s => areSimilarWords(s.text.toLowerCase(), word.toLowerCase())))
@@ -641,24 +758,24 @@ export function useAdvancedAI() {
       const finalSuggestions = uniqueSuggestions
         .sort((a, b) => {
           // Primary sort by confidence
-          if (Math.abs(a.confidence - b.confidence) > 0.1) {
+          if (Math.abs(a.confidence - b.confidence) > 0.05) {
             return b.confidence - a.confidence;
           }
           // Secondary sort by type priority
           const typePriority = {
+            'common_phrase': 7,
             'preference': 6,
             'completion': 5,
             'next_word': 4,
             'temporal': 3,
-            'common_phrase': 2,
-            'synonym': 1,
-            'contextual': 0
+            'synonym': 2,
+            'contextual': 1
           };
           return (typePriority[b.type] || 0) - (typePriority[a.type] || 0);
         })
         .slice(0, maxSuggestions);
 
-      console.log('Generated ultra-advanced suggestions:', finalSuggestions);
+      console.log('Generated ChatGPT-style suggestions:', finalSuggestions);
       return finalSuggestions;
 
     } catch (err) {

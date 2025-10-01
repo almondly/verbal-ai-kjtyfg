@@ -1,75 +1,53 @@
 
-import { ScrollView, Text, TouchableOpacity, StyleSheet, View, Animated } from 'react-native';
-import { useRef } from 'react';
-import Icon from './Icon';
+import React from 'react';
+import { View, ScrollView, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { Category } from '../types';
 import { colors } from '../styles/commonStyles';
+import Icon from './Icon';
 
 interface Props {
   categories: Category[];
   selectedId: string;
   onSelect: (id: string) => void;
-  style?: any;
 }
 
-export default function CategoryBar({ categories, selectedId, onSelect, style }: Props) {
-  const scaleAnim = useRef(new Animated.Value(1)).current;
-
-  const animatePop = () => {
-    Animated.sequence([
-      Animated.timing(scaleAnim, { toValue: 1.15, duration: 100, useNativeDriver: true }),
-      Animated.timing(scaleAnim, { toValue: 1, duration: 100, useNativeDriver: true }),
-    ]).start();
-  };
-
+export default function CategoryBar({ categories, selectedId, onSelect }: Props) {
   return (
-    <View style={[styles.wrapper, style]}>
+    <View style={styles.container}>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.row}
-        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={styles.scrollContent}
+        style={styles.scrollView}
       >
-        {categories.map((cat, index) => {
-          const active = cat.id === selectedId;
-
+        {categories.map((category) => {
+          const isSelected = category.id === selectedId;
           return (
-            <Animated.View
-              key={cat.id}
-              style={{
-                transform: [{ scale: active ? scaleAnim : 1 }],
-                marginRight: index < categories.length - 1 ? 12 : 0,
-              }}
+            <TouchableOpacity
+              key={category.id}
+              style={[
+                styles.categoryButton,
+                isSelected && styles.categoryButtonSelected,
+                isSelected && { 
+                  backgroundColor: category.color,
+                  boxShadow: `0px 0px 20px ${category.color}`,
+                }
+              ]}
+              onPress={() => onSelect(category.id)}
+              activeOpacity={0.8}
             >
-              <TouchableOpacity
-                style={[
-                  styles.chip,
-                  {
-                    backgroundColor: active ? cat.color : colors.backgroundAlt,
-                    borderColor: cat.color,
-                    borderWidth: active ? 3 : 2,
-                    boxShadow: `0px 0px ${active ? '25px' : '15px'} ${cat.color}`,
-                  },
-                ]}
-                onPress={() => {
-                  onSelect(cat.id);
-                  animatePop();
-                }}
-                activeOpacity={0.8}
-              >
-                <Icon 
-                  name={cat.icon as any} 
-                  size={24} 
-                  color={colors.text} 
-                />
-                <Text style={[
-                  styles.chipText, 
-                  { color: colors.text }
-                ]}>
-                  {cat.label}
-                </Text>
-              </TouchableOpacity>
-            </Animated.View>
+              <Icon 
+                name={category.icon} 
+                size={24} 
+                color={isSelected ? '#FFFFFF' : colors.text} 
+              />
+              <Text style={[
+                styles.categoryLabel,
+                isSelected && styles.categoryLabelSelected
+              ]}>
+                {category.label}
+              </Text>
+            </TouchableOpacity>
           );
         })}
       </ScrollView>
@@ -78,29 +56,42 @@ export default function CategoryBar({ categories, selectedId, onSelect, style }:
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
+  container: {
     width: '100%',
-    paddingHorizontal: 8,
-    paddingVertical: 6,
     backgroundColor: colors.background,
-    borderRadius: 16,
-    boxShadow: '0px 2px 8px rgba(0,0,0,0.06)',
+    paddingVertical: 4,
+    borderBottomWidth: 2,
+    borderBottomColor: colors.backgroundAlt,
   },
-  row: {
+  scrollView: {
+    flexGrow: 0,
+  },
+  scrollContent: {
+    paddingHorizontal: 8,
+    gap: 8 as any,
     alignItems: 'center',
-    paddingHorizontal: 4,
   },
-  chip: {
-    width: 70,
-    height: 70,
-    borderRadius: 16,
+  categoryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8 as any,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 12,
+    backgroundColor: colors.backgroundAlt,
+    minWidth: 100,
     justifyContent: 'center',
-    alignItems: 'center',
   },
-  chipText: {
-    fontSize: 11,
+  categoryButtonSelected: {
+    transform: [{ scale: 1.05 }],
+  },
+  categoryLabel: {
     fontFamily: 'Montserrat_600SemiBold',
-    marginTop: 3,
-    textAlign: 'center',
+    fontSize: 14,
+    color: colors.text,
+  },
+  categoryLabelSelected: {
+    color: '#FFFFFF',
+    fontFamily: 'Montserrat_700Bold',
   },
 });

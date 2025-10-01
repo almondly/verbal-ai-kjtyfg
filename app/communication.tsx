@@ -73,7 +73,7 @@ export default function CommunicationScreen() {
     }
     
     // Log component mount
-    console.log('Communication screen mounted');
+    console.log('Communication screen mounted successfully');
   }, []);
 
   // Update advanced suggestions when sentence changes
@@ -220,29 +220,28 @@ export default function CommunicationScreen() {
           )}
         </View>
 
-        {/* Category Bar - Compact and only show when settings is not open */}
-        {!settingsOpen && (
-          <View style={styles.categoryContainer}>
-            <CategoryBar
-              categories={categories}
-              selectedId={selectedCategory}
-              onSelect={(id) => {
-                setSelectedCategory(id);
-                handleUserActivity();
-              }}
-            />
-          </View>
-        )}
+        {/* Category Bar - Fixed position with proper z-index */}
+        <View style={styles.categoryContainer}>
+          <CategoryBar
+            categories={categories}
+            selectedId={selectedCategory}
+            onSelect={(id) => {
+              setSelectedCategory(id);
+              handleUserActivity();
+            }}
+          />
+        </View>
 
-        {/* Communication Grid - Moved much higher up */}
+        {/* Communication Grid - Scrollable area below category bar */}
         <View style={styles.gridContainer}>
           <ScrollView
-            style={{ flex: 1 }}
+            style={styles.gridScrollView}
             contentContainerStyle={styles.gridScrollContent}
             contentInsetAdjustmentBehavior="never"
             keyboardShouldPersistTaps="handled"
             onTouchStart={handleUserActivity}
-            showsVerticalScrollIndicator={false}
+            showsVerticalScrollIndicator={true}
+            bounces={true}
           >
             <CommunicationGrid
               tiles={visibleTiles}
@@ -307,6 +306,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 2,
+    zIndex: 10,
   },
   iconBtn: {
     backgroundColor: colors.backgroundAlt,
@@ -328,22 +328,31 @@ const styles = StyleSheet.create({
   },
   phraseBarContainer: {
     marginBottom: 2,
+    zIndex: 9,
   },
   suggestionsContainer: {
     marginBottom: 2,
     minHeight: 40,
+    zIndex: 8,
   },
   categoryContainer: {
-    marginBottom: 2,
+    marginBottom: 4,
     height: 70,
+    zIndex: 5,
+    backgroundColor: colors.background,
+    position: 'relative',
   },
   gridContainer: {
     flex: 1,
     marginTop: 0,
+    zIndex: 1,
+  },
+  gridScrollView: {
+    flex: 1,
   },
   gridScrollContent: {
-    paddingTop: 2,
-    paddingBottom: 8,
+    paddingTop: 8,
+    paddingBottom: 16,
     flexGrow: 1,
   },
 });

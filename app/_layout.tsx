@@ -22,6 +22,7 @@ function RootLayoutInner() {
 
   useEffect(() => {
     setupErrorLogging();
+    console.log('App layout initialized');
     if (Platform.OS === 'web') {
       try {
         const params = new URLSearchParams(window.location.search);
@@ -50,8 +51,11 @@ function RootLayoutInner() {
   }
 
   if (!fontsLoaded) {
+    console.log('Fonts loading...');
     return <View style={[commonStyles.wrapper, { backgroundColor: colors.background }]} />;
   }
+
+  console.log('Fonts loaded, rendering app');
 
   return (
     <SafeAreaView
@@ -71,10 +75,10 @@ function RootLayoutInner() {
           headerShown: false,
           animation: 'default',
         }}
-        initialRouteName="main-menu"
       >
-        <Stack.Screen name="main-menu" />
         <Stack.Screen name="index" />
+        <Stack.Screen name="main-menu" />
+        <Stack.Screen name="communication" />
       </Stack>
     </SafeAreaView>
   );

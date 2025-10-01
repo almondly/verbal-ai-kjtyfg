@@ -1,3 +1,4 @@
+
 import { View, StyleSheet, useWindowDimensions } from 'react-native';
 import TileItem from './TileItem';
 import { Tile } from '../types';
@@ -18,35 +19,19 @@ function getColumns(width: number): number {
   return 3;
 }
 
-export default function CommunicationGrid({
-  tiles,
-  onPressTile,
-  onPressAdd,
-  onRemoveTile,
-}: Props) {
+export default function CommunicationGrid({ tiles, onPressTile, onPressAdd, onRemoveTile }: Props) {
   const { width } = useWindowDimensions();
   const columns = getColumns(width);
   const itemPercent = 100 / columns;
 
-  const addTile: Tile = {
-    id: '__add__',
-    text: 'Add',
-    color: '#E5E7EB',
-  };
-
+  const addTile: Tile = { id: '__add__', text: 'Add', color: '#E5E7EB' };
   const items = [addTile, ...tiles];
 
   return (
     <View style={styles.grid}>
       {items.map((tile) =>
         tile.id === '__add__' ? (
-          <TileItem
-            key={tile.id}
-            tile={tile}
-            onPress={() => onPressAdd()}
-            isAdd
-            itemPercent={itemPercent}
-          />
+          <TileItem key={tile.id} tile={tile} onPress={onPressAdd} isAdd itemPercent={itemPercent} />
         ) : (
           <TileItem
             key={tile.id}
@@ -66,7 +51,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     marginHorizontal: -1,
-    marginTop: 260, // increased from 200 to 260 for more spacing
+    paddingTop: 4,
     backgroundColor: 'transparent',
   },
 });

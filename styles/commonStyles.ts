@@ -40,9 +40,9 @@ export const commonStyles = StyleSheet.create({
     alignItems: 'center',
   },
   shadow: {
-    boxShadow: '0px 4px 12px rgba(0,0,0,0.1)',
+    boxShadow: '0px 4px 10px rgba(0,0,0,0.1)',
   },
   shadowLarge: {
-    boxShadow: '0px 8px 24px rgba(0,0,0,0.15)',
+    boxShadow: '0px 8px 10px rgba(0,0,0,0.15)',
   },
 });
