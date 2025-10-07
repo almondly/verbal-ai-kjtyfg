@@ -1,6 +1,6 @@
 
 import { memo, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Animated } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Animated, useWindowDimensions } from 'react-native';
 import { Tile } from '../types';
 import { colors } from '../styles/commonStyles';
 import { categories } from '../data/categories';
@@ -22,6 +22,7 @@ const TileItem = memo(function TileItem({
   itemPercent = 33.33,
 }: Props) {
   const scale = useRef(new Animated.Value(1)).current;
+  const { width } = useWindowDimensions();
 
   const handlePressIn = () => {
     Animated.spring(scale, { toValue: 0.96, useNativeDriver: true, speed: 50, bounciness: 8 }).start();
@@ -42,7 +43,18 @@ const TileItem = memo(function TileItem({
     return '#FFFFFF'; // fallback
   };
 
+  // Responsive font size based on screen width
+  const getResponsiveFontSize = () => {
+    if (width >= 1400) return 18; // Large tablets/desktops
+    if (width >= 1200) return 17; // Medium tablets
+    if (width >= 1000) return 16; // Small tablets
+    if (width >= 820) return 15;  // Large phones landscape
+    if (width >= 680) return 14;  // Medium phones landscape
+    return 13; // Small phones
+  };
+
   const bg = getCategoryColor();
+  const fontSize = getResponsiveFontSize();
 
   return (
     <Animated.View
@@ -64,7 +76,6 @@ const TileItem = memo(function TileItem({
             backgroundColor: bg,
             borderColor: bg,
             borderWidth: 2,
-            // Removed boxShadow glow - only keep neon color
           }
         ]}
       >
@@ -76,14 +87,13 @@ const TileItem = memo(function TileItem({
               source={{ uri: tile.imageUri }} 
               style={styles.image} 
               resizeMode="cover"
-              // Add loading fallback and error handling for better UX
               onError={() => console.log(`Failed to load image for tile: ${tile.text}`)}
             />
           ) : (
             <Icon name="chatbubble-ellipses-outline" size={34} color={colors.text} />
           )}
         </View>
-        <Text style={styles.text} numberOfLines={2}>
+        <Text style={[styles.text, { fontSize }]} numberOfLines={2}>
           {tile.text}
         </Text>
       </TouchableOpacity>
@@ -120,10 +130,9 @@ const styles = StyleSheet.create({
   },
   text: {
     fontFamily: 'Montserrat_600SemiBold',
-    fontSize: 12,
     color: colors.text,
     textAlign: 'center',
     marginTop: 2,
-    lineHeight: 14,
+    lineHeight: 18,
   },
 });

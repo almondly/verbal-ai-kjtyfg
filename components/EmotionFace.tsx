@@ -14,13 +14,11 @@ export default function EmotionFace({ emotion, size = 100 }: Props) {
       width: size,
       height: size,
       borderRadius: size / 2,
-      backgroundColor: colors.backgroundAlt,
-      borderWidth: 3,
-      borderColor: colors.primary,
+      // Removed backgroundColor - no white box
+      borderWidth: 0, // Removed border
       justifyContent: 'center',
       alignItems: 'center',
       position: 'relative' as const,
-      // Removed any shadow properties
     };
   };
 
