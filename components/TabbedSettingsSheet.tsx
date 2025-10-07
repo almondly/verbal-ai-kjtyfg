@@ -441,6 +441,7 @@ export default function TabbedSettingsSheet({
       handleIndicatorStyle={{ backgroundColor: '#CBD5E1' }}
       keyboardBehavior="interactive"
       keyboardBlurBehavior="restore"
+      style={{ zIndex: 9999 }}
     >
       <BottomSheetView style={styles.container}>
         <View style={styles.header}>
@@ -497,12 +498,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 16,
     flex: 1,
+    zIndex: 9999,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 20,
+    zIndex: 9999,
   },
   title: {
     fontSize: 24,
@@ -516,6 +519,7 @@ const styles = StyleSheet.create({
   },
   tabBar: {
     marginBottom: 20,
+    zIndex: 9999,
   },
   tabBarContent: {
     gap: 8 as any,
@@ -546,6 +550,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flex: 1,
+    zIndex: 9999,
   },
   tabContent: {
     flex: 1,

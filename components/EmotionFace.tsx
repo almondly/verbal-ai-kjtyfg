@@ -14,8 +14,8 @@ export default function EmotionFace({ emotion, size = 100 }: Props) {
       width: size,
       height: size,
       borderRadius: size / 2,
-      // Removed backgroundColor - no white box
-      borderWidth: 0, // Removed border
+      backgroundColor: 'transparent',
+      borderWidth: 0,
       justifyContent: 'center',
       alignItems: 'center',
       position: 'relative' as const,

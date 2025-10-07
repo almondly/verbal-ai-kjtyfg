@@ -113,10 +113,7 @@ const styles = StyleSheet.create({
   },
   emotionContainer: {
     alignItems: 'center',
-    backgroundColor: colors.backgroundAlt,
-    borderRadius: 32,
     padding: 40,
-    boxShadow: '0px 8px 24px rgba(0,0,0,0.1)',
     minWidth: 400,
   },
   emotionText: {
