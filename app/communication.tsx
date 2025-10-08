@@ -163,6 +163,7 @@ export default function CommunicationScreen() {
 
   const visibleTiles = useMemo(() => {
     if (selectedCategory === 'all') return tiles;
+    if (selectedCategory === 'keyboard') return []; // No tiles for keyboard category
     return tiles.filter(t => t.category === selectedCategory);
   }, [tiles, selectedCategory]);
 
@@ -175,6 +176,17 @@ export default function CommunicationScreen() {
     console.log('Opening settings');
     router.push('/settings');
   };
+
+  const handleCategorySelect = useCallback((categoryId: string) => {
+    console.log('Category selected:', categoryId);
+    if (categoryId === 'keyboard') {
+      console.log('Navigating to keyboard screen');
+      router.push('/keyboard');
+    } else {
+      setSelectedCategory(categoryId);
+      handleUserActivity();
+    }
+  }, [router, handleUserActivity]);
 
   console.log('Visible tiles:', visibleTiles.length);
 
@@ -229,10 +241,7 @@ export default function CommunicationScreen() {
           <CategoryBar
             categories={categories}
             selectedId={selectedCategory}
-            onSelect={(id) => {
-              setSelectedCategory(id);
-              handleUserActivity();
-            }}
+            onSelect={handleCategorySelect}
           />
         </View>
 
@@ -266,7 +275,7 @@ export default function CommunicationScreen() {
           open={addOpen}
           title="Add Tile"
           mode="add"
-          defaultCategoryId={selectedCategory === 'all' ? 'core' : selectedCategory}
+          defaultCategoryId={selectedCategory === 'all' || selectedCategory === 'keyboard' ? 'core' : selectedCategory}
           onClose={() => setAddOpen(false)}
           onAddTile={(tile) => {
             addTile(tile);

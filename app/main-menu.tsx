@@ -31,11 +31,6 @@ export default function MainMenu() {
     router.push('/communication');
   };
 
-  const handleStartKeyboard = () => {
-    console.log('Starting keyboard mode');
-    router.push('/keyboard');
-  };
-
   const handleOpenSettings = () => {
     console.log('Opening settings');
     router.push('/settings');
@@ -67,27 +62,15 @@ export default function MainMenu() {
 
           {/* Action Buttons */}
           <View style={styles.buttonSection}>
-            <View style={styles.buttonRow}>
-              <TouchableOpacity 
-                style={[styles.actionButton, styles.primaryButton]} 
-                onPress={handleStartCommunication}
-                activeOpacity={0.9}
-              >
-                <Icon name="grid-outline" size={32} color="#FFFFFF" />
-                <Text style={styles.actionButtonText}>Tile Grid</Text>
-                <Text style={styles.actionButtonSubtext}>Use picture tiles</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity 
-                style={[styles.actionButton, styles.secondaryButton]} 
-                onPress={handleStartKeyboard}
-                activeOpacity={0.9}
-              >
-                <Icon name="keypad-outline" size={32} color="#FFFFFF" />
-                <Text style={styles.actionButtonText}>Keyboard</Text>
-                <Text style={styles.actionButtonSubtext}>Type sentences</Text>
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity 
+              style={[styles.actionButton, styles.primaryButton]} 
+              onPress={handleStartCommunication}
+              activeOpacity={0.9}
+            >
+              <Icon name="grid-outline" size={40} color="#FFFFFF" />
+              <Text style={styles.actionButtonText}>Start Communicating</Text>
+              <Text style={styles.actionButtonSubtext}>Use tiles or keyboard</Text>
+            </TouchableOpacity>
 
             <TouchableOpacity 
               style={styles.settingsButton} 
@@ -167,39 +150,29 @@ const styles = StyleSheet.create({
     marginTop: 20,
     alignItems: 'center',
     width: '100%',
-    maxWidth: 800,
-  },
-  buttonRow: {
-    flexDirection: 'row',
+    maxWidth: 600,
     gap: 20 as any,
-    marginBottom: 20,
-    width: '100%',
-    justifyContent: 'center',
   },
   actionButton: {
-    flex: 1,
-    maxWidth: 280,
+    width: '100%',
     alignItems: 'center',
     gap: 12 as any,
-    paddingHorizontal: 32,
-    paddingVertical: 24,
+    paddingHorizontal: 40,
+    paddingVertical: 32,
     borderRadius: 20,
     boxShadow: '0px 6px 20px rgba(0,0,0,0.15)',
   },
   primaryButton: {
     backgroundColor: colors.primary,
   },
-  secondaryButton: {
-    backgroundColor: colors.secondary,
-  },
   actionButtonText: {
-    fontSize: 20,
+    fontSize: 24,
     fontFamily: 'Montserrat_700Bold',
     color: '#FFFFFF',
     textAlign: 'center',
   },
   actionButtonSubtext: {
-    fontSize: 14,
+    fontSize: 16,
     fontFamily: 'Montserrat_600SemiBold',
     color: '#FFFFFF',
     opacity: 0.9,
