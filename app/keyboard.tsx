@@ -11,6 +11,8 @@ import LandscapeGuard from '../components/LandscapeGuard';
 import { useRouter } from 'expo-router';
 import EmotionFace from '../components/EmotionFace';
 import AdvancedSuggestionsRow from '../components/AdvancedSuggestionsRow';
+import CategoryBar from '../components/CategoryBar';
+import { categories } from '../data/categories';
 
 export default function KeyboardScreen() {
   console.log('KeyboardScreen rendering...');
@@ -27,6 +29,7 @@ export default function KeyboardScreen() {
   const [typedText, setTypedText] = useState('');
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [sentenceHistory, setSentenceHistory] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>('keyboard');
 
   useEffect(() => {
     // Lock orientation on native platforms only
@@ -124,16 +127,26 @@ export default function KeyboardScreen() {
     router.push('/settings');
   };
 
+  const handleCategorySelect = useCallback((categoryId: string) => {
+    console.log('Category selected:', categoryId);
+    if (categoryId === 'keyboard') {
+      setSelectedCategory('keyboard');
+    } else {
+      console.log('Navigating to communication screen');
+      router.push('/communication');
+    }
+  }, [router]);
+
   return (
     <LandscapeGuard>
-      <View style={[commonStyles.container, styles.container]}>
-        {/* Top Bar */}
+      <View style={[commonStyles.container, { paddingHorizontal: 8 }]}>
+        {/* Top Bar - Matching communication screen */}
         <View style={styles.topBar}>
           <TouchableOpacity onPress={handleBackToMenu} style={styles.iconBtn} activeOpacity={0.8}>
             <Icon name="home-outline" size={32} color={colors.text} />
           </TouchableOpacity>
           
-          <Text style={styles.appTitle}>Keyboard Mode</Text>
+          <Text style={styles.appTitle}>ComPanion</Text>
           
           <View style={styles.rightSection}>
             <View style={styles.emotionContainer}>
@@ -145,14 +158,71 @@ export default function KeyboardScreen() {
           </View>
         </View>
 
-        {/* Main Content */}
-        <View style={styles.content}>
-          {/* Text Input Area */}
-          <View style={styles.inputSection}>
-            <View style={styles.inputContainer}>
+        {/* Phrase Bar Area - Shows current typed text */}
+        <View style={styles.phraseBarContainer}>
+          <View style={styles.phraseBar}>
+            <ScrollView 
+              horizontal 
+              style={styles.phraseScroll}
+              showsHorizontalScrollIndicator={false}
+            >
+              <Text style={styles.phraseText}>
+                {typedText || 'Type your sentence here, mate...'}
+              </Text>
+            </ScrollView>
+            <View style={styles.phraseActions}>
+              <TouchableOpacity 
+                onPress={handleClear} 
+                style={styles.phraseBtn}
+                activeOpacity={0.8}
+              >
+                <Icon name="close-outline" size={24} color={colors.danger} />
+              </TouchableOpacity>
+              <TouchableOpacity 
+                onPress={handleSpeak} 
+                style={[styles.phraseBtn, styles.speakBtn]}
+                activeOpacity={0.8}
+                disabled={!typedText.trim()}
+              >
+                <Icon name="volume-high-outline" size={28} color="#FFFFFF" />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+
+        {/* Suggestions Row - Matching communication screen */}
+        <View style={styles.suggestionsContainer}>
+          {suggestions.length > 0 && (
+            <AdvancedSuggestionsRow
+              suggestions={suggestions}
+              onPressSuggestion={handleSuggestionPress}
+              showDetails={false}
+            />
+          )}
+        </View>
+
+        {/* Category Bar - Same as communication screen */}
+        <View style={styles.categoryContainer}>
+          <CategoryBar
+            categories={categories}
+            selectedId={selectedCategory}
+            onSelect={handleCategorySelect}
+          />
+        </View>
+
+        {/* Main Content Area - Keyboard and History in tile-like format */}
+        <View style={styles.gridContainer}>
+          <ScrollView
+            style={styles.gridScrollView}
+            contentContainerStyle={styles.gridScrollContent}
+            showsVerticalScrollIndicator={true}
+          >
+            {/* Text Input Tile */}
+            <View style={styles.inputTile}>
+              <Text style={styles.inputLabel}>Type Your Message</Text>
               <TextInput
                 style={styles.textInput}
-                placeholder="Type your sentence here, mate..."
+                placeholder="G'day! Start typing here..."
                 placeholderTextColor={colors.textSecondary}
                 value={typedText}
                 onChangeText={setTypedText}
@@ -161,68 +231,30 @@ export default function KeyboardScreen() {
                 autoCorrect
                 autoCapitalize="sentences"
               />
-              
-              {/* Action Buttons */}
-              <View style={styles.actionButtons}>
-                <TouchableOpacity 
-                  onPress={handleClear} 
-                  style={[styles.actionBtn, styles.clearBtn]}
-                  activeOpacity={0.8}
-                >
-                  <Icon name="close-outline" size={24} color={colors.danger} />
-                  <Text style={[styles.actionBtnText, { color: colors.danger }]}>Clear</Text>
-                </TouchableOpacity>
-                
-                <TouchableOpacity 
-                  onPress={handleSpeak} 
-                  style={[styles.actionBtn, styles.speakBtn]}
-                  activeOpacity={0.8}
-                  disabled={!typedText.trim()}
-                >
-                  <Icon name="volume-high-outline" size={24} color="#FFFFFF" />
-                  <Text style={[styles.actionBtnText, { color: '#FFFFFF' }]}>Speak</Text>
-                </TouchableOpacity>
+            </View>
+
+            {/* History Section - Tile format */}
+            {sentenceHistory.length > 0 && (
+              <View style={styles.historySection}>
+                <Text style={styles.sectionTitle}>Recent Sentences</Text>
+                <View style={styles.historyGrid}>
+                  {sentenceHistory.map((sentence, index) => (
+                    <TouchableOpacity
+                      key={index}
+                      style={styles.historyTile}
+                      onPress={() => handleHistoryPress(sentence)}
+                      activeOpacity={0.8}
+                    >
+                      <Icon name="time-outline" size={24} color={colors.primary} />
+                      <Text style={styles.historyTileText} numberOfLines={3}>
+                        {sentence}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
               </View>
-            </View>
-          </View>
-
-          {/* Suggestions */}
-          {suggestions.length > 0 && (
-            <View style={styles.suggestionsSection}>
-              <Text style={styles.sectionTitle}>Suggestions</Text>
-              <AdvancedSuggestionsRow
-                suggestions={suggestions}
-                onPressSuggestion={handleSuggestionPress}
-                showDetails={false}
-              />
-            </View>
-          )}
-
-          {/* History */}
-          {sentenceHistory.length > 0 && (
-            <View style={styles.historySection}>
-              <Text style={styles.sectionTitle}>Recent Sentences</Text>
-              <ScrollView 
-                style={styles.historyScroll}
-                showsVerticalScrollIndicator={false}
-              >
-                {sentenceHistory.map((sentence, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    style={styles.historyItem}
-                    onPress={() => handleHistoryPress(sentence)}
-                    activeOpacity={0.8}
-                  >
-                    <Icon name="time-outline" size={20} color={colors.textSecondary} />
-                    <Text style={styles.historyText} numberOfLines={1}>
-                      {sentence}
-                    </Text>
-                    <Icon name="chevron-forward-outline" size={20} color={colors.textSecondary} />
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View>
-          )}
+            )}
+          </ScrollView>
         </View>
       </View>
     </LandscapeGuard>
@@ -230,17 +262,22 @@ export default function KeyboardScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+  appTitle: {
+    fontSize: 22,
+    fontFamily: 'Montserrat_700Bold',
+    color: colors.text,
+    flex: 1,
+    textAlign: 'center',
   },
   topBar: {
     width: '100%',
-    paddingVertical: 8,
+    paddingTop: 1,
+    paddingBottom: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 16,
+    marginBottom: 2,
+    zIndex: 10,
   },
   iconBtn: {
     backgroundColor: colors.backgroundAlt,
@@ -251,13 +288,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  appTitle: {
-    fontSize: 22,
-    fontFamily: 'Montserrat_700Bold',
-    color: colors.text,
-    flex: 1,
-    textAlign: 'center',
-  },
   rightSection: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -267,81 +297,127 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  content: {
+  phraseBarContainer: {
+    marginBottom: 2,
+    zIndex: 9,
+  },
+  phraseBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.backgroundAlt,
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    minHeight: 70,
+    boxShadow: '0px 6px 14px rgba(0,0,0,0.08)',
+  },
+  phraseScroll: {
+    flex: 1,
+    marginRight: 12,
+  },
+  phraseText: {
+    fontSize: 20,
+    fontFamily: 'Montserrat_600SemiBold',
+    color: colors.text,
+    lineHeight: 28,
+  },
+  phraseActions: {
+    flexDirection: 'row',
+    gap: 8 as any,
+  },
+  phraseBtn: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: colors.background,
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: '0px 4px 10px rgba(0,0,0,0.08)',
+  },
+  speakBtn: {
+    backgroundColor: colors.primary,
+  },
+  suggestionsContainer: {
+    marginBottom: 2,
+    minHeight: 40,
+    zIndex: 8,
+  },
+  categoryContainer: {
+    marginBottom: 4,
+    height: 70,
+    zIndex: 5,
+    backgroundColor: colors.background,
+    position: 'relative',
+  },
+  gridContainer: {
+    flex: 1,
+    marginTop: 0,
+    zIndex: 1,
+  },
+  gridScrollView: {
     flex: 1,
   },
-  inputSection: {
-    marginBottom: 16,
+  gridScrollContent: {
+    paddingTop: 8,
+    paddingBottom: 16,
+    paddingHorizontal: 8,
   },
-  inputContainer: {
+  inputTile: {
     backgroundColor: colors.backgroundAlt,
     borderRadius: 20,
-    padding: 20,
+    padding: 24,
+    marginBottom: 16,
     boxShadow: '0px 6px 20px rgba(0,0,0,0.08)',
+    borderWidth: 2,
+    borderColor: colors.primary,
+  },
+  inputLabel: {
+    fontSize: 18,
+    fontFamily: 'Montserrat_700Bold',
+    color: colors.primary,
+    marginBottom: 12,
   },
   textInput: {
     fontSize: 20,
     fontFamily: 'Montserrat_600SemiBold',
     color: colors.text,
     minHeight: 120,
-    maxHeight: 180,
+    maxHeight: 200,
     textAlignVertical: 'top',
-    marginBottom: 16,
   },
-  actionButtons: {
-    flexDirection: 'row',
-    gap: 12 as any,
-    justifyContent: 'flex-end',
-  },
-  actionBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8 as any,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 14,
-    boxShadow: '0px 4px 12px rgba(0,0,0,0.1)',
-  },
-  clearBtn: {
-    backgroundColor: '#FEE2E2',
-  },
-  speakBtn: {
-    backgroundColor: colors.primary,
-  },
-  actionBtnText: {
-    fontSize: 16,
-    fontFamily: 'Montserrat_700Bold',
-  },
-  suggestionsSection: {
-    marginBottom: 16,
+  historySection: {
+    marginTop: 8,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontFamily: 'Montserrat_700Bold',
     color: colors.text,
     marginBottom: 12,
     paddingHorizontal: 4,
   },
-  historySection: {
-    flex: 1,
-  },
-  historyScroll: {
-    flex: 1,
-  },
-  historyItem: {
+  historyGrid: {
     flexDirection: 'row',
-    alignItems: 'center',
+    flexWrap: 'wrap',
     gap: 12 as any,
-    backgroundColor: colors.backgroundAlt,
-    padding: 16,
-    borderRadius: 14,
-    marginBottom: 8,
-    boxShadow: '0px 4px 10px rgba(0,0,0,0.06)',
   },
-  historyText: {
-    flex: 1,
+  historyTile: {
+    backgroundColor: colors.backgroundAlt,
+    borderRadius: 16,
+    padding: 16,
+    minWidth: 180,
+    maxWidth: 250,
+    minHeight: 120,
+    boxShadow: '0px 6px 14px rgba(0,0,0,0.08)',
+    borderWidth: 2,
+    borderColor: colors.primary + '40',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8 as any,
+  },
+  historyTileText: {
     fontSize: 16,
     fontFamily: 'Montserrat_600SemiBold',
     color: colors.text,
+    textAlign: 'center',
   },
 });
