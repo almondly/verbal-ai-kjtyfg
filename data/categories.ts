@@ -13,7 +13,7 @@ export const categories: Category[] = [
   { id: 'people', label: 'People', icon: 'people-outline', color: '#FF77FF' },
   { id: 'actions', label: 'Actions', icon: 'flash-outline', color: '#00FFA5' },
   { id: 'feelings', label: 'Feelings', icon: 'happy-outline', color: '#FFD700' },
-  { id: 'food', label: 'Tucker', icon: 'restaurant-outline', color: '#FF6F61' },
+  { id: 'food', label: 'Food', icon: 'restaurant-outline', color: '#FF6F61' },
   { id: 'home', label: 'Home', icon: 'home-outline', color: '#7F7FFF' },
   { id: 'school', label: 'School', icon: 'school-outline', color: '#7FFF7F' },
   { id: 'body', label: 'Body', icon: 'body-outline', color: '#FFE066' },
