@@ -71,7 +71,7 @@ export default function SettingsScreen() {
     });
     
     // Test the voice
-    await speak('G\'day! This is how I sound, mate!');
+    await speak('Hello! This is how I sound!');
   };
 
   const handlePreferenceSelect = async (category: string, key: string, value: string) => {
@@ -134,7 +134,7 @@ export default function SettingsScreen() {
                 </View>
                 <TouchableOpacity 
                   style={styles.testVoiceBtn}
-                  onPress={() => speak('G\'day! This is how I sound, mate!')}
+                  onPress={() => speak('Hello! This is how I sound!')}
                   activeOpacity={0.8}
                 >
                   <Icon name="volume-high-outline" size={20} color={colors.primary} />

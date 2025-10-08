@@ -315,7 +315,7 @@ export default function SettingsSheet({
                 onChangeText={setPhrase}
               />
 
-              <Text style={styles.sectionTitle}>Color</Text>
+              <Text style={styles.sectionTitle}>Colour</Text>
               <View style={styles.colorsRow}>
                 {['#FFFFFF', '#FEF3C7', '#DBEAFE', '#DCFCE7', '#FDE68A', '#FECACA'].map((c) => (
                   <TouchableOpacity

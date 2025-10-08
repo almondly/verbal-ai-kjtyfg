@@ -167,7 +167,7 @@ export default function KeyboardScreen() {
               showsHorizontalScrollIndicator={false}
             >
               <Text style={styles.phraseText}>
-                {typedText || 'Type your sentence here, mate...'}
+                {typedText || 'Type your sentence here...'}
               </Text>
             </ScrollView>
             <View style={styles.phraseActions}>
@@ -222,7 +222,7 @@ export default function KeyboardScreen() {
               <Text style={styles.inputLabel}>Type Your Message</Text>
               <TextInput
                 style={styles.textInput}
-                placeholder="G'day! Start typing here..."
+                placeholder="Start typing here..."
                 placeholderTextColor={colors.textSecondary}
                 value={typedText}
                 onChangeText={setTypedText}

@@ -42,7 +42,7 @@ export default function MainMenu() {
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>ComPanion</Text>
-          <Text style={styles.subtitle}>Your Communication Mate</Text>
+          <Text style={styles.subtitle}>Your Communication Companion</Text>
         </View>
 
         {/* Main Content */}
@@ -52,10 +52,10 @@ export default function MainMenu() {
             <View style={styles.emotionContainer}>
               <EmotionFace emotion={settings.selectedEmotion} size={Math.min(width * 0.3, height * 0.4)} />
               <Text style={styles.emotionText}>
-                Feeling {settings.selectedEmotion} today, mate!
+                Feeling {settings.selectedEmotion} today!
               </Text>
               <Text style={styles.emotionSubtext}>
-                Ready to have a yarn?
+                Ready to communicate?
               </Text>
             </View>
           </View>
@@ -86,7 +86,7 @@ export default function MainMenu() {
         {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            G&apos;day! Choose how you want to communicate
+            Choose how you want to communicate
           </Text>
         </View>
       </View>
