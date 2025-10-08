@@ -31,6 +31,16 @@ export default function MainMenu() {
     router.push('/communication');
   };
 
+  const handleStartKeyboard = () => {
+    console.log('Starting keyboard mode');
+    router.push('/keyboard');
+  };
+
+  const handleOpenSettings = () => {
+    console.log('Opening settings');
+    router.push('/settings');
+  };
+
   return (
     <LandscapeGuard>
       <View style={[commonStyles.container, styles.container]}>
@@ -42,10 +52,10 @@ export default function MainMenu() {
 
         {/* Main Content */}
         <View style={styles.content}>
-          {/* Emotion Display - Takes up 80% of screen height as requested */}
-          <View style={[styles.emotionSection, { height: height * 0.8 }]}>
+          {/* Emotion Display */}
+          <View style={[styles.emotionSection, { height: height * 0.5 }]}>
             <View style={styles.emotionContainer}>
-              <EmotionFace emotion={settings.selectedEmotion} size={Math.min(width * 0.4, height * 0.6)} />
+              <EmotionFace emotion={settings.selectedEmotion} size={Math.min(width * 0.3, height * 0.4)} />
               <Text style={styles.emotionText}>
                 Feeling {settings.selectedEmotion} today, mate!
               </Text>
@@ -55,15 +65,37 @@ export default function MainMenu() {
             </View>
           </View>
 
-          {/* Start Button - Made smaller as requested */}
+          {/* Action Buttons */}
           <View style={styles.buttonSection}>
+            <View style={styles.buttonRow}>
+              <TouchableOpacity 
+                style={[styles.actionButton, styles.primaryButton]} 
+                onPress={handleStartCommunication}
+                activeOpacity={0.9}
+              >
+                <Icon name="grid-outline" size={32} color="#FFFFFF" />
+                <Text style={styles.actionButtonText}>Tile Grid</Text>
+                <Text style={styles.actionButtonSubtext}>Use picture tiles</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                style={[styles.actionButton, styles.secondaryButton]} 
+                onPress={handleStartKeyboard}
+                activeOpacity={0.9}
+              >
+                <Icon name="keypad-outline" size={32} color="#FFFFFF" />
+                <Text style={styles.actionButtonText}>Keyboard</Text>
+                <Text style={styles.actionButtonSubtext}>Type sentences</Text>
+              </TouchableOpacity>
+            </View>
+
             <TouchableOpacity 
-              style={styles.startButton} 
-              onPress={handleStartCommunication}
+              style={styles.settingsButton} 
+              onPress={handleOpenSettings}
               activeOpacity={0.9}
             >
-              <Icon name="chatbubble-outline" size={32} color="#FFFFFF" />
-              <Text style={styles.startButtonText}>Start Chatting</Text>
+              <Icon name="settings-outline" size={24} color={colors.primary} />
+              <Text style={styles.settingsButtonText}>Settings</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -71,7 +103,7 @@ export default function MainMenu() {
         {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            G'day! Tap the button above to start communicating
+            G&apos;day! Choose how you want to communicate
           </Text>
         </View>
       </View>
@@ -134,23 +166,59 @@ const styles = StyleSheet.create({
   buttonSection: {
     marginTop: 20,
     alignItems: 'center',
+    width: '100%',
+    maxWidth: 800,
   },
-  startButton: {
-    backgroundColor: colors.primary,
+  buttonRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16 as any,
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-    borderRadius: 20,
-    boxShadow: '0px 6px 20px rgba(77, 158, 255, 0.3)',
-    minWidth: 200,
+    gap: 20 as any,
+    marginBottom: 20,
+    width: '100%',
     justifyContent: 'center',
   },
-  startButtonText: {
+  actionButton: {
+    flex: 1,
+    maxWidth: 280,
+    alignItems: 'center',
+    gap: 12 as any,
+    paddingHorizontal: 32,
+    paddingVertical: 24,
+    borderRadius: 20,
+    boxShadow: '0px 6px 20px rgba(0,0,0,0.15)',
+  },
+  primaryButton: {
+    backgroundColor: colors.primary,
+  },
+  secondaryButton: {
+    backgroundColor: colors.secondary,
+  },
+  actionButtonText: {
     fontSize: 20,
     fontFamily: 'Montserrat_700Bold',
     color: '#FFFFFF',
+    textAlign: 'center',
+  },
+  actionButtonSubtext: {
+    fontSize: 14,
+    fontFamily: 'Montserrat_600SemiBold',
+    color: '#FFFFFF',
+    opacity: 0.9,
+    textAlign: 'center',
+  },
+  settingsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12 as any,
+    backgroundColor: colors.backgroundAlt,
+    paddingHorizontal: 24,
+    paddingVertical: 14,
+    borderRadius: 16,
+    boxShadow: '0px 4px 12px rgba(0,0,0,0.08)',
+  },
+  settingsButtonText: {
+    fontSize: 16,
+    fontFamily: 'Montserrat_700Bold',
+    color: colors.primary,
   },
   footer: {
     alignItems: 'center',

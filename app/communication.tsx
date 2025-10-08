@@ -50,7 +50,6 @@ export default function CommunicationScreen() {
   const { speak } = useTTSSettings();
   
   const [sentence, setSentence] = useState<Tile[]>([]);
-  const [settingsOpen, setSettingsOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('core');
   const [advancedSuggestions, setAdvancedSuggestions] = useState<any[]>([]);
@@ -172,6 +171,11 @@ export default function CommunicationScreen() {
     router.push('/main-menu');
   };
 
+  const handleOpenSettings = () => {
+    console.log('Opening settings');
+    router.push('/settings');
+  };
+
   console.log('Visible tiles:', visibleTiles.length);
 
   return (
@@ -189,7 +193,7 @@ export default function CommunicationScreen() {
             <View style={styles.emotionContainer}>
               <EmotionFace emotion={settings.selectedEmotion} size={60} />
             </View>
-            <TouchableOpacity onPress={() => setSettingsOpen(true)} style={styles.iconBtn} activeOpacity={0.8}>
+            <TouchableOpacity onPress={handleOpenSettings} style={styles.iconBtn} activeOpacity={0.8}>
               <Icon name="settings-outline" size={32} color={colors.text} />
             </TouchableOpacity>
           </View>
@@ -257,21 +261,6 @@ export default function CommunicationScreen() {
             />
           </ScrollView>
         </View>
-
-        <TabbedSettingsSheet
-          open={settingsOpen}
-          onClose={() => setSettingsOpen(false)}
-          onResetLearning={() => {
-            resetLearning();
-            handleUserActivity();
-          }}
-          onResetTiles={() => {
-            resetTiles();
-            handleUserActivity();
-          }}
-          currentEmotion={settings.selectedEmotion}
-          onEmotionChange={updateEmotion}
-        />
 
         <TabbedSettingsSheet
           open={addOpen}

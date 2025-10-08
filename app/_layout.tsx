@@ -79,6 +79,8 @@ function RootLayoutInner() {
         <Stack.Screen name="index" />
         <Stack.Screen name="main-menu" />
         <Stack.Screen name="communication" />
+        <Stack.Screen name="keyboard" />
+        <Stack.Screen name="settings" />
       </Stack>
     </SafeAreaView>
   );
