@@ -1,14 +1,56 @@
 
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Image } from 'react-native';
 import { colors } from '../styles/commonStyles';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface Props {
   emotion: string;
   size?: number;
 }
 
+const CUSTOM_EMOTIONS_KEY = 'custom_emotions';
+
 export default function EmotionFace({ emotion, size = 100 }: Props) {
+  const [customImage, setCustomImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadCustomEmotion();
+  }, [emotion]);
+
+  const loadCustomEmotion = async () => {
+    try {
+      const stored = await AsyncStorage.getItem(CUSTOM_EMOTIONS_KEY);
+      if (stored) {
+        const customEmotions = JSON.parse(stored);
+        if (customEmotions[emotion]) {
+          setCustomImage(customEmotions[emotion]);
+        } else {
+          setCustomImage(null);
+        }
+      }
+    } catch (error) {
+      console.log('Error loading custom emotion:', error);
+    }
+  };
+
+  // If there's a custom image, display it
+  if (customImage) {
+    return (
+      <View style={getFaceStyle()}>
+        <Image 
+          source={{ uri: customImage }} 
+          style={{
+            width: size,
+            height: size,
+            borderRadius: size / 2,
+          }}
+          resizeMode="cover"
+        />
+      </View>
+    );
+  }
+
   const getFaceStyle = () => {
     return {
       width: size,

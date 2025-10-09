@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform, TextInput, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform, TextInput, Image, Alert } from 'react-native';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import Icon from '../components/Icon';
 import { commonStyles, colors } from '../styles/commonStyles';
@@ -13,8 +13,12 @@ import { useEmotionSettings } from '../hooks/useEmotionSettings';
 import { defaultTiles } from '../data/defaultTiles';
 import { useLibrary } from '../hooks/useLibrary';
 import { useAI } from '../hooks/useAI';
+import * as ImagePicker from 'expo-image-picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type TabType = 'emotions' | 'voice' | 'ai' | 'manage';
+
+const CUSTOM_EMOTIONS_KEY = 'custom_emotions';
 
 // Get all emotions from the feelings category
 const emotionOptions = defaultTiles
@@ -27,6 +31,7 @@ export default function SettingsScreen() {
   
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabType>('emotions');
+  const [customEmotions, setCustomEmotions] = useState<Record<string, string>>({});
   
   const { settings: emotionSettings, updateEmotion } = useEmotionSettings();
   const { settings: ttsSettings, availableVoices, updateSettings: updateTTSSettings, speak } = useTTSSettings();
@@ -49,8 +54,62 @@ export default function SettingsScreen() {
       }
     }
     
+    // Load custom emotions
+    loadCustomEmotions();
+    
     console.log('Settings screen mounted successfully');
   }, []);
+
+  const loadCustomEmotions = async () => {
+    try {
+      const stored = await AsyncStorage.getItem(CUSTOM_EMOTIONS_KEY);
+      if (stored) {
+        setCustomEmotions(JSON.parse(stored));
+      }
+    } catch (error) {
+      console.log('Error loading custom emotions:', error);
+    }
+  };
+
+  const pickEmotionImage = async (emotion: string) => {
+    try {
+      const res = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (res.status !== 'granted') {
+        console.log('Permission not granted');
+        Alert.alert('Permission Required', 'Please grant permission to access your photo library.');
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        quality: 0.7,
+        aspect: [1, 1],
+      });
+      if (!result.canceled) {
+        const newCustomEmotions = {
+          ...customEmotions,
+          [emotion]: result.assets[0].uri
+        };
+        setCustomEmotions(newCustomEmotions);
+        await AsyncStorage.setItem(CUSTOM_EMOTIONS_KEY, JSON.stringify(newCustomEmotions));
+        console.log('Custom emotion image saved for:', emotion);
+      }
+    } catch (e) {
+      console.log('pickEmotionImage error', e);
+    }
+  };
+
+  const removeCustomEmotionImage = async (emotion: string) => {
+    try {
+      const newCustomEmotions = { ...customEmotions };
+      delete newCustomEmotions[emotion];
+      setCustomEmotions(newCustomEmotions);
+      await AsyncStorage.setItem(CUSTOM_EMOTIONS_KEY, JSON.stringify(newCustomEmotions));
+      console.log('Custom emotion image removed for:', emotion);
+    } catch (e) {
+      console.log('removeCustomEmotionImage error', e);
+    }
+  };
 
   const handleBackToMenu = () => {
     console.log('Going back to main menu');
@@ -102,6 +161,7 @@ export default function SettingsScreen() {
 
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Choose Your Emotion</Text>
+              <Text style={styles.helperText}>Tap an emotion to select it. Long press to add a custom image.</Text>
               <View style={styles.emotionGrid}>
                 {emotionOptions.map((emotion) => (
                   <TouchableOpacity
@@ -111,10 +171,20 @@ export default function SettingsScreen() {
                       emotionSettings.selectedEmotion === emotion && styles.emotionOptionSelected,
                     ]}
                     onPress={() => handleEmotionSelect(emotion)}
+                    onLongPress={() => pickEmotionImage(emotion)}
                     activeOpacity={0.8}
                   >
                     <EmotionFace emotion={emotion} size={70} />
                     <Text style={styles.emotionOptionText}>{emotion}</Text>
+                    {customEmotions[emotion] && (
+                      <TouchableOpacity
+                        style={styles.removeImageBtn}
+                        onPress={() => removeCustomEmotionImage(emotion)}
+                        activeOpacity={0.8}
+                      >
+                        <Icon name="close-circle" size={20} color={colors.danger} />
+                      </TouchableOpacity>
+                    )}
                   </TouchableOpacity>
                 ))}
               </View>
@@ -446,6 +516,13 @@ const styles = StyleSheet.create({
     color: colors.text,
     marginBottom: 16,
   },
+  helperText: {
+    fontSize: 13,
+    fontFamily: 'Montserrat_400Regular',
+    color: colors.textSecondary,
+    marginBottom: 12,
+    fontStyle: 'italic',
+  },
   categoryHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -481,6 +558,7 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: 'transparent',
     marginBottom: 8,
+    position: 'relative',
   },
   emotionOptionSelected: {
     borderColor: colors.primary,
@@ -493,6 +571,14 @@ const styles = StyleSheet.create({
     marginTop: 6,
     textAlign: 'center',
     textTransform: 'capitalize',
+  },
+  removeImageBtn: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    padding: 2,
   },
   currentVoiceContainer: {
     backgroundColor: '#F9FAFB',

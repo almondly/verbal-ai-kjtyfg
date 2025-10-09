@@ -1,6 +1,9 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '../app/integrations/supabase/client';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const PREFERENCES_STORAGE_KEY = 'ai_preferences_local';
 
 export interface AIPreference {
   id: string;
@@ -20,7 +23,7 @@ export interface PreferenceOption {
 }
 
 export function useAIPreferences() {
-  const [preferences, setPreferences] = useState<AIPreference[]>([]);
+  const [preferences, setPreferences] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -182,27 +185,20 @@ export function useAIPreferences() {
     }
   };
 
-  // Load preferences from database
+  // Load preferences from local storage
   const loadPreferences = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
 
-      const { data, error } = await supabase
-        .from('ai_preferences')
-        .select('*')
-        .eq('is_active', true)
-        .order('category', { ascending: true })
-        .order('display_order', { ascending: true });
-
-      if (error) {
-        console.log('Error loading AI preferences:', error);
-        setError('Failed to load preferences');
-        return;
+      const stored = await AsyncStorage.getItem(PREFERENCES_STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        setPreferences(parsed);
+        console.log('Loaded AI preferences from local storage:', Object.keys(parsed).length);
+      } else {
+        console.log('No stored preferences found');
       }
-
-      setPreferences(data || []);
-      console.log('Loaded AI preferences:', data?.length || 0, data);
     } catch (err) {
       console.log('Error in loadPreferences:', err);
       setError('Failed to load preferences');
@@ -221,71 +217,47 @@ export function useAIPreferences() {
     try {
       console.log('Saving preference:', { category, key, value });
       
-      const { data, error } = await supabase
-        .from('ai_preferences')
-        .upsert({
-          preference_type: 'choice',
-          preference_key: key,
-          preference_value: value,
-          options: options,
-          category: category,
-          is_active: true,
-          updated_at: new Date().toISOString()
-        }, {
-          onConflict: 'preference_key'
-        })
-        .select();
-
-      if (error) {
-        console.log('Error saving preference:', error);
-        setError('Failed to save preference');
-        return false;
-      }
-
-      console.log('Successfully saved preference:', data);
-
       // Update local state immediately for instant UI feedback
-      setPreferences(prevPrefs => {
-        const existingIndex = prevPrefs.findIndex(p => p.preference_key === key);
-        if (existingIndex >= 0) {
-          // Update existing preference
-          const updated = [...prevPrefs];
-          updated[existingIndex] = {
-            ...updated[existingIndex],
-            preference_value: value,
-            category: category,
-            updated_at: new Date().toISOString()
-          } as AIPreference;
-          return updated;
-        } else {
-          // Add new preference
-          if (data && data.length > 0) {
-            return [...prevPrefs, data[0] as AIPreference];
-          }
-          return prevPrefs;
-        }
-      });
-
+      const updatedPreferences = {
+        ...preferences,
+        [key]: value
+      };
+      
+      setPreferences(updatedPreferences);
+      
+      // Save to local storage
+      await AsyncStorage.setItem(PREFERENCES_STORAGE_KEY, JSON.stringify(updatedPreferences));
+      
+      console.log('Successfully saved preference to local storage');
       return true;
     } catch (err) {
       console.log('Error in savePreference:', err);
       setError('Failed to save preference');
       return false;
     }
-  }, []);
+  }, [preferences]);
 
   // Get preference value by key
   const getPreference = useCallback((key: string): string | null => {
-    const pref = preferences.find(p => p.preference_key === key);
-    const value = pref?.preference_value || null;
+    const value = preferences[key] || null;
     console.log('Getting preference:', key, '=', value);
     return value;
   }, [preferences]);
 
   // Get preferences by category
-  const getPreferencesByCategory = useCallback((category: string): AIPreference[] => {
-    return preferences.filter(p => p.category === category);
-  }, [preferences]);
+  const getPreferencesByCategory = useCallback((category: string): Record<string, string> => {
+    const categoryPrefs = preferenceCategories[category as keyof typeof preferenceCategories];
+    if (!categoryPrefs) return {};
+    
+    const result: Record<string, string> = {};
+    categoryPrefs.preferences.forEach(pref => {
+      const value = preferences[pref.key];
+      if (value) {
+        result[pref.key] = value;
+      }
+    });
+    return result;
+  }, [preferences, preferenceCategories]);
 
   // Generate contextual suggestions based on preferences
   const getContextualSuggestions = useCallback((context: string, currentHour: number): string[] => {

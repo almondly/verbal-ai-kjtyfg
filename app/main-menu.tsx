@@ -36,31 +36,34 @@ export default function MainMenu() {
     router.push('/settings');
   };
 
+  // Calculate face size - make it much larger (60% of screen height)
+  const faceSize = Math.min(width * 0.4, height * 0.6);
+
   return (
     <LandscapeGuard>
       <View style={[commonStyles.container, styles.container]}>
-        {/* Header */}
+        {/* Header - smaller */}
         <View style={styles.header}>
           <Text style={styles.title}>COMpanion</Text>
         </View>
 
         {/* Main Content */}
         <View style={styles.content}>
-          {/* Emotion Display */}
-          <View style={[styles.emotionSection, { height: height * 0.4 }]}>
+          {/* Emotion Display - Much Larger */}
+          <View style={styles.emotionSection}>
             <View style={styles.emotionContainer}>
-              <EmotionFace emotion={settings.selectedEmotion} size={Math.min(width * 0.25, height * 0.35)} />
+              <EmotionFace emotion={settings.selectedEmotion} size={faceSize} />
             </View>
           </View>
 
-          {/* Action Buttons */}
+          {/* Action Buttons - Smaller */}
           <View style={styles.buttonSection}>
             <TouchableOpacity 
               style={[styles.actionButton, styles.primaryButton]} 
               onPress={handleStartCommunication}
               activeOpacity={0.9}
             >
-              <Icon name="grid-outline" size={32} color="#FFFFFF" />
+              <Icon name="grid-outline" size={24} color="#FFFFFF" />
               <Text style={styles.actionButtonText}>Start</Text>
             </TouchableOpacity>
 
@@ -69,7 +72,7 @@ export default function MainMenu() {
               onPress={handleOpenSettings}
               activeOpacity={0.9}
             >
-              <Icon name="settings-outline" size={20} color={colors.primary} />
+              <Icon name="settings-outline" size={16} color={colors.primary} />
               <Text style={styles.settingsButtonText}>Settings</Text>
             </TouchableOpacity>
           </View>
@@ -82,14 +85,14 @@ export default function MainMenu() {
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 32,
-    paddingVertical: 24,
+    paddingVertical: 16,
   },
   header: {
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 10,
   },
   title: {
-    fontSize: 48,
+    fontSize: 32,
     fontFamily: 'Montserrat_700Bold',
     color: colors.primary,
     textAlign: 'center',
@@ -103,34 +106,36 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     width: '100%',
+    flex: 1,
   },
   emotionContainer: {
     alignItems: 'center',
-    padding: 20,
+    padding: 10,
   },
   buttonSection: {
-    marginTop: 20,
+    marginTop: 10,
+    marginBottom: 20,
     alignItems: 'center',
     width: '100%',
-    maxWidth: 400,
-    gap: 16 as any,
+    maxWidth: 300,
+    gap: 12 as any,
   },
   actionButton: {
     width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 12 as any,
-    paddingHorizontal: 32,
-    paddingVertical: 20,
-    borderRadius: 16,
+    gap: 10 as any,
+    paddingHorizontal: 24,
+    paddingVertical: 14,
+    borderRadius: 14,
     boxShadow: '0px 4px 16px rgba(0,0,0,0.12)',
   },
   primaryButton: {
     backgroundColor: colors.primary,
   },
   actionButtonText: {
-    fontSize: 20,
+    fontSize: 16,
     fontFamily: 'Montserrat_700Bold',
     color: '#FFFFFF',
     textAlign: 'center',
@@ -138,15 +143,15 @@ const styles = StyleSheet.create({
   settingsButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10 as any,
+    gap: 8 as any,
     backgroundColor: colors.backgroundAlt,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 10,
     boxShadow: '0px 3px 10px rgba(0,0,0,0.08)',
   },
   settingsButtonText: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: 'Montserrat_700Bold',
     color: colors.primary,
   },

@@ -1,7 +1,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, ScrollView, Alert } from 'react-native';
 import { colors } from '../styles/commonStyles';
 import Icon from './Icon';
 import EmotionFace from './EmotionFace';
@@ -11,6 +11,7 @@ import { categories } from '../data/categories';
 import { defaultTiles } from '../data/defaultTiles';
 import { useTTSSettings } from '../hooks/useTTSSettings';
 import { useAIPreferences } from '../hooks/useAIPreferences';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface Props {
   open: boolean;
@@ -26,6 +27,8 @@ interface Props {
 }
 
 type TabType = 'emotions' | 'voice' | 'ai' | 'manage' | 'add';
+
+const CUSTOM_EMOTIONS_KEY = 'custom_emotions';
 
 // Get all emotions from the feelings category
 const emotionOptions = defaultTiles
@@ -55,6 +58,9 @@ export default function TabbedSettingsSheet({
   const [imageUri, setImageUri] = useState<string | undefined>(undefined);
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>(defaultCategoryId);
   
+  // Custom emotions state
+  const [customEmotions, setCustomEmotions] = useState<Record<string, string>>({});
+  
   const { settings: ttsSettings, availableVoices, updateSettings: updateTTSSettings, speak } = useTTSSettings();
   const { 
     preferenceCategories, 
@@ -70,6 +76,9 @@ export default function TabbedSettingsSheet({
     } else if (open && mode === 'settings') {
       setActiveTab('emotions');
     }
+    
+    // Load custom emotions
+    loadCustomEmotions();
   }, [open, mode, defaultCategoryId]);
 
   // Control opening/closing
@@ -80,6 +89,17 @@ export default function TabbedSettingsSheet({
       setTimeout(() => sheetRef.current?.close(), 0);
     }
   }, [open]);
+
+  const loadCustomEmotions = async () => {
+    try {
+      const stored = await AsyncStorage.getItem(CUSTOM_EMOTIONS_KEY);
+      if (stored) {
+        setCustomEmotions(JSON.parse(stored));
+      }
+    } catch (error) {
+      console.log('Error loading custom emotions:', error);
+    }
+  };
 
   const tabs: { id: TabType; label: string; icon: string }[] = mode === 'add' 
     ? [{ id: 'add', label: 'Add Tile', icon: 'add-outline' }]
@@ -95,6 +115,7 @@ export default function TabbedSettingsSheet({
       const res = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (res.status !== 'granted') {
         console.log('Permission not granted');
+        Alert.alert('Permission Required', 'Please grant permission to access your photo library.');
         return;
       }
       const result = await ImagePicker.launchImageLibraryAsync({
@@ -107,6 +128,46 @@ export default function TabbedSettingsSheet({
       }
     } catch (e) {
       console.log('pickImage error', e);
+    }
+  };
+
+  const pickEmotionImage = async (emotion: string) => {
+    try {
+      const res = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (res.status !== 'granted') {
+        console.log('Permission not granted');
+        Alert.alert('Permission Required', 'Please grant permission to access your photo library.');
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        quality: 0.7,
+        aspect: [1, 1],
+      });
+      if (!result.canceled) {
+        const newCustomEmotions = {
+          ...customEmotions,
+          [emotion]: result.assets[0].uri
+        };
+        setCustomEmotions(newCustomEmotions);
+        await AsyncStorage.setItem(CUSTOM_EMOTIONS_KEY, JSON.stringify(newCustomEmotions));
+        console.log('Custom emotion image saved for:', emotion);
+      }
+    } catch (e) {
+      console.log('pickEmotionImage error', e);
+    }
+  };
+
+  const removeCustomEmotionImage = async (emotion: string) => {
+    try {
+      const newCustomEmotions = { ...customEmotions };
+      delete newCustomEmotions[emotion];
+      setCustomEmotions(newCustomEmotions);
+      await AsyncStorage.setItem(CUSTOM_EMOTIONS_KEY, JSON.stringify(newCustomEmotions));
+      console.log('Custom emotion image removed for:', emotion);
+    } catch (e) {
+      console.log('removeCustomEmotionImage error', e);
     }
   };
 
@@ -168,6 +229,7 @@ export default function TabbedSettingsSheet({
 
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Choose Your Emotion</Text>
+              <Text style={styles.helperText}>Tap an emotion to select it. Long press to add a custom image.</Text>
               <View style={styles.emotionGrid}>
                 {emotionOptions.map((emotion) => (
                   <TouchableOpacity
@@ -177,10 +239,20 @@ export default function TabbedSettingsSheet({
                       currentEmotion === emotion && styles.emotionOptionSelected,
                     ]}
                     onPress={() => handleEmotionSelect(emotion)}
+                    onLongPress={() => pickEmotionImage(emotion)}
                     activeOpacity={0.8}
                   >
                     <EmotionFace emotion={emotion} size={70} />
                     <Text style={styles.emotionOptionText}>{emotion}</Text>
+                    {customEmotions[emotion] && (
+                      <TouchableOpacity
+                        style={styles.removeImageBtn}
+                        onPress={() => removeCustomEmotionImage(emotion)}
+                        activeOpacity={0.8}
+                      >
+                        <Icon name="close-circle" size={20} color={colors.danger} />
+                      </TouchableOpacity>
+                    )}
                   </TouchableOpacity>
                 ))}
               </View>
@@ -569,6 +641,13 @@ const styles = StyleSheet.create({
     color: colors.text,
     marginBottom: 16,
   },
+  helperText: {
+    fontSize: 13,
+    fontFamily: 'Montserrat_400Regular',
+    color: colors.textSecondary,
+    marginBottom: 12,
+    fontStyle: 'italic',
+  },
   categoryHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -604,6 +683,7 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: 'transparent',
     marginBottom: 8,
+    position: 'relative',
   },
   emotionOptionSelected: {
     borderColor: colors.primary,
@@ -616,6 +696,14 @@ const styles = StyleSheet.create({
     marginTop: 6,
     textAlign: 'center',
     textTransform: 'capitalize',
+  },
+  removeImageBtn: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    padding: 2,
   },
   currentVoiceContainer: {
     backgroundColor: '#F9FAFB',
