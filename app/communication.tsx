@@ -142,6 +142,12 @@ export default function CommunicationScreen() {
     handleUserActivity();
   }, [handleUserActivity]);
 
+  const handleBackspace = useCallback(() => {
+    console.log('Backspace pressed - removing last tile');
+    setSentence(prev => prev.slice(0, -1));
+    handleUserActivity();
+  }, [handleUserActivity]);
+
   const suggestions = useMemo(() => {
     const words = sentence.map(s => s.text);
     const libraryWords = tiles.map(t => t.text);
@@ -150,16 +156,62 @@ export default function CommunicationScreen() {
 
   const onSuggestionPress = useCallback((suggestionText: string) => {
     console.log('Suggestion pressed:', suggestionText);
-    const found = tiles.find(t => t.text.toLowerCase() === suggestionText.toLowerCase());
-    const tile: Tile = found || {
-      id: `temp-${suggestionText}-${Date.now()}`,
-      text: suggestionText,
-      color: colors.backgroundAlt,
-      imageUri: undefined,
-    };
-    setSentence(prev => [...prev, tile]);
+    
+    // Check if it's a full sentence suggestion
+    const isFullSentence = suggestionText.split(' ').length > 2;
+    
+    if (isFullSentence) {
+      // For full sentences, check if current sentence is a prefix
+      const currentText = sentence.map(t => t.text).join(' ').toLowerCase();
+      const suggestionLower = suggestionText.toLowerCase();
+      
+      if (suggestionLower.startsWith(currentText) && currentText.length > 0) {
+        // Remove the matching prefix and add the rest as tiles
+        const remainingText = suggestionText.substring(currentText.length).trim();
+        const remainingWords = remainingText.split(' ');
+        
+        remainingWords.forEach(word => {
+          const found = tiles.find(t => t.text.toLowerCase() === word.toLowerCase());
+          const tile: Tile = found || {
+            id: `temp-${word}-${Date.now()}`,
+            text: word,
+            color: colors.backgroundAlt,
+            imageUri: undefined,
+          };
+          setSentence(prev => [...prev, tile]);
+        });
+      } else {
+        // Replace entire sentence with the suggestion
+        const words = suggestionText.split(' ');
+        const newSentence: Tile[] = [];
+        
+        words.forEach(word => {
+          const found = tiles.find(t => t.text.toLowerCase() === word.toLowerCase());
+          const tile: Tile = found || {
+            id: `temp-${word}-${Date.now()}`,
+            text: word,
+            color: colors.backgroundAlt,
+            imageUri: undefined,
+          };
+          newSentence.push(tile);
+        });
+        
+        setSentence(newSentence);
+      }
+    } else {
+      // For single words, add as a tile
+      const found = tiles.find(t => t.text.toLowerCase() === suggestionText.toLowerCase());
+      const tile: Tile = found || {
+        id: `temp-${suggestionText}-${Date.now()}`,
+        text: suggestionText,
+        color: colors.backgroundAlt,
+        imageUri: undefined,
+      };
+      setSentence(prev => [...prev, tile]);
+    }
+    
     handleUserActivity();
-  }, [tiles, handleUserActivity]);
+  }, [tiles, sentence, handleUserActivity]);
 
   const visibleTiles = useMemo(() => {
     if (selectedCategory === 'all') return tiles;
@@ -217,6 +269,7 @@ export default function CommunicationScreen() {
             sentence={sentence}
             onClear={handleClear}
             onSpeak={handleSpeak}
+            onBackspace={handleBackspace}
           />
         </View>
 

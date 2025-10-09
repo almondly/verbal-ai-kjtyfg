@@ -6,39 +6,156 @@
  * - User history
  * - Grammatical rules
  * - Context awareness
+ * - Pronoun variations (I, you, he, she, we, they)
  */
 
 import { detectTenseContext, getVerbFormForContext, getBaseForm } from './wordVariations';
 
-// Common sentence templates (Australian English)
+// Enhanced sentence templates with pronoun variations (Australian English)
 export const sentenceTemplates = [
-  // Basic needs
-  { pattern: ['I', 'want'], completions: ['to go', 'to play', 'to eat', 'to drink', 'some water', 'some food', 'that', 'more'] },
-  { pattern: ['I', 'need'], completions: ['help', 'the toilet', 'water', 'food', 'a break', 'to go', 'to rest', 'mum', 'dad'] },
-  { pattern: ['I', 'like'], completions: ['to play', 'to eat', 'this', 'that', 'it', 'you', 'playing', 'eating'] },
-  { pattern: ['I', 'love'], completions: ['you', 'this', 'that', 'it', 'playing', 'eating', 'mum', 'dad'] },
+  // I want variations
+  { pattern: ['I', 'want'], completions: ['to go', 'to play', 'to eat', 'to drink', 'some water', 'some food', 'that', 'more', 'to go outside', 'to watch telly', 'help'] },
+  { pattern: ['I', 'want', 'to'], completions: ['go', 'play', 'eat', 'drink', 'sleep', 'read', 'draw', 'watch', 'go outside', 'go home'] },
+  
+  // You want variations
+  { pattern: ['you', 'want'], completions: ['to go', 'to play', 'to eat', 'to drink', 'some water', 'some food', 'that', 'more', 'to help me', 'to come'] },
+  { pattern: ['you', 'want', 'to'], completions: ['go', 'play', 'eat', 'drink', 'help me', 'come', 'see', 'know'] },
+  
+  // He/She wants variations
+  { pattern: ['he', 'wants'], completions: ['to go', 'to play', 'to eat', 'to drink', 'some water', 'some food', 'that', 'more', 'help'] },
+  { pattern: ['she', 'wants'], completions: ['to go', 'to play', 'to eat', 'to drink', 'some water', 'some food', 'that', 'more', 'help'] },
+  { pattern: ['he', 'wants', 'to'], completions: ['go', 'play', 'eat', 'drink', 'help', 'come', 'see'] },
+  { pattern: ['she', 'wants', 'to'], completions: ['go', 'play', 'eat', 'drink', 'help', 'come', 'see'] },
+  
+  // We want variations
+  { pattern: ['we', 'want'], completions: ['to go', 'to play', 'to eat', 'to drink', 'some water', 'some food', 'that', 'more', 'to go outside', 'to play together'] },
+  { pattern: ['we', 'want', 'to'], completions: ['go', 'play', 'eat', 'drink', 'go outside', 'play together', 'have fun'] },
+  
+  // They want variations
+  { pattern: ['they', 'want'], completions: ['to go', 'to play', 'to eat', 'to drink', 'some water', 'some food', 'that', 'more', 'help'] },
+  { pattern: ['they', 'want', 'to'], completions: ['go', 'play', 'eat', 'drink', 'help', 'come', 'see'] },
+  
+  // I need variations
+  { pattern: ['I', 'need'], completions: ['help', 'the toilet', 'water', 'food', 'a break', 'to go', 'to rest', 'mum', 'dad', 'you'] },
+  { pattern: ['I', 'need', 'to'], completions: ['go', 'eat', 'drink', 'sleep', 'rest', 'use toilet', 'go home'] },
+  
+  // You need variations
+  { pattern: ['you', 'need'], completions: ['to help me', 'to come', 'to see', 'to know', 'this', 'that'] },
+  { pattern: ['you', 'need', 'to'], completions: ['help me', 'come', 'see', 'know', 'listen'] },
+  
+  // He/She needs variations
+  { pattern: ['he', 'needs'], completions: ['help', 'water', 'food', 'to go', 'to rest', 'that', 'this'] },
+  { pattern: ['she', 'needs'], completions: ['help', 'water', 'food', 'to go', 'to rest', 'that', 'this'] },
+  { pattern: ['he', 'needs', 'to'], completions: ['go', 'eat', 'drink', 'rest', 'help'] },
+  { pattern: ['she', 'needs', 'to'], completions: ['go', 'eat', 'drink', 'rest', 'help'] },
+  
+  // We need variations
+  { pattern: ['we', 'need'], completions: ['help', 'water', 'food', 'to go', 'to rest', 'that', 'this', 'to go home'] },
+  { pattern: ['we', 'need', 'to'], completions: ['go', 'eat', 'drink', 'rest', 'go home', 'leave'] },
+  
+  // They need variations
+  { pattern: ['they', 'need'], completions: ['help', 'water', 'food', 'to go', 'to rest', 'that', 'this'] },
+  { pattern: ['they', 'need', 'to'], completions: ['go', 'eat', 'drink', 'rest', 'help'] },
+  
+  // I like variations
+  { pattern: ['I', 'like'], completions: ['to play', 'to eat', 'this', 'that', 'it', 'you', 'playing', 'eating', 'red', 'blue'] },
+  { pattern: ['I', 'like', 'to'], completions: ['play', 'eat', 'read', 'draw', 'watch', 'listen', 'go outside'] },
+  
+  // You like variations
+  { pattern: ['you', 'like'], completions: ['to play', 'to eat', 'this', 'that', 'it', 'playing', 'eating'] },
+  { pattern: ['you', 'like', 'to'], completions: ['play', 'eat', 'read', 'draw', 'watch', 'help'] },
+  
+  // He/She likes variations
+  { pattern: ['he', 'likes'], completions: ['to play', 'to eat', 'this', 'that', 'it', 'playing', 'eating'] },
+  { pattern: ['she', 'likes'], completions: ['to play', 'to eat', 'this', 'that', 'it', 'playing', 'eating'] },
+  { pattern: ['he', 'likes', 'to'], completions: ['play', 'eat', 'read', 'draw', 'watch'] },
+  { pattern: ['she', 'likes', 'to'], completions: ['play', 'eat', 'read', 'draw', 'watch'] },
+  
+  // We like variations
+  { pattern: ['we', 'like'], completions: ['to play', 'to eat', 'this', 'that', 'it', 'playing', 'eating', 'playing together'] },
+  { pattern: ['we', 'like', 'to'], completions: ['play', 'eat', 'play together', 'have fun', 'go outside'] },
+  
+  // They like variations
+  { pattern: ['they', 'like'], completions: ['to play', 'to eat', 'this', 'that', 'it', 'playing', 'eating'] },
+  { pattern: ['they', 'like', 'to'], completions: ['play', 'eat', 'read', 'draw', 'watch'] },
+  
+  // I have variations
+  { pattern: ['I', 'have'], completions: ['a toy', 'a book', 'water', 'food', 'this', 'that', 'something', 'to go', 'to tell you'] },
+  { pattern: ['I', 'have', 'to'], completions: ['go', 'eat', 'sleep', 'tell you', 'go home', 'use toilet'] },
+  
+  // You have variations
+  { pattern: ['you', 'have'], completions: ['to help me', 'to come', 'to see', 'this', 'that', 'something'] },
+  { pattern: ['you', 'have', 'to'], completions: ['help me', 'come', 'see', 'listen', 'know'] },
+  
+  // He/She has variations
+  { pattern: ['he', 'has'], completions: ['a toy', 'a book', 'water', 'food', 'this', 'that', 'something', 'to go'] },
+  { pattern: ['she', 'has'], completions: ['a toy', 'a book', 'water', 'food', 'this', 'that', 'something', 'to go'] },
+  { pattern: ['he', 'has', 'to'], completions: ['go', 'eat', 'sleep', 'go home', 'leave'] },
+  { pattern: ['she', 'has', 'to'], completions: ['go', 'eat', 'sleep', 'go home', 'leave'] },
+  
+  // We have variations
+  { pattern: ['we', 'have'], completions: ['to go', 'to eat', 'to play', 'this', 'that', 'something', 'fun'] },
+  { pattern: ['we', 'have', 'to'], completions: ['go', 'eat', 'play', 'go home', 'leave', 'finish'] },
+  
+  // They have variations
+  { pattern: ['they', 'have'], completions: ['to go', 'to eat', 'this', 'that', 'something'] },
+  { pattern: ['they', 'have', 'to'], completions: ['go', 'eat', 'leave', 'finish'] },
+  
+  // I love variations
+  { pattern: ['I', 'love'], completions: ['you', 'this', 'that', 'it', 'playing', 'eating', 'mum', 'dad', 'my family'] },
+  
+  // You love variations
+  { pattern: ['you', 'love'], completions: ['this', 'that', 'it', 'playing', 'me'] },
+  
+  // He/She loves variations
+  { pattern: ['he', 'loves'], completions: ['this', 'that', 'it', 'playing', 'eating'] },
+  { pattern: ['she', 'loves'], completions: ['this', 'that', 'it', 'playing', 'eating'] },
+  
+  // We love variations
+  { pattern: ['we', 'love'], completions: ['this', 'that', 'it', 'playing', 'eating', 'playing together'] },
+  
+  // They love variations
+  { pattern: ['they', 'love'], completions: ['this', 'that', 'it', 'playing', 'eating'] },
   
   // Questions
-  { pattern: ['what'], completions: ['is your name', 'time is it', 'are you doing', 'do you want', 'is that', 'happened'] },
+  { pattern: ['what'], completions: ['is your name', 'time is it', 'are you doing', 'do you want', 'is that', 'happened', 'do I need', 'do we need'] },
   { pattern: ['what', 'is'], completions: ['your name', 'that', 'the time', 'happening', 'for lunch', 'for tea'] },
-  { pattern: ['where'], completions: ['are you', 'is it', 'are we going', 'do you live', 'is the toilet', 'is mum', 'is dad'] },
-  { pattern: ['where', 'is'], completions: ['it', 'the toilet', 'mum', 'dad', 'my toy', 'my book'] },
-  { pattern: ['when'], completions: ['are we going', 'is lunch', 'is tea', 'can we go', 'will you be back'] },
-  { pattern: ['why'], completions: ['are you sad', 'are you happy', 'not', 'is that', 'do we have to'] },
-  { pattern: ['who'], completions: ['is that', 'are you', 'is coming', 'wants to play'] },
-  { pattern: ['how'], completions: ['are you', 'are you going', 'was your day', 'do you feel', 'old are you'] },
+  { pattern: ['what', 'do'], completions: ['you want', 'I need', 'we need', 'they want', 'you need'] },
+  { pattern: ['where'], completions: ['are you', 'is it', 'are we going', 'do you live', 'is the toilet', 'is mum', 'is dad', 'are they'] },
+  { pattern: ['where', 'is'], completions: ['it', 'the toilet', 'mum', 'dad', 'my toy', 'my book', 'he', 'she'] },
+  { pattern: ['where', 'are'], completions: ['you', 'we going', 'they', 'we'] },
+  { pattern: ['when'], completions: ['are we going', 'is lunch', 'is tea', 'can we go', 'will you be back', 'do we leave'] },
+  { pattern: ['why'], completions: ['are you sad', 'are you happy', 'not', 'is that', 'do we have to', 'is he sad', 'is she happy'] },
+  { pattern: ['who'], completions: ['is that', 'are you', 'is coming', 'wants to play', 'needs help'] },
+  { pattern: ['how'], completions: ['are you', 'are you going', 'was your day', 'do you feel', 'old are you', 'is he', 'is she'] },
   
-  // Can/Could/Would
+  // Can/Could/Would with pronoun variations
   { pattern: ['can', 'I'], completions: ['have', 'go', 'play', 'please', 'have water', 'have food', 'go outside'] },
   { pattern: ['can', 'you'], completions: ['help me', 'please', 'show me', 'teach me', 'come here'] },
   { pattern: ['can', 'we'], completions: ['go', 'play', 'eat', 'have', 'go outside', 'go home'] },
+  { pattern: ['can', 'he'], completions: ['come', 'help', 'play', 'go'] },
+  { pattern: ['can', 'she'], completions: ['come', 'help', 'play', 'go'] },
+  { pattern: ['can', 'they'], completions: ['come', 'help', 'play', 'go'] },
   { pattern: ['could', 'I'], completions: ['have', 'please', 'go', 'play'] },
   { pattern: ['could', 'you'], completions: ['help me', 'please', 'show me'] },
+  { pattern: ['could', 'we'], completions: ['go', 'play', 'have'] },
   { pattern: ['would', 'you'], completions: ['like', 'please', 'help me'] },
+  { pattern: ['would', 'I'], completions: ['like', 'like to', 'like some'] },
+  { pattern: ['would', 'we'], completions: ['like', 'like to', 'like some'] },
   
-  // Feelings
+  // Feelings with pronoun variations
   { pattern: ['I', 'feel'], completions: ['happy', 'sad', 'tired', 'excited', 'scared', 'angry', 'good', 'bad', 'sick'] },
+  { pattern: ['you', 'feel'], completions: ['happy', 'sad', 'tired', 'excited', 'good', 'bad'] },
+  { pattern: ['he', 'feels'], completions: ['happy', 'sad', 'tired', 'excited', 'good', 'bad'] },
+  { pattern: ['she', 'feels'], completions: ['happy', 'sad', 'tired', 'excited', 'good', 'bad'] },
+  { pattern: ['we', 'feel'], completions: ['happy', 'sad', 'tired', 'excited', 'good', 'bad'] },
+  { pattern: ['they', 'feel'], completions: ['happy', 'sad', 'tired', 'excited', 'good', 'bad'] },
   { pattern: ['I', 'am'], completions: ['happy', 'sad', 'tired', 'excited', 'hungry', 'thirsty', 'ready', 'finished'] },
+  { pattern: ['you', 'are'], completions: ['happy', 'sad', 'tired', 'excited', 'ready', 'nice'] },
+  { pattern: ['he', 'is'], completions: ['happy', 'sad', 'tired', 'excited', 'hungry', 'ready'] },
+  { pattern: ['she', 'is'], completions: ['happy', 'sad', 'tired', 'excited', 'hungry', 'ready'] },
+  { pattern: ['we', 'are'], completions: ['happy', 'sad', 'tired', 'excited', 'ready', 'going'] },
+  { pattern: ['they', 'are'], completions: ['happy', 'sad', 'tired', 'excited', 'ready', 'coming'] },
   { pattern: ['I\'m'], completions: ['happy', 'sad', 'tired', 'excited', 'hungry', 'thirsty', 'ready', 'finished', 'sorry'] },
   
   // Actions
@@ -58,7 +175,7 @@ export const sentenceTemplates = [
   
   // Greetings
   { pattern: ['good'], completions: ['morning', 'afternoon', 'evening', 'day', 'night'] },
-  { pattern: ['how', 'are'], completions: ['you', 'you going', 'you feeling'] },
+  { pattern: ['how', 'are'], completions: ['you', 'you going', 'you feeling', 'they', 'we'] },
   
   // Politeness
   { pattern: ['thank'], completions: ['you', 'you very much', 'you mate'] },
@@ -76,7 +193,7 @@ export const sentenceTemplates = [
   { pattern: ['have'], completions: ['water', 'food', 'lunch', 'tea', 'a snack', 'a drink'] },
   
   // Activities
-  { pattern: ['play'], completions: ['outside', 'with toys', 'games', 'with mates', 'at the park'] },
+  { pattern: ['play'], completions: ['outside', 'with toys', 'games', 'with mates', 'at the park', 'together'] },
   { pattern: ['watch'], completions: ['telly', 'TV', 'a movie', 'cartoons'] },
   { pattern: ['read'], completions: ['a book', 'a story', 'with me'] },
   { pattern: ['draw'], completions: ['a picture', 'with me', 'something'] },
@@ -227,7 +344,8 @@ export function analyzeSentenceStructure(words: string[]): {
   // Detect verb (simple heuristic)
   const commonVerbs = ['am', 'is', 'are', 'was', 'were', 'be', 'been', 'have', 'has', 'had', 
                        'do', 'does', 'did', 'will', 'would', 'can', 'could', 'should', 'may', 'might',
-                       'want', 'need', 'like', 'love', 'go', 'come', 'see', 'know', 'think', 'feel'];
+                       'want', 'need', 'like', 'love', 'go', 'come', 'see', 'know', 'think', 'feel',
+                       'wants', 'needs', 'likes', 'loves', 'goes', 'comes', 'sees', 'knows', 'thinks', 'feels'];
   const hasVerb = lowerWords.some(w => commonVerbs.includes(w) || w.endsWith('ing') || w.endsWith('ed'));
   
   // Detect object (anything after verb)

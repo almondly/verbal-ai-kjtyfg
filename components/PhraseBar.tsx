@@ -8,9 +8,10 @@ interface Props {
   sentence: Tile[];
   onSpeak: () => void;
   onClear: () => void;
+  onBackspace?: () => void;
 }
 
-export default function PhraseBar({ sentence, onSpeak, onClear }: Props) {
+export default function PhraseBar({ sentence, onSpeak, onClear, onBackspace }: Props) {
   const text = sentence.map(s => s.text).join(' ');
   return (
     <View style={styles.bar}>
@@ -18,6 +19,16 @@ export default function PhraseBar({ sentence, onSpeak, onClear }: Props) {
         <Text style={styles.text}>{text || 'Tap tiles to build a sentence'}</Text>
       </View>
       <View style={styles.actions}>
+        {onBackspace && (
+          <TouchableOpacity 
+            style={[styles.actionBtn, styles.backspaceBtn, { opacity: sentence.length > 0 ? 1 : 0.5 }]} 
+            onPress={onBackspace} 
+            activeOpacity={0.9}
+            disabled={sentence.length === 0}
+          >
+            <Icon name="backspace-outline" size={24} color={colors.text} />
+          </TouchableOpacity>
+        )}
         <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.secondary }]} onPress={onSpeak} activeOpacity={0.9}>
           <Icon name="volume-high-outline" size={28} color="#fff" />
         </TouchableOpacity>
@@ -66,5 +77,10 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  backspaceBtn: {
+    backgroundColor: colors.backgroundAlt,
+    borderWidth: 2,
+    borderColor: colors.primary + '40',
   },
 });

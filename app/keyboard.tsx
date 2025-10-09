@@ -97,20 +97,41 @@ export default function KeyboardScreen() {
     setTypedText('');
   }, []);
 
+  const handleBackspace = useCallback(() => {
+    console.log('Backspace pressed');
+    setTypedText(prev => prev.slice(0, -1));
+  }, []);
+
   const handleSuggestionPress = useCallback((suggestionText: string) => {
     console.log('Suggestion pressed:', suggestionText);
     
-    // If it's a full sentence suggestion, replace the text
-    if (suggestionText.split(' ').length > 2) {
-      setTypedText(suggestionText);
+    // Check if it's a full sentence suggestion
+    const isFullSentence = suggestionText.split(' ').length > 2;
+    
+    if (isFullSentence) {
+      // For full sentences, check if current text is a prefix
+      const currentTextLower = typedText.trim().toLowerCase();
+      const suggestionLower = suggestionText.toLowerCase();
+      
+      if (suggestionLower.startsWith(currentTextLower) && currentTextLower.length > 0) {
+        // Remove the matching prefix and add the rest
+        const remainingText = suggestionText.substring(currentTextLower.length).trim();
+        setTypedText(prev => {
+          const trimmed = prev.trim();
+          return trimmed ? `${trimmed} ${remainingText}` : remainingText;
+        });
+      } else {
+        // Replace entire text with the suggestion
+        setTypedText(suggestionText);
+      }
     } else {
-      // Otherwise append to current text
+      // For single words, append to current text
       setTypedText(prev => {
         const trimmed = prev.trim();
         return trimmed ? `${trimmed} ${suggestionText}` : suggestionText;
       });
     }
-  }, []);
+  }, [typedText]);
 
   const handleHistoryPress = useCallback((sentence: string) => {
     console.log('History item pressed:', sentence);
@@ -171,6 +192,14 @@ export default function KeyboardScreen() {
               </Text>
             </ScrollView>
             <View style={styles.phraseActions}>
+              <TouchableOpacity 
+                onPress={handleBackspace} 
+                style={[styles.phraseBtn, styles.backspaceBtn]}
+                activeOpacity={0.8}
+                disabled={!typedText}
+              >
+                <Icon name="backspace-outline" size={24} color={typedText ? colors.text : colors.textSecondary} />
+              </TouchableOpacity>
               <TouchableOpacity 
                 onPress={handleClear} 
                 style={styles.phraseBtn}
@@ -333,6 +362,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     boxShadow: '0px 4px 10px rgba(0,0,0,0.08)',
+  },
+  backspaceBtn: {
+    backgroundColor: colors.backgroundAlt,
+    borderWidth: 2,
+    borderColor: colors.primary + '40',
   },
   speakBtn: {
     backgroundColor: colors.primary,
