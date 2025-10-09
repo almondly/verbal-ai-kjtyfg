@@ -75,8 +75,9 @@ export default function SettingsScreen() {
   };
 
   const handlePreferenceSelect = async (category: string, key: string, value: string) => {
-    console.log('Preference selected:', { category, key, value });
-    await savePreference(category, key, value);
+    console.log('Preference select clicked:', { category, key, value });
+    const success = await savePreference(category, key, value);
+    console.log('Preference save result:', success);
   };
 
   const tabs: { id: TabType; label: string; icon: string }[] = [
@@ -225,37 +226,41 @@ export default function SettingsScreen() {
                 
                 {category.preferences.map((pref) => {
                   const currentValue = getPreference(pref.key);
+                  console.log('Rendering preference:', pref.key, 'current value:', currentValue);
                   return (
                     <View key={pref.key} style={styles.preferenceContainer}>
                       <Text style={styles.preferenceQuestion}>{pref.question}</Text>
                       <View style={styles.optionsGrid}>
-                        {pref.options.map((option) => (
-                          <TouchableOpacity
-                            key={option.value}
-                            style={[
-                              styles.optionButton,
-                              currentValue === option.value && styles.optionButtonSelected,
-                              option.colour && { borderColor: option.colour }
-                            ]}
-                            onPress={() => handlePreferenceSelect(categoryKey, pref.key, option.value)}
-                            activeOpacity={0.8}
-                          >
-                            {option.colour && (
-                              <View 
-                                style={[styles.colourIndicator, { backgroundColor: option.colour }]} 
-                              />
-                            )}
-                            <Text style={[
-                              styles.optionText,
-                              currentValue === option.value && styles.optionTextSelected
-                            ]}>
-                              {option.label}
-                            </Text>
-                            {currentValue === option.value && (
-                              <Icon name="checkmark-circle" size={20} color={colors.primary} />
-                            )}
-                          </TouchableOpacity>
-                        ))}
+                        {pref.options.map((option) => {
+                          const isSelected = currentValue === option.value;
+                          return (
+                            <TouchableOpacity
+                              key={option.value}
+                              style={[
+                                styles.optionButton,
+                                isSelected && styles.optionButtonSelected,
+                                option.colour && !isSelected && { borderColor: option.colour, borderWidth: 2 }
+                              ]}
+                              onPress={() => handlePreferenceSelect(categoryKey, pref.key, option.value)}
+                              activeOpacity={0.7}
+                            >
+                              {option.colour && (
+                                <View 
+                                  style={[styles.colourIndicator, { backgroundColor: option.colour }]} 
+                                />
+                              )}
+                              <Text style={[
+                                styles.optionText,
+                                isSelected && styles.optionTextSelected
+                              ]}>
+                                {option.label}
+                              </Text>
+                              {isSelected && (
+                                <Icon name="checkmark-circle" size={20} color={colors.primary} />
+                              )}
+                            </TouchableOpacity>
+                          );
+                        })}
                       </View>
                     </View>
                   );

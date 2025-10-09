@@ -202,7 +202,7 @@ export function useAIPreferences() {
       }
 
       setPreferences(data || []);
-      console.log('Loaded AI preferences:', data?.length || 0);
+      console.log('Loaded AI preferences:', data?.length || 0, data);
     } catch (err) {
       console.log('Error in loadPreferences:', err);
       setError('Failed to load preferences');
@@ -221,7 +221,7 @@ export function useAIPreferences() {
     try {
       console.log('Saving preference:', { category, key, value });
       
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('ai_preferences')
         .upsert({
           preference_type: 'choice',
@@ -233,7 +233,8 @@ export function useAIPreferences() {
           updated_at: new Date().toISOString()
         }, {
           onConflict: 'preference_key'
-        });
+        })
+        .select();
 
       if (error) {
         console.log('Error saving preference:', error);
@@ -241,21 +242,44 @@ export function useAIPreferences() {
         return false;
       }
 
-      // Reload preferences to get updated data
-      await loadPreferences();
-      console.log('Successfully saved preference:', { category, key, value });
+      console.log('Successfully saved preference:', data);
+
+      // Update local state immediately for instant UI feedback
+      setPreferences(prevPrefs => {
+        const existingIndex = prevPrefs.findIndex(p => p.preference_key === key);
+        if (existingIndex >= 0) {
+          // Update existing preference
+          const updated = [...prevPrefs];
+          updated[existingIndex] = {
+            ...updated[existingIndex],
+            preference_value: value,
+            category: category,
+            updated_at: new Date().toISOString()
+          } as AIPreference;
+          return updated;
+        } else {
+          // Add new preference
+          if (data && data.length > 0) {
+            return [...prevPrefs, data[0] as AIPreference];
+          }
+          return prevPrefs;
+        }
+      });
+
       return true;
     } catch (err) {
       console.log('Error in savePreference:', err);
       setError('Failed to save preference');
       return false;
     }
-  }, [loadPreferences]);
+  }, []);
 
   // Get preference value by key
   const getPreference = useCallback((key: string): string | null => {
     const pref = preferences.find(p => p.preference_key === key);
-    return pref?.preference_value || null;
+    const value = pref?.preference_value || null;
+    console.log('Getting preference:', key, '=', value);
+    return value;
   }, [preferences]);
 
   // Get preferences by category
