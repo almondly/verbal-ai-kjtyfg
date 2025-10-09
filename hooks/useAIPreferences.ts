@@ -53,11 +53,13 @@ export function useAIPreferences() {
             { value: 'pizza', label: 'Pizza' },
             { value: 'pasta', label: 'Pasta' },
             { value: 'burgers', label: 'Burgers' },
-            { value: 'fish_and_chips', label: 'Fish and Chips' },
-            { value: 'meat_pies', label: 'Meat Pies' },
+            { value: 'fish and chips', label: 'Fish and Chips' },
+            { value: 'meat pies', label: 'Meat Pies' },
             { value: 'lamingtons', label: 'Lamingtons' },
             { value: 'pavlova', label: 'Pavlova' },
-            { value: 'vegemite_toast', label: 'Vegemite Toast' },
+            { value: 'vegemite toast', label: 'Vegemite Toast' },
+            { value: 'cake', label: 'Cake' },
+            { value: 'ice cream', label: 'Ice Cream' },
           ]
         },
         {
@@ -65,14 +67,14 @@ export function useAIPreferences() {
           type: 'choice',
           question: "What's your favourite activity?",
           options: [
-            { value: 'playing_games', label: 'Playing Games' },
-            { value: 'watching_tv', label: 'Watching TV' },
-            { value: 'reading_books', label: 'Reading Books' },
-            { value: 'going_to_park', label: 'Going to the Park' },
+            { value: 'playing games', label: 'Playing Games' },
+            { value: 'watching tv', label: 'Watching TV' },
+            { value: 'reading books', label: 'Reading Books' },
+            { value: 'going to park', label: 'Going to the Park' },
             { value: 'swimming', label: 'Swimming' },
             { value: 'drawing', label: 'Drawing' },
-            { value: 'listening_music', label: 'Listening to Music' },
-            { value: 'playing_sport', label: 'Playing Sport' },
+            { value: 'listening music', label: 'Listening to Music' },
+            { value: 'playing sport', label: 'Playing Sport' },
           ]
         },
         {
@@ -105,7 +107,7 @@ export function useAIPreferences() {
             { value: 'hi', label: 'Hi' },
             { value: 'gday', label: 'G\'day' },
             { value: 'hey', label: 'Hey' },
-            { value: 'good_morning', label: 'Good Morning' },
+            { value: 'good morning', label: 'Good Morning' },
             { value: 'howdy', label: 'Howdy' },
           ]
         },
@@ -142,12 +144,12 @@ export function useAIPreferences() {
           type: 'choice',
           question: 'What do you usually do in the morning?',
           options: [
-            { value: 'eat_breakfast', label: 'Eat Breakfast' },
-            { value: 'brush_teeth', label: 'Brush Teeth' },
-            { value: 'get_dressed', label: 'Get Dressed' },
-            { value: 'go_to_school', label: 'Go to School' },
-            { value: 'watch_tv', label: 'Watch TV' },
-            { value: 'play_games', label: 'Play Games' },
+            { value: 'eat breakfast', label: 'Eat Breakfast' },
+            { value: 'brush teeth', label: 'Brush Teeth' },
+            { value: 'get dressed', label: 'Get Dressed' },
+            { value: 'go to school', label: 'Go to School' },
+            { value: 'watch tv', label: 'Watch TV' },
+            { value: 'play games', label: 'Play Games' },
           ]
         },
         {
@@ -155,12 +157,12 @@ export function useAIPreferences() {
           type: 'choice',
           question: 'What do you like doing in the afternoon?',
           options: [
-            { value: 'play_outside', label: 'Play Outside' },
-            { value: 'do_homework', label: 'Do Homework' },
-            { value: 'watch_tv', label: 'Watch TV' },
-            { value: 'have_snack', label: 'Have a Snack' },
+            { value: 'play outside', label: 'Play Outside' },
+            { value: 'do homework', label: 'Do Homework' },
+            { value: 'watch tv', label: 'Watch TV' },
+            { value: 'have snack', label: 'Have a Snack' },
             { value: 'rest', label: 'Have a Rest' },
-            { value: 'play_with_friends', label: 'Play with Friends' },
+            { value: 'play with friends', label: 'Play with Friends' },
           ]
         },
         {
@@ -168,12 +170,12 @@ export function useAIPreferences() {
           type: 'choice',
           question: 'What do you do in the evening?',
           options: [
-            { value: 'eat_dinner', label: 'Eat Dinner' },
-            { value: 'watch_tv', label: 'Watch TV' },
-            { value: 'read_book', label: 'Read a Book' },
-            { value: 'have_bath', label: 'Have a Bath' },
-            { value: 'brush_teeth', label: 'Brush Teeth' },
-            { value: 'go_to_bed', label: 'Go to Bed' },
+            { value: 'eat dinner', label: 'Eat Dinner' },
+            { value: 'watch tv', label: 'Watch TV' },
+            { value: 'read book', label: 'Read a Book' },
+            { value: 'have bath', label: 'Have a Bath' },
+            { value: 'brush teeth', label: 'Brush Teeth' },
+            { value: 'go to bed', label: 'Go to Bed' },
           ]
         }
       ]
@@ -217,6 +219,8 @@ export function useAIPreferences() {
     options: string[] = []
   ) => {
     try {
+      console.log('Saving preference:', { category, key, value });
+      
       const { error } = await supabase
         .from('ai_preferences')
         .upsert({
@@ -237,9 +241,9 @@ export function useAIPreferences() {
         return false;
       }
 
-      // Reload preferences
+      // Reload preferences to get updated data
       await loadPreferences();
-      console.log('Saved preference:', { category, key, value });
+      console.log('Successfully saved preference:', { category, key, value });
       return true;
     } catch (err) {
       console.log('Error in savePreference:', err);
@@ -262,47 +266,85 @@ export function useAIPreferences() {
   // Generate contextual suggestions based on preferences
   const getContextualSuggestions = useCallback((context: string, currentHour: number): string[] => {
     const suggestions: string[] = [];
+    const lowerContext = context.toLowerCase();
+    
+    console.log('Getting contextual suggestions for:', { context: lowerContext, currentHour });
     
     // Time-based suggestions
     if (currentHour >= 6 && currentHour < 12) {
       const morningRoutine = getPreference('morning_routine');
-      if (morningRoutine) {
-        suggestions.push(morningRoutine.replace(/_/g, ' '));
+      if (morningRoutine && (lowerContext.includes('morning') || lowerContext.includes('do'))) {
+        suggestions.push(morningRoutine);
+        console.log('Added morning routine suggestion:', morningRoutine);
       }
     } else if (currentHour >= 12 && currentHour < 17) {
       const afternoonActivity = getPreference('afternoon_activity');
-      if (afternoonActivity) {
-        suggestions.push(afternoonActivity.replace(/_/g, ' '));
+      if (afternoonActivity && (lowerContext.includes('afternoon') || lowerContext.includes('arvo') || lowerContext.includes('do'))) {
+        suggestions.push(afternoonActivity);
+        console.log('Added afternoon activity suggestion:', afternoonActivity);
       }
     } else if (currentHour >= 17 && currentHour < 22) {
       const eveningRoutine = getPreference('evening_routine');
-      if (eveningRoutine) {
-        suggestions.push(eveningRoutine.replace(/_/g, ' '));
+      if (eveningRoutine && (lowerContext.includes('evening') || lowerContext.includes('night') || lowerContext.includes('do'))) {
+        suggestions.push(eveningRoutine);
+        console.log('Added evening routine suggestion:', eveningRoutine);
       }
     }
 
-    // Personal preference suggestions
+    // Personal preference suggestions with context matching
     const favouriteColour = getPreference('favourite_colour');
     const favouriteFood = getPreference('favourite_food');
     const favouriteActivity = getPreference('favourite_activity');
+    const favouriteAnimal = getPreference('favourite_animal');
     const greetingStyle = getPreference('greeting_style');
 
-    if (context.includes('colour') && favouriteColour) {
-      suggestions.push(`my favourite colour is ${favouriteColour}`);
+    // Colour context
+    if (favouriteColour && (lowerContext.includes('colour') || lowerContext.includes('color') || lowerContext.includes('favourite colour'))) {
+      suggestions.push(favouriteColour);
+      console.log('Added favourite colour suggestion:', favouriteColour);
     }
     
-    if (context.includes('food') && favouriteFood) {
-      suggestions.push(`I like ${favouriteFood.replace(/_/g, ' ')}`);
+    // Food context - more comprehensive matching
+    if (favouriteFood && (
+      lowerContext.includes('food') || 
+      lowerContext.includes('eat') || 
+      lowerContext.includes('hungry') ||
+      lowerContext.includes('favourite food') ||
+      lowerContext.includes('want to eat') ||
+      lowerContext.includes('like to eat')
+    )) {
+      suggestions.push(favouriteFood);
+      console.log('Added favourite food suggestion:', favouriteFood);
     }
     
-    if (context.includes('play') && favouriteActivity) {
-      suggestions.push(favouriteActivity.replace(/_/g, ' '));
+    // Activity context
+    if (favouriteActivity && (
+      lowerContext.includes('play') || 
+      lowerContext.includes('activity') || 
+      lowerContext.includes('do') ||
+      lowerContext.includes('favourite activity')
+    )) {
+      suggestions.push(favouriteActivity);
+      console.log('Added favourite activity suggestion:', favouriteActivity);
     }
     
-    if (context.includes('hello') || context.includes('hi') && greetingStyle) {
-      suggestions.push(greetingStyle.replace(/_/g, ' '));
+    // Animal context
+    if (favouriteAnimal && (
+      lowerContext.includes('animal') || 
+      lowerContext.includes('pet') ||
+      lowerContext.includes('favourite animal')
+    )) {
+      suggestions.push(favouriteAnimal);
+      console.log('Added favourite animal suggestion:', favouriteAnimal);
+    }
+    
+    // Greeting context
+    if (greetingStyle && (lowerContext.includes('hello') || lowerContext.includes('hi') || lowerContext.includes('hey'))) {
+      suggestions.push(greetingStyle);
+      console.log('Added greeting style suggestion:', greetingStyle);
     }
 
+    console.log('Total contextual suggestions:', suggestions.length);
     return suggestions.slice(0, 5); // Return max 5 suggestions
   }, [getPreference]);
 

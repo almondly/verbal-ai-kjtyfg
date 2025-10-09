@@ -20,7 +20,7 @@ import {
 export interface AdvancedSuggestion {
   text: string;
   confidence: number;
-  type: 'completion' | 'next_word' | 'common_phrase' | 'contextual' | 'temporal' | 'synonym' | 'preference';
+  type: 'completion' | 'next_word' | 'common_phrase' | 'contextual' | 'temporal' | 'synonym' | 'preference' | 'full_sentence';
   context?: string;
 }
 
@@ -71,6 +71,10 @@ export function useAdvancedAI() {
     'need': ['help', 'the toilet', 'water', 'food', 'a break', 'to go', 'to rest'],
     'like': ['to play', 'to eat', 'this', 'that', 'it', 'you'],
     'love': ['you', 'this', 'that', 'it', 'playing', 'eating'],
+    
+    // Preference-based triggers
+    'my': ['favourite colour', 'favourite food', 'favourite activity', 'favourite animal'],
+    'favourite': ['colour is', 'food is', 'activity is', 'animal is'],
     
     // Food and drink - Australian
     'I\'m': ['hungry', 'thirsty', 'starving', 'peckish'],
@@ -143,6 +147,25 @@ export function useAdvancedAI() {
     'go': ['to school', 'to kindy', 'to class'],
     'time': ['for school', 'for class', 'for learning'],
   };
+
+  // Common full sentence templates
+  const fullSentenceTemplates: string[] = [
+    'I want to go outside',
+    'Can I have some water please',
+    'I need help with this',
+    'What time is it',
+    'Where is mum',
+    'I am feeling happy today',
+    'Can we play together',
+    'I would like to eat now',
+    'Thank you very much',
+    'I need to go to the toilet',
+    'Can you help me please',
+    'I want to watch telly',
+    'What are we doing today',
+    'I love you',
+    'Good morning everyone',
+  ];
 
   // Massively enhanced synonym database for maximum AI capabilities with Australian English
   const synonymDatabase: { [key: string]: string[] } = {
@@ -630,7 +653,7 @@ export function useAdvancedAI() {
       const tenseContext = detectTenseContext(currentWords);
       const sentenceStructure = analyzeSentenceStructure(currentWords);
 
-      console.log('Getting ChatGPT-style suggestions for:', { 
+      console.log('Getting advanced suggestions for:', { 
         currentWords, 
         lastWord, 
         currentText, 
@@ -676,13 +699,14 @@ export function useAdvancedAI() {
         });
       }
 
-      // 3. AI Preference-based suggestions
+      // 3. AI Preference-based suggestions (ENHANCED)
       const contextualPreferenceSuggestions = getContextualSuggestions(currentText, currentHour);
+      console.log('Contextual preference suggestions:', contextualPreferenceSuggestions);
       contextualPreferenceSuggestions.forEach((suggestion, index) => {
         if (!suggestions.some(s => areSimilarWords(s.text.toLowerCase(), suggestion.toLowerCase()))) {
           suggestions.push({
             text: suggestion,
-            confidence: Math.max(0.85, 0.90 - index * 0.03),
+            confidence: Math.max(0.88, 0.93 - index * 0.03),
             type: 'preference',
             context: 'Based on your preferences'
           });
@@ -875,10 +899,10 @@ export function useAdvancedAI() {
       });
 
       // 9. Add high-frequency words as fallback
-      if (suggestions.length < maxSuggestions) {
+      if (suggestions.length < maxSuggestions - 3) {
         const fallbackWords = filteredAvailableWords
           .filter(word => !suggestions.some(s => areSimilarWords(s.text.toLowerCase(), word.toLowerCase())))
-          .slice(0, maxSuggestions - suggestions.length);
+          .slice(0, maxSuggestions - suggestions.length - 3);
         
         fallbackWords.forEach(word => {
           suggestions.push({
@@ -887,6 +911,29 @@ export function useAdvancedAI() {
             type: 'contextual',
             context: 'Available option'
           });
+        });
+      }
+
+      // 10. Add full sentence suggestions as last options (NEW FEATURE)
+      if (currentWords.length >= 1 && currentWords.length <= 4) {
+        const relevantSentences = fullSentenceTemplates
+          .filter(sentence => {
+            const sentenceLower = sentence.toLowerCase();
+            // Check if sentence starts with current text or is contextually relevant
+            return sentenceLower.startsWith(currentText) || 
+                   currentWords.some(word => sentenceLower.includes(word.toLowerCase()));
+          })
+          .slice(0, 3);
+
+        relevantSentences.forEach((sentence, index) => {
+          if (!suggestions.some(s => s.text.toLowerCase() === sentence.toLowerCase())) {
+            suggestions.push({
+              text: sentence,
+              confidence: Math.max(0.75, 0.85 - index * 0.05),
+              type: 'full_sentence',
+              context: 'Complete sentence suggestion'
+            });
+          }
         });
       }
 
@@ -915,8 +962,9 @@ export function useAdvancedAI() {
           }
           // Secondary sort by type priority
           const typePriority = {
+            'preference': 8,
             'common_phrase': 7,
-            'preference': 6,
+            'full_sentence': 6,
             'completion': 5,
             'next_word': 4,
             'temporal': 3,
@@ -928,7 +976,7 @@ export function useAdvancedAI() {
         .slice(0, maxSuggestions)
         .map(({ text, confidence, type, context }) => ({ text, confidence, type, context })); // Remove score from output
 
-      console.log('Generated ChatGPT-style suggestions:', finalSuggestions);
+      console.log('Generated advanced suggestions:', finalSuggestions);
       return finalSuggestions;
 
     } catch (err) {

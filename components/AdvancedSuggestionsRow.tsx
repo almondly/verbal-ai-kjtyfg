@@ -20,6 +20,10 @@ const getTypeIcon = (type: string) => {
       return 'trending-up-outline';
     case 'contextual':
       return 'search-outline';
+    case 'preference':
+      return 'heart-outline';
+    case 'full_sentence':
+      return 'text-outline';
     default:
       return 'bulb-outline';
   }
@@ -55,32 +59,48 @@ export default function AdvancedSuggestionsRow({
         contentContainerStyle={styles.row}
         keyboardShouldPersistTaps="handled"
       >
-        {suggestions.slice(0, 6).map((suggestion, index) => (
-          <TouchableOpacity
-            key={`${suggestion.text}-${index}`}
-            style={[
-              styles.suggestion,
-              { borderLeftColor: getConfidenceColor(suggestion.confidence) }
-            ]}
-            onPress={() => onPressSuggestion(suggestion.text)}
-            activeOpacity={0.8}
-          >
-            <View style={styles.suggestionHeader}>
-              <Icon
-                name={getTypeIcon(suggestion.type)}
-                size={14}
-                color={colors.textSecondary}
-                style={styles.typeIcon}
-              />
-              <Text style={styles.confidenceText}>
-                {Math.round(suggestion.confidence * 100)}%
+        {suggestions.slice(0, 10).map((suggestion, index) => {
+          const isFullSentence = suggestion.type === 'full_sentence';
+          return (
+            <TouchableOpacity
+              key={`${suggestion.text}-${index}`}
+              style={[
+                styles.suggestion,
+                isFullSentence && styles.fullSentenceSuggestion,
+                { borderLeftColor: getConfidenceColor(suggestion.confidence) }
+              ]}
+              onPress={() => onPressSuggestion(suggestion.text)}
+              activeOpacity={0.8}
+            >
+              <View style={styles.suggestionHeader}>
+                <Icon
+                  name={getTypeIcon(suggestion.type)}
+                  size={14}
+                  color={isFullSentence ? colors.primary : colors.textSecondary}
+                  style={styles.typeIcon}
+                />
+                <Text style={[
+                  styles.confidenceText,
+                  isFullSentence && styles.fullSentenceConfidence
+                ]}>
+                  {Math.round(suggestion.confidence * 100)}%
+                </Text>
+              </View>
+              <Text 
+                style={[
+                  styles.suggestionText,
+                  isFullSentence && styles.fullSentenceText
+                ]} 
+                numberOfLines={isFullSentence ? 3 : 2}
+              >
+                {suggestion.text}
               </Text>
-            </View>
-            <Text style={styles.suggestionText} numberOfLines={2}>
-              {suggestion.text}
-            </Text>
-          </TouchableOpacity>
-        ))}
+              {isFullSentence && (
+                <Text style={styles.fullSentenceLabel}>Full Sentence</Text>
+              )}
+            </TouchableOpacity>
+          );
+        })}
       </ScrollView>
     </View>
   );
@@ -109,6 +129,13 @@ const styles = StyleSheet.create({
     borderLeftWidth: 3,
     boxShadow: '0px 2px 4px rgba(0,0,0,0.08)',
   },
+  fullSentenceSuggestion: {
+    minWidth: 180,
+    maxWidth: 220,
+    backgroundColor: '#EEF2FF',
+    borderLeftColor: colors.primary,
+    borderLeftWidth: 4,
+  },
   suggestionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -123,11 +150,26 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     fontFamily: 'Montserrat_600SemiBold',
   },
+  fullSentenceConfidence: {
+    color: colors.primary,
+  },
   suggestionText: {
     fontSize: 13,
     fontFamily: 'Montserrat_600SemiBold',
     color: colors.text,
     lineHeight: 16,
+  },
+  fullSentenceText: {
+    fontSize: 12,
+    lineHeight: 15,
+    color: colors.primary,
+  },
+  fullSentenceLabel: {
+    fontSize: 9,
+    fontFamily: 'Montserrat_500Medium',
+    color: colors.primary,
+    marginTop: 4,
+    textTransform: 'uppercase',
   },
   emptyContainer: {
     backgroundColor: colors.backgroundAlt,
