@@ -41,22 +41,15 @@ export default function MainMenu() {
       <View style={[commonStyles.container, styles.container]}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>ComPanion</Text>
-          <Text style={styles.subtitle}>Your Communication Companion</Text>
+          <Text style={styles.title}>COMpanion</Text>
         </View>
 
         {/* Main Content */}
         <View style={styles.content}>
           {/* Emotion Display */}
-          <View style={[styles.emotionSection, { height: height * 0.5 }]}>
+          <View style={[styles.emotionSection, { height: height * 0.4 }]}>
             <View style={styles.emotionContainer}>
-              <EmotionFace emotion={settings.selectedEmotion} size={Math.min(width * 0.3, height * 0.4)} />
-              <Text style={styles.emotionText}>
-                Feeling {settings.selectedEmotion} today!
-              </Text>
-              <Text style={styles.emotionSubtext}>
-                Ready to communicate?
-              </Text>
+              <EmotionFace emotion={settings.selectedEmotion} size={Math.min(width * 0.25, height * 0.35)} />
             </View>
           </View>
 
@@ -67,9 +60,8 @@ export default function MainMenu() {
               onPress={handleStartCommunication}
               activeOpacity={0.9}
             >
-              <Icon name="grid-outline" size={40} color="#FFFFFF" />
-              <Text style={styles.actionButtonText}>Start Communicating</Text>
-              <Text style={styles.actionButtonSubtext}>Use tiles or keyboard</Text>
+              <Icon name="grid-outline" size={32} color="#FFFFFF" />
+              <Text style={styles.actionButtonText}>Start</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
@@ -77,17 +69,10 @@ export default function MainMenu() {
               onPress={handleOpenSettings}
               activeOpacity={0.9}
             >
-              <Icon name="settings-outline" size={24} color={colors.primary} />
+              <Icon name="settings-outline" size={20} color={colors.primary} />
               <Text style={styles.settingsButtonText}>Settings</Text>
             </TouchableOpacity>
           </View>
-        </View>
-
-        {/* Footer */}
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>
-            Choose how you want to communicate
-          </Text>
         </View>
       </View>
     </LandscapeGuard>
@@ -108,13 +93,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat_700Bold',
     color: colors.primary,
     textAlign: 'center',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 18,
-    fontFamily: 'Montserrat_600SemiBold',
-    color: colors.textSecondary,
-    textAlign: 'center',
   },
   content: {
     flex: 1,
@@ -128,79 +106,48 @@ const styles = StyleSheet.create({
   },
   emotionContainer: {
     alignItems: 'center',
-    padding: 40,
-    minWidth: 400,
-  },
-  emotionText: {
-    fontSize: 28,
-    fontFamily: 'Montserrat_700Bold',
-    color: colors.text,
-    textAlign: 'center',
-    marginTop: 24,
-    textTransform: 'capitalize',
-  },
-  emotionSubtext: {
-    fontSize: 18,
-    fontFamily: 'Montserrat_600SemiBold',
-    color: colors.textSecondary,
-    textAlign: 'center',
-    marginTop: 12,
+    padding: 20,
   },
   buttonSection: {
     marginTop: 20,
     alignItems: 'center',
     width: '100%',
-    maxWidth: 600,
-    gap: 20 as any,
+    maxWidth: 400,
+    gap: 16 as any,
   },
   actionButton: {
     width: '100%',
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 12 as any,
-    paddingHorizontal: 40,
-    paddingVertical: 32,
-    borderRadius: 20,
-    boxShadow: '0px 6px 20px rgba(0,0,0,0.15)',
+    paddingHorizontal: 32,
+    paddingVertical: 20,
+    borderRadius: 16,
+    boxShadow: '0px 4px 16px rgba(0,0,0,0.12)',
   },
   primaryButton: {
     backgroundColor: colors.primary,
   },
   actionButtonText: {
-    fontSize: 24,
+    fontSize: 20,
     fontFamily: 'Montserrat_700Bold',
     color: '#FFFFFF',
-    textAlign: 'center',
-  },
-  actionButtonSubtext: {
-    fontSize: 16,
-    fontFamily: 'Montserrat_600SemiBold',
-    color: '#FFFFFF',
-    opacity: 0.9,
     textAlign: 'center',
   },
   settingsButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12 as any,
+    gap: 10 as any,
     backgroundColor: colors.backgroundAlt,
-    paddingHorizontal: 24,
-    paddingVertical: 14,
-    borderRadius: 16,
-    boxShadow: '0px 4px 12px rgba(0,0,0,0.08)',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 12,
+    boxShadow: '0px 3px 10px rgba(0,0,0,0.08)',
   },
   settingsButtonText: {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: 'Montserrat_700Bold',
     color: colors.primary,
-  },
-  footer: {
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  footerText: {
-    fontSize: 14,
-    fontFamily: 'Montserrat_400Regular',
-    color: colors.textSecondary,
-    textAlign: 'center',
   },
 });

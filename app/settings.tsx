@@ -305,7 +305,7 @@ export default function SettingsScreen() {
             <Icon name="arrow-back-outline" size={32} color={colors.text} />
           </TouchableOpacity>
           
-          <Text style={styles.appTitle}>Settings</Text>
+          <Text style={styles.appTitle}>COMpanion Settings</Text>
           
           <View style={styles.rightSection}>
             <View style={styles.emotionContainer}>

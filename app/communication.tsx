@@ -199,7 +199,7 @@ export default function CommunicationScreen() {
             <Icon name="home-outline" size={32} color={colors.text} />
           </TouchableOpacity>
           
-          <Text style={styles.appTitle}>ComPanion</Text>
+          <Text style={styles.appTitle}>COMpanion</Text>
           
           <View style={styles.rightSection}>
             <View style={styles.emotionContainer}>
