@@ -295,17 +295,17 @@ export const defaultTiles: Tile[] = [
   t('colours', 'white', 'https://static.arasaac.org/pictograms/2374/2374_300.png'),
   t('colours', 'grey', 'https://static.arasaac.org/pictograms/2375/2375_300.png'),
 
-  // Numbers - Number vocabulary
-  t('numbers', 'one', 'https://static.arasaac.org/pictograms/8/8_300.png'),
-  t('numbers', 'two', 'https://static.arasaac.org/pictograms/9/9_300.png'),
-  t('numbers', 'three', 'https://static.arasaac.org/pictograms/10/10_300.png'),
-  t('numbers', 'four', 'https://static.arasaac.org/pictograms/11/11_300.png'),
-  t('numbers', 'five', 'https://static.arasaac.org/pictograms/12/12_300.png'),
-  t('numbers', 'six', 'https://static.arasaac.org/pictograms/13/13_300.png'),
-  t('numbers', 'seven', 'https://static.arasaac.org/pictograms/14/14_300.png'),
-  t('numbers', 'eight', 'https://static.arasaac.org/pictograms/15/15_300.png'),
-  t('numbers', 'nine', 'https://static.arasaac.org/pictograms/16/16_300.png'),
-  t('numbers', 'ten', 'https://static.arasaac.org/pictograms/17/17_300.png'),
+  // Numbers - Number vocabulary (CORRECTED IDs)
+  t('numbers', 'one', 'https://static.arasaac.org/pictograms/4196/4196_300.png'),
+  t('numbers', 'two', 'https://static.arasaac.org/pictograms/4197/4197_300.png'),
+  t('numbers', 'three', 'https://static.arasaac.org/pictograms/4198/4198_300.png'),
+  t('numbers', 'four', 'https://static.arasaac.org/pictograms/4199/4199_300.png'),
+  t('numbers', 'five', 'https://static.arasaac.org/pictograms/4200/4200_300.png'),
+  t('numbers', 'six', 'https://static.arasaac.org/pictograms/4201/4201_300.png'),
+  t('numbers', 'seven', 'https://static.arasaac.org/pictograms/4202/4202_300.png'),
+  t('numbers', 'eight', 'https://static.arasaac.org/pictograms/4203/4203_300.png'),
+  t('numbers', 'nine', 'https://static.arasaac.org/pictograms/4204/4204_300.png'),
+  t('numbers', 'ten', 'https://static.arasaac.org/pictograms/4205/4205_300.png'),
 
   // Animals - Animal vocabulary
   t('animals', 'dog', 'https://static.arasaac.org/pictograms/2376/2376_300.png'),

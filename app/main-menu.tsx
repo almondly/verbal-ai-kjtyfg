@@ -36,34 +36,34 @@ export default function MainMenu() {
     router.push('/settings');
   };
 
-  // Calculate face size - make it much larger (60% of screen height)
-  const faceSize = Math.min(width * 0.4, height * 0.6);
+  // Calculate face size - make it MUCH larger (70% of screen height)
+  const faceSize = Math.min(width * 0.5, height * 0.7);
 
   return (
     <LandscapeGuard>
       <View style={[commonStyles.container, styles.container]}>
-        {/* Header - smaller */}
+        {/* Header - much smaller */}
         <View style={styles.header}>
           <Text style={styles.title}>COMpanion</Text>
         </View>
 
         {/* Main Content */}
         <View style={styles.content}>
-          {/* Emotion Display - Much Larger */}
+          {/* Emotion Display - MUCH LARGER */}
           <View style={styles.emotionSection}>
             <View style={styles.emotionContainer}>
               <EmotionFace emotion={settings.selectedEmotion} size={faceSize} />
             </View>
           </View>
 
-          {/* Action Buttons - Smaller */}
+          {/* Action Buttons - Much Smaller */}
           <View style={styles.buttonSection}>
             <TouchableOpacity 
               style={[styles.actionButton, styles.primaryButton]} 
               onPress={handleStartCommunication}
               activeOpacity={0.9}
             >
-              <Icon name="grid-outline" size={24} color="#FFFFFF" />
+              <Icon name="grid-outline" size={20} color="#FFFFFF" />
               <Text style={styles.actionButtonText}>Start</Text>
             </TouchableOpacity>
 
@@ -72,7 +72,7 @@ export default function MainMenu() {
               onPress={handleOpenSettings}
               activeOpacity={0.9}
             >
-              <Icon name="settings-outline" size={16} color={colors.primary} />
+              <Icon name="settings-outline" size={14} color={colors.primary} />
               <Text style={styles.settingsButtonText}>Settings</Text>
             </TouchableOpacity>
           </View>
@@ -85,14 +85,14 @@ export default function MainMenu() {
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 32,
-    paddingVertical: 16,
+    paddingVertical: 12,
   },
   header: {
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 8,
   },
   title: {
-    fontSize: 32,
+    fontSize: 24,
     fontFamily: 'Montserrat_700Bold',
     color: colors.primary,
     textAlign: 'center',
@@ -113,29 +113,29 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   buttonSection: {
-    marginTop: 10,
-    marginBottom: 20,
+    marginTop: 8,
+    marginBottom: 16,
     alignItems: 'center',
     width: '100%',
-    maxWidth: 300,
-    gap: 12 as any,
+    maxWidth: 240,
+    gap: 10 as any,
   },
   actionButton: {
     width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 10 as any,
-    paddingHorizontal: 24,
-    paddingVertical: 14,
-    borderRadius: 14,
-    boxShadow: '0px 4px 16px rgba(0,0,0,0.12)',
+    gap: 8 as any,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 12,
+    boxShadow: '0px 3px 12px rgba(0,0,0,0.1)',
   },
   primaryButton: {
     backgroundColor: colors.primary,
   },
   actionButtonText: {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: 'Montserrat_700Bold',
     color: '#FFFFFF',
     textAlign: 'center',
@@ -143,15 +143,15 @@ const styles = StyleSheet.create({
   settingsButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8 as any,
+    gap: 6 as any,
     backgroundColor: colors.backgroundAlt,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 10,
-    boxShadow: '0px 3px 10px rgba(0,0,0,0.08)',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 8,
+    boxShadow: '0px 2px 8px rgba(0,0,0,0.06)',
   },
   settingsButtonText: {
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: 'Montserrat_700Bold',
     color: colors.primary,
   },
