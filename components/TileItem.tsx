@@ -1,11 +1,10 @@
 
-import { memo, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated, useWindowDimensions } from 'react-native';
+import { memo, useRef, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Animated, useWindowDimensions, Image } from 'react-native';
 import { Tile } from '../types';
 import { colors } from '../styles/commonStyles';
 import { categories } from '../data/categories';
 import Icon from './Icon';
-import { SvgUri } from 'react-native-svg';
 
 interface Props {
   tile: Tile;
@@ -24,6 +23,7 @@ const TileItem = memo(function TileItem({
 }: Props) {
   const scale = useRef(new Animated.Value(1)).current;
   const { width } = useWindowDimensions();
+  const [imageError, setImageError] = useState(false);
 
   const handlePressIn = () => {
     Animated.spring(scale, { toValue: 0.96, useNativeDriver: true, speed: 50, bounciness: 8 }).start();
@@ -68,9 +68,6 @@ const TileItem = memo(function TileItem({
   const fontSize = getResponsiveFontSize();
   const imageSize = getResponsiveImageSize();
 
-  // Check if the image is an SVG
-  const isSvg = tile.imageUri?.endsWith('.svg');
-
   return (
     <Animated.View
       style={[
@@ -97,19 +94,16 @@ const TileItem = memo(function TileItem({
         <View style={styles.imageWrap}>
           {isAdd ? (
             <Icon name="add-circle-outline" size={34} color={colors.text} />
-          ) : tile.imageUri ? (
-            isSvg ? (
-              <SvgUri
-                uri={tile.imageUri}
-                width={imageSize}
-                height={imageSize}
-                onError={(error) => {
-                  console.log(`Failed to load SVG for tile: ${tile.text}`, error);
-                }}
-              />
-            ) : (
-              <Icon name="chatbubble-ellipses-outline" size={34} color={colors.text} />
-            )
+          ) : tile.imageUri && !imageError ? (
+            <Image
+              source={{ uri: tile.imageUri }}
+              style={{ width: imageSize, height: imageSize }}
+              resizeMode="contain"
+              onError={(error) => {
+                console.log(`Failed to load image for tile: ${tile.text}`, error.nativeEvent.error);
+                setImageError(true);
+              }}
+            />
           ) : (
             <Icon name="chatbubble-ellipses-outline" size={34} color={colors.text} />
           )}
