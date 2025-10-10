@@ -45,13 +45,13 @@ const TileItem = memo(function TileItem({
 
   // Get the category color for this tile
   const getCategoryColor = () => {
-    if (isAdd) return colors.borderLight;
+    if (isAdd) return colors.border;
     if (tile.color) return tile.color;
     if (tile.category) {
       const category = categories.find(cat => cat.id === tile.category);
       if (category) return category.color;
     }
-    return colors.borderLight;
+    return colors.border;
   };
 
   // Responsive font size - AAC style (larger and bolder)

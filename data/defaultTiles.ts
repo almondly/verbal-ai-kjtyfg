@@ -2,27 +2,27 @@
 import { Tile } from '../types';
 
 const categoryColor: Record<string, string> = {
-  core: '#5DADE2',
-  people: '#AF7AC5',
-  actions: '#52BE80',
-  feelings: '#F4D03F',
-  food: '#EC7063',
-  home: '#85C1E9',
-  school: '#82E0AA',
-  body: '#F8C471',
-  places: '#BB8FCE',
-  routines: '#F0B27A',
-  questions: '#FAD7A0',
-  colours: '#76D7C4',
-  numbers: '#7FB3D5',
-  animals: '#F5B7B1',
-  clothing: '#D7BDE2',
-  weather: '#AED6F1',
-  time: '#F8B4D9',
-  toys: '#FADBD8',
+  core: '#0066CC',
+  people: '#CC00CC',
+  actions: '#00CC66',
+  feelings: '#FFCC00',
+  food: '#FF6633',
+  home: '#6666FF',
+  school: '#66CC66',
+  body: '#FFDD66',
+  places: '#9966FF',
+  routines: '#FF9966',
+  questions: '#FFCC66',
+  colours: '#33CCFF',
+  numbers: '#3399FF',
+  animals: '#FF8855',
+  clothing: '#BB88FF',
+  weather: '#5599FF',
+  time: '#FF55FF',
+  toys: '#FFAACC',
 };
 
-// Helper to build tiles quickly with universal pictogram images
+// Helper to build tiles quickly with pictogram images
 const t = (category: string, text: string, imageUri?: string): Tile => ({
   id: `${category}-${text.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
   text,
@@ -33,140 +33,286 @@ const t = (category: string, text: string, imageUri?: string): Tile => ({
 
 export const defaultTiles: Tile[] = [
   // Core - Essential communication words
-  t('core', 'I', 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=300&fit=crop'),
-  t('core', 'you', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop'),
-  t('core', 'he', 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=300&fit=crop'),
-  t('core', 'she', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&h=300&fit=crop'),
-  t('core', 'we', 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=300&h=300&fit=crop'),
-  t('core', 'they', 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=300&h=300&fit=crop'),
-  t('core', 'it', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=300&fit=crop'),
-  t('core', 'me', 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=300&h=300&fit=crop'),
-  t('core', 'my', 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&h=300&fit=crop'),
-  t('core', 'mine', 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&h=300&fit=crop'),
-  t('core', 'your', 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300&h=300&fit=crop'),
-  t('core', 'want', 'https://images.unsplash.com/photo-1532635241-17e820acc59f?w=300&h=300&fit=crop'),
-  t('core', 'need', 'https://images.unsplash.com/photo-1516534775068-ba3e7458af70?w=300&h=300&fit=crop'),
-  t('core', 'like', 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=300&h=300&fit=crop'),
-  t('core', "don't", 'https://images.unsplash.com/photo-1577563908411-5077b6dc7624?w=300&h=300&fit=crop'),
-  t('core', 'help', 'https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=300&h=300&fit=crop'),
-  t('core', 'more', 'https://images.unsplash.com/photo-1553729459-efe14ef6055d?w=300&h=300&fit=crop'),
-  t('core', 'again', 'https://images.unsplash.com/photo-1501139083538-0139583c060f?w=300&h=300&fit=crop'),
-  t('core', 'different', 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=300&h=300&fit=crop'),
-  t('core', 'same', 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=300&h=300&fit=crop'),
-  t('core', 'this', 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=300&h=300&fit=crop'),
-  t('core', 'that', 'https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?w=300&h=300&fit=crop'),
-  t('core', 'here', 'https://images.unsplash.com/photo-1524661135-423995f22d0b?w=300&h=300&fit=crop'),
-  t('core', 'there', 'https://images.unsplash.com/photo-1569163139394-de4798aa62b6?w=300&h=300&fit=crop'),
-  t('core', 'go', 'https://images.unsplash.com/photo-1502101872923-d48509bff386?w=300&h=300&fit=crop'),
-  t('core', 'stop', 'https://images.unsplash.com/photo-1615486511262-2d3e1f0e2f8e?w=300&h=300&fit=crop'),
-  t('core', 'come', 'https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=300&h=300&fit=crop'),
-  t('core', 'look', 'https://images.unsplash.com/photo-1574169208507-84376144848b?w=300&h=300&fit=crop'),
-  t('core', 'put', 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=300&h=300&fit=crop'),
-  t('core', 'make', 'https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?w=300&h=300&fit=crop'),
-  t('core', 'turn', 'https://images.unsplash.com/photo-1503455637927-730bce8583c0?w=300&h=300&fit=crop'),
-  t('core', 'open', 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=300&fit=crop'),
-  t('core', 'close', 'https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=300&h=300&fit=crop'),
-  t('core', 'all done', 'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=300&h=300&fit=crop'),
-  t('core', 'finished', 'https://images.unsplash.com/photo-1521791136064-7986c2920216?w=300&h=300&fit=crop'),
-  t('core', 'please', 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=300&h=300&fit=crop'),
-  t('core', 'thank you', 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=300&h=300&fit=crop'),
-  t('core', 'yes', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop'),
-  t('core', 'no', 'https://images.unsplash.com/photo-1552058544-f2b08422138a?w=300&h=300&fit=crop'),
-  t('core', 'because', 'https://images.unsplash.com/photo-1516534775068-ba3e7458af70?w=300&h=300&fit=crop'),
-  t('core', 'and', 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=300&h=300&fit=crop'),
-  t('core', 'or', 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=300&h=300&fit=crop'),
-  t('core', 'with', 'https://images.unsplash.com/photo-1491438590914-bc09fcaaf77a?w=300&h=300&fit=crop'),
-  t('core', 'without', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fitPerfect! Now I understand the current styling. Based on the user's request to match universally used AAC tools, I need to make the following changes:
+  t('core', 'I', 'https://api.iconify.design/mdi/account.svg?color=%23000000&width=300'),
+  t('core', 'you', 'https://api.iconify.design/mdi/account-outline.svg?color=%23000000&width=300'),
+  t('core', 'he', 'https://api.iconify.design/mdi/human-male.svg?color=%23000000&width=300'),
+  t('core', 'she', 'https://api.iconify.design/mdi/human-female.svg?color=%23000000&width=300'),
+  t('core', 'we', 'https://api.iconify.design/mdi/account-multiple.svg?color=%23000000&width=300'),
+  t('core', 'they', 'https://api.iconify.design/mdi/account-group.svg?color=%23000000&width=300'),
+  t('core', 'it', 'https://api.iconify.design/mdi/cube-outline.svg?color=%23000000&width=300'),
+  t('core', 'me', 'https://api.iconify.design/mdi/account-circle.svg?color=%23000000&width=300'),
+  t('core', 'my', 'https://api.iconify.design/mdi/hand-pointing-right.svg?color=%23000000&width=300'),
+  t('core', 'mine', 'https://api.iconify.design/mdi/hand-back-right.svg?color=%23000000&width=300'),
+  t('core', 'your', 'https://api.iconify.design/mdi/hand-pointing-left.svg?color=%23000000&width=300'),
+  t('core', 'want', 'https://api.iconify.design/mdi/hand-heart.svg?color=%23000000&width=300'),
+  t('core', 'need', 'https://api.iconify.design/mdi/alert-circle.svg?color=%23000000&width=300'),
+  t('core', 'like', 'https://api.iconify.design/mdi/heart.svg?color=%23000000&width=300'),
+  t('core', "don't", 'https://api.iconify.design/mdi/cancel.svg?color=%23000000&width=300'),
+  t('core', 'help', 'https://api.iconify.design/mdi/hand-extended.svg?color=%23000000&width=300'),
+  t('core', 'more', 'https://api.iconify.design/mdi/plus-circle.svg?color=%23000000&width=300'),
+  t('core', 'again', 'https://api.iconify.design/mdi/refresh.svg?color=%23000000&width=300'),
+  t('core', 'different', 'https://api.iconify.design/mdi/compare-horizontal.svg?color=%23000000&width=300'),
+  t('core', 'same', 'https://api.iconify.design/mdi/equal.svg?color=%23000000&width=300'),
+  t('core', 'this', 'https://api.iconify.design/mdi/arrow-down-bold.svg?color=%23000000&width=300'),
+  t('core', 'that', 'https://api.iconify.design/mdi/arrow-up-bold.svg?color=%23000000&width=300'),
+  t('core', 'here', 'https://api.iconify.design/mdi/map-marker.svg?color=%23000000&width=300'),
+  t('core', 'there', 'https://api.iconify.design/mdi/map-marker-outline.svg?color=%23000000&width=300'),
+  t('core', 'go', 'https://api.iconify.design/mdi/arrow-right-bold.svg?color=%23000000&width=300'),
+  t('core', 'stop', 'https://api.iconify.design/mdi/stop-circle.svg?color=%23000000&width=300'),
+  t('core', 'come', 'https://api.iconify.design/mdi/arrow-left-bold.svg?color=%23000000&width=300'),
+  t('core', 'look', 'https://api.iconify.design/mdi/eye.svg?color=%23000000&width=300'),
+  t('core', 'put', 'https://api.iconify.design/mdi/arrow-down-box.svg?color=%23000000&width=300'),
+  t('core', 'make', 'https://api.iconify.design/mdi/hammer-wrench.svg?color=%23000000&width=300'),
+  t('core', 'turn', 'https://api.iconify.design/mdi/rotate-right.svg?color=%23000000&width=300'),
+  t('core', 'open', 'https://api.iconify.design/mdi/door-open.svg?color=%23000000&width=300'),
+  t('core', 'close', 'https://api.iconify.design/mdi/door-closed.svg?color=%23000000&width=300'),
+  t('core', 'all done', 'https://api.iconify.design/mdi/check-circle.svg?color=%23000000&width=300'),
+  t('core', 'finished', 'https://api.iconify.design/mdi/check-all.svg?color=%23000000&width=300'),
+  t('core', 'please', 'https://api.iconify.design/mdi/hand-wave.svg?color=%23000000&width=300'),
+  t('core', 'thank you', 'https://api.iconify.design/mdi/hand-heart-outline.svg?color=%23000000&width=300'),
+  t('core', 'yes', 'https://api.iconify.design/mdi/check-bold.svg?color=%23000000&width=300'),
+  t('core', 'no', 'https://api.iconify.design/mdi/close-thick.svg?color=%23000000&width=300'),
+  t('core', 'because', 'https://api.iconify.design/mdi/arrow-decision.svg?color=%23000000&width=300'),
+  t('core', 'and', 'https://api.iconify.design/mdi/plus.svg?color=%23000000&width=300'),
+  t('core', 'or', 'https://api.iconify.design/mdi/slash-forward.svg?color=%23000000&width=300'),
+  t('core', 'with', 'https://api.iconify.design/mdi/account-multiple-plus.svg?color=%23000000&width=300'),
+  t('core', 'without', 'https://api.iconify.design/mdi/account-multiple-minus.svg?color=%23000000&width=300'),
 
-## Key AAC Design Principles to Implement:
+  // People
+  t('people', 'mom', 'https://api.iconify.design/mdi/human-female.svg?color=%23000000&width=300'),
+  t('people', 'dad', 'https://api.iconify.design/mdi/human-male.svg?color=%23000000&width=300'),
+  t('people', 'brother', 'https://api.iconify.design/mdi/human-male-boy.svg?color=%23000000&width=300'),
+  t('people', 'sister', 'https://api.iconify.design/mdi/human-female-girl.svg?color=%23000000&width=300'),
+  t('people', 'baby', 'https://api.iconify.design/mdi/baby-face.svg?color=%23000000&width=300'),
+  t('people', 'friend', 'https://api.iconify.design/mdi/account-heart.svg?color=%23000000&width=300'),
+  t('people', 'teacher', 'https://api.iconify.design/mdi/teach.svg?color=%23000000&width=300'),
+  t('people', 'family', 'https://api.iconify.design/mdi/home-account.svg?color=%23000000&width=300'),
+  t('people', 'boy', 'https://api.iconify.design/mdi/face-man.svg?color=%23000000&width=300'),
+  t('people', 'girl', 'https://api.iconify.design/mdi/face-woman.svg?color=%23000000&width=300'),
+  t('people', 'man', 'https://api.iconify.design/mdi/human-male-male.svg?color=%23000000&width=300'),
+  t('people', 'woman', 'https://api.iconify.design/mdi/human-female-female.svg?color=%23000000&width=300'),
+  t('people', 'grandma', 'https://api.iconify.design/mdi/human-cane.svg?color=%23000000&width=300'),
+  t('people', 'grandpa', 'https://api.iconify.design/mdi/human-male-height.svg?color=%23000000&width=300'),
 
-1. **Larger, bolder borders on tiles** - AAC tools typically have thick, prominent borders (3-4px)
-2. **Higher contrast colors** - More saturated, distinct category colors
-3. **Larger, clearer text** - Bigger font sizes with better readability
-4. **More spacing between tiles** - Better visual separation
-5. **Simpler, cleaner tile design** - Less rounded corners, more structured grid
-6. **Consistent visual hierarchy** - Clear distinction between different UI elements
-7. **Professional AAC color palette** - Using standard AAC color coding
+  // Actions
+  t('actions', 'eat', 'https://api.iconify.design/mdi/food-fork-drink.svg?color=%23000000&width=300'),
+  t('actions', 'drink', 'https://api.iconify.design/mdi/cup.svg?color=%23000000&width=300'),
+  t('actions', 'sleep', 'https://api.iconify.design/mdi/sleep.svg?color=%23000000&width=300'),
+  t('actions', 'play', 'https://api.iconify.design/mdi/gamepad-variant.svg?color=%23000000&width=300'),
+  t('actions', 'walk', 'https://api.iconify.design/mdi/walk.svg?color=%23000000&width=300'),
+  t('actions', 'run', 'https://api.iconify.design/mdi/run.svg?color=%23000000&width=300'),
+  t('actions', 'jump', 'https://api.iconify.design/mdi/human-handsup.svg?color=%23000000&width=300'),
+  t('actions', 'sit', 'https://api.iconify.design/mdi/seat.svg?color=%23000000&width=300'),
+  t('actions', 'stand', 'https://api.iconify.design/mdi/human.svg?color=%23000000&width=300'),
+  t('actions', 'read', 'https://api.iconify.design/mdi/book-open-page-variant.svg?color=%23000000&width=300'),
+  t('actions', 'write', 'https://api.iconify.design/mdi/pencil.svg?color=%23000000&width=300'),
+  t('actions', 'draw', 'https://api.iconify.design/mdi/palette.svg?color=%23000000&width=300'),
+  t('actions', 'sing', 'https://api.iconify.design/mdi/music.svg?color=%23000000&width=300'),
+  t('actions', 'dance', 'https://api.iconify.design/mdi/human-handsdown.svg?color=%23000000&width=300'),
+  t('actions', 'watch', 'https://api.iconify.design/mdi/television.svg?color=%23000000&width=300'),
+  t('actions', 'listen', 'https://api.iconify.design/mdi/ear-hearing.svg?color=%23000000&width=300'),
+  t('actions', 'talk', 'https://api.iconify.design/mdi/comment-text.svg?color=%23000000&width=300'),
+  t('actions', 'give', 'https://api.iconify.design/mdi/hand-coin.svg?color=%23000000&width=300'),
+  t('actions', 'take', 'https://api.iconify.design/mdi/hand-back-left.svg?color=%23000000&width=300'),
+  t('actions', 'throw', 'https://api.iconify.design/mdi/baseball.svg?color=%23000000&width=300'),
+  t('actions', 'catch', 'https://api.iconify.design/mdi/hand-back-right.svg?color=%23000000&width=300'),
+  t('actions', 'push', 'https://api.iconify.design/mdi/arrow-right-thick.svg?color=%23000000&width=300'),
+  t('actions', 'pull', 'https://api.iconify.design/mdi/arrow-left-thick.svg?color=%23000000&width=300'),
+  t('actions', 'wash', 'https://api.iconify.design/mdi/water.svg?color=%23000000&width=300'),
+  t('actions', 'clean', 'https://api.iconify.design/mdi/broom.svg?color=%23000000&width=300'),
 
-Let me implement these changes:
+  // Feelings
+  t('feelings', 'happy', 'https://api.iconify.design/mdi/emoticon-happy.svg?color=%23000000&width=300'),
+  t('feelings', 'sad', 'https://api.iconify.design/mdi/emoticon-sad.svg?color=%23000000&width=300'),
+  t('feelings', 'angry', 'https://api.iconify.design/mdi/emoticon-angry.svg?color=%23000000&width=300'),
+  t('feelings', 'scared', 'https://api.iconify.design/mdi/emoticon-frown.svg?color=%23000000&width=300'),
+  t('feelings', 'excited', 'https://api.iconify.design/mdi/emoticon-excited.svg?color=%23000000&width=300'),
+  t('feelings', 'tired', 'https://api.iconify.design/mdi/emoticon-dead.svg?color=%23000000&width=300'),
+  t('feelings', 'sick', 'https://api.iconify.design/mdi/emoticon-sick.svg?color=%23000000&width=300'),
+  t('feelings', 'hurt', 'https://api.iconify.design/mdi/bandage.svg?color=%23000000&width=300'),
+  t('feelings', 'love', 'https://api.iconify.design/mdi/heart-multiple.svg?color=%23000000&width=300'),
+  t('feelings', 'worried', 'https://api.iconify.design/mdi/emoticon-confused.svg?color=%23000000&width=300'),
+  t('feelings', 'calm', 'https://api.iconify.design/mdi/emoticon-neutral.svg?color=%23000000&width=300'),
+  t('feelings', 'surprised', 'https://api.iconify.design/mdi/emoticon-surprised.svg?color=%23000000&width=300'),
 
-<write file="styles/commonStyles.ts">
-import { StyleSheet } from 'react-native';
+  // Food
+  t('food', 'apple', 'https://api.iconify.design/mdi/food-apple.svg?color=%23000000&width=300'),
+  t('food', 'banana', 'https://api.iconify.design/mdi/fruit-cherries.svg?color=%23000000&width=300'),
+  t('food', 'bread', 'https://api.iconify.design/mdi/baguette.svg?color=%23000000&width=300'),
+  t('food', 'cheese', 'https://api.iconify.design/mdi/cheese.svg?color=%23000000&width=300'),
+  t('food', 'milk', 'https://api.iconify.design/mdi/cup-water.svg?color=%23000000&width=300'),
+  t('food', 'juice', 'https://api.iconify.design/mdi/cup.svg?color=%23000000&width=300'),
+  t('food', 'water', 'https://api.iconify.design/mdi/water-outline.svg?color=%23000000&width=300'),
+  t('food', 'cookie', 'https://api.iconify.design/mdi/cookie.svg?color=%23000000&width=300'),
+  t('food', 'cake', 'https://api.iconify.design/mdi/cake.svg?color=%23000000&width=300'),
+  t('food', 'pizza', 'https://api.iconify.design/mdi/pizza.svg?color=%23000000&width=300'),
+  t('food', 'sandwich', 'https://api.iconify.design/mdi/food.svg?color=%23000000&width=300'),
+  t('food', 'egg', 'https://api.iconify.design/mdi/egg.svg?color=%23000000&width=300'),
+  t('food', 'chicken', 'https://api.iconify.design/mdi/food-drumstick.svg?color=%23000000&width=300'),
+  t('food', 'fish', 'https://api.iconify.design/mdi/fish.svg?color=%23000000&width=300'),
+  t('food', 'carrot', 'https://api.iconify.design/mdi/carrot.svg?color=%23000000&width=300'),
+  t('food', 'snack', 'https://api.iconify.design/mdi/food-variant.svg?color=%23000000&width=300'),
 
-// AAC-standard color palette with high contrast and clear categorization
-export const colors = {
-  // Primary AAC colors - bold and clear
-  primary: '#0066CC',        // Strong blue for core words
-  secondary: '#CC00CC',      // Vibrant purple for people
-  accent: '#00CC66',         // Bright green for actions
-  
-  // Background colors - clean and simple
-  background: '#FFFFFF',
-  backgroundAlt: '#F5F5F5',
-  surface: '#FFFFFF',
-  
-  // Text colors - high contrast
-  text: '#000000',           // Pure black for maximum readability
-  textSecondary: '#4A4A4A',  // Dark gray for secondary text
-  textLight: '#FFFFFF',      // White text for dark backgrounds
-  
-  // Border and UI elements
-  border: '#CCCCCC',         // Medium gray for borders
-  borderDark: '#666666',     // Darker border for emphasis
-  
-  // Status colors
-  success: '#00AA00',        // Green for success
-  warning: '#FF9900',        // Orange for warnings
-  danger: '#CC0000',         // Red for errors/danger
-  error: '#CC0000',
-  info: '#0066CC',
-  
-  // AAC Category colors - standardized and distinct
-  categoryCore: '#0066CC',      // Blue - Core vocabulary
-  categoryPeople: '#CC00CC',    // Purple - People
-  categoryActions: '#00CC66',   // Green - Actions/Verbs
-  categoryFeelings: '#FFCC00',  // Yellow - Emotions
-  categoryFood: '#FF6633',      // Orange - Food
-  categoryHome: '#6666FF',      // Light blue - Home
-  categorySchool: '#66CC66',    // Light green - School
-  categoryBody: '#FFDD66',      // Light yellow - Body
-  categoryPlaces: '#9966FF',    // Lavender - Places
-  categoryRoutines: '#FF9966',  // Peach - Routines
-  categoryQuestions: '#FFCC66', // Gold - Questions
-  categoryColours: '#33CCFF',   // Cyan - Colors
-  categoryNumbers: '#3399FF',   // Sky blue - Numbers
-  categoryAnimals: '#FF8855',   // Coral - Animals
-  categoryClothing: '#BB88FF',  // Light purple - Clothing
-  categoryWeather: '#5599FF',   // Medium blue - Weather
-  categoryTime: '#FF55FF',      // Pink - Time
-  categoryToys: '#FFAACC',      // Light pink - Toys
-};
+  // Home
+  t('home', 'house', 'https://api.iconify.design/mdi/home.svg?color=%23000000&width=300'),
+  t('home', 'bed', 'https://api.iconify.design/mdi/bed.svg?color=%23000000&width=300'),
+  t('home', 'chair', 'https://api.iconify.design/mdi/chair-rolling.svg?color=%23000000&width=300'),
+  t('home', 'table', 'https://api.iconify.design/mdi/table-furniture.svg?color=%23000000&width=300'),
+  t('home', 'door', 'https://api.iconify.design/mdi/door.svg?color=%23000000&width=300'),
+  t('home', 'window', 'https://api.iconify.design/mdi/window-closed.svg?color=%23000000&width=300'),
+  t('home', 'bathroom', 'https://api.iconify.design/mdi/shower.svg?color=%23000000&width=300'),
+  t('home', 'kitchen', 'https://api.iconify.design/mdi/stove.svg?color=%23000000&width=300'),
+  t('home', 'bedroom', 'https://api.iconify.design/mdi/bed-empty.svg?color=%23000000&width=300'),
+  t('home', 'living room', 'https://api.iconify.design/mdi/sofa.svg?color=%23000000&width=300'),
+  t('home', 'TV', 'https://api.iconify.design/mdi/television-classic.svg?color=%23000000&width=300'),
+  t('home', 'phone', 'https://api.iconify.design/mdi/phone.svg?color=%23000000&width=300'),
+  t('home', 'computer', 'https://api.iconify.design/mdi/laptop.svg?color=%23000000&width=300'),
+  t('home', 'tablet', 'https://api.iconify.design/mdi/tablet.svg?color=%23000000&width=300'),
 
-export const commonStyles = StyleSheet.create({
-  wrapper: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  centered: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  shadow: {
-    boxShadow: '0px 2px 4px rgba(0,0,0,0.15)',
-  },
-  shadowLarge: {
-    boxShadow: '0px 4px 8px rgba(0,0,0,0.2)',
-  },
-});
+  // School
+  t('school', 'school', 'https://api.iconify.design/mdi/school.svg?color=%23000000&width=300'),
+  t('school', 'book', 'https://api.iconify.design/mdi/book.svg?color=%23000000&width=300'),
+  t('school', 'pencil', 'https://api.iconify.design/mdi/pencil.svg?color=%23000000&width=300'),
+  t('school', 'pen', 'https://api.iconify.design/mdi/pen.svg?color=%23000000&width=300'),
+  t('school', 'paper', 'https://api.iconify.design/mdi/file-document.svg?color=%23000000&width=300'),
+  t('school', 'crayon', 'https://api.iconify.design/mdi/crayon.svg?color=%23000000&width=300'),
+  t('school', 'scissors', 'https://api.iconify.design/mdi/content-cut.svg?color=%23000000&width=300'),
+  t('school', 'glue', 'https://api.iconify.design/mdi/water-plus.svg?color=%23000000&width=300'),
+  t('school', 'backpack', 'https://api.iconify.design/mdi/bag-personal.svg?color=%23000000&width=300'),
+  t('school', 'lunch', 'https://api.iconify.design/mdi/food-apple.svg?color=%23000000&width=300'),
+  t('school', 'recess', 'https://api.iconify.design/mdi/run-fast.svg?color=%23000000&width=300'),
+  t('school', 'class', 'https://api.iconify.design/mdi/google-classroom.svg?color=%23000000&width=300'),
+
+  // Body
+  t('body', 'head', 'https://api.iconify.design/mdi/head.svg?color=%23000000&width=300'),
+  t('body', 'face', 'https://api.iconify.design/mdi/face-recognition.svg?color=%23000000&width=300'),
+  t('body', 'eyes', 'https://api.iconify.design/mdi/eye.svg?color=%23000000&width=300'),
+  t('body', 'ears', 'https://api.iconify.design/mdi/ear-hearing.svg?color=%23000000&width=300'),
+  t('body', 'nose', 'https://api.iconify.design/mdi/nose.svg?color=%23000000&width=300'),
+  t('body', 'mouth', 'https://api.iconify.design/mdi/mouth.svg?color=%23000000&width=300'),
+  t('body', 'teeth', 'https://api.iconify.design/mdi/tooth.svg?color=%23000000&width=300'),
+  t('body', 'hair', 'https://api.iconify.design/mdi/hair-dryer.svg?color=%23000000&width=300'),
+  t('body', 'hands', 'https://api.iconify.design/mdi/hand-back-left.svg?color=%23000000&width=300'),
+  t('body', 'fingers', 'https://api.iconify.design/mdi/hand-pointing-up.svg?color=%23000000&width=300'),
+  t('body', 'arms', 'https://api.iconify.design/mdi/arm-flex.svg?color=%23000000&width=300'),
+  t('body', 'legs', 'https://api.iconify.design/mdi/human-male-height-variant.svg?color=%23000000&width=300'),
+  t('body', 'feet', 'https://api.iconify.design/mdi/foot-print.svg?color=%23000000&width=300'),
+  t('body', 'tummy', 'https://api.iconify.design/mdi/stomach.svg?color=%23000000&width=300'),
+
+  // Places
+  t('places', 'park', 'https://api.iconify.design/mdi/tree.svg?color=%23000000&width=300'),
+  t('places', 'store', 'https://api.iconify.design/mdi/store.svg?color=%23000000&width=300'),
+  t('places', 'library', 'https://api.iconify.design/mdi/library.svg?color=%23000000&width=300'),
+  t('places', 'hospital', 'https://api.iconify.design/mdi/hospital-building.svg?color=%23000000&width=300'),
+  t('places', 'doctor', 'https://api.iconify.design/mdi/doctor.svg?color=%23000000&width=300'),
+  t('places', 'playground', 'https://api.iconify.design/mdi/slide.svg?color=%23000000&width=300'),
+  t('places', 'restaurant', 'https://api.iconify.design/mdi/silverware-fork-knife.svg?color=%23000000&width=300'),
+  t('places', 'car', 'https://api.iconify.design/mdi/car.svg?color=%23000000&width=300'),
+  t('places', 'bus', 'https://api.iconify.design/mdi/bus.svg?color=%23000000&width=300'),
+  t('places', 'train', 'https://api.iconify.design/mdi/train.svg?color=%23000000&width=300'),
+  t('places', 'airplane', 'https://api.iconify.design/mdi/airplane.svg?color=%23000000&width=300'),
+  t('places', 'beach', 'https://api.iconify.design/mdi/beach.svg?color=%23000000&width=300'),
+
+  // Routines
+  t('routines', 'wake up', 'https://api.iconify.design/mdi/alarm.svg?color=%23000000&width=300'),
+  t('routines', 'breakfast', 'https://api.iconify.design/mdi/coffee.svg?color=%23000000&width=300'),
+  t('routines', 'lunch', 'https://api.iconify.design/mdi/food.svg?color=%23000000&width=300'),
+  t('routines', 'dinner', 'https://api.iconify.design/mdi/food-variant.svg?color=%23000000&width=300'),
+  t('routines', 'snack time', 'https://api.iconify.design/mdi/cookie.svg?color=%23000000&width=300'),
+  t('routines', 'bath time', 'https://api.iconify.design/mdi/shower.svg?color=%23000000&width=300'),
+  t('routines', 'bedtime', 'https://api.iconify.design/mdi/sleep.svg?color=%23000000&width=300'),
+  t('routines', 'brush teeth', 'https://api.iconify.design/mdi/toothbrush.svg?color=%23000000&width=300'),
+  t('routines', 'get dressed', 'https://api.iconify.design/mdi/tshirt-crew.svg?color=%23000000&width=300'),
+  t('routines', 'potty', 'https://api.iconify.design/mdi/toilet.svg?color=%23000000&width=300'),
+
+  // Questions
+  t('questions', 'what', 'https://api.iconify.design/mdi/help-circle.svg?color=%23000000&width=300'),
+  t('questions', 'where', 'https://api.iconify.design/mdi/map-marker-question.svg?color=%23000000&width=300'),
+  t('questions', 'when', 'https://api.iconify.design/mdi/clock-outline.svg?color=%23000000&width=300'),
+  t('questions', 'who', 'https://api.iconify.design/mdi/account-question.svg?color=%23000000&width=300'),
+  t('questions', 'why', 'https://api.iconify.design/mdi/comment-question.svg?color=%23000000&width=300'),
+  t('questions', 'how', 'https://api.iconify.design/mdi/help.svg?color=%23000000&width=300'),
+  t('questions', 'which', 'https://api.iconify.design/mdi/arrow-decision.svg?color=%23000000&width=300'),
+
+  // Colours
+  t('colours', 'red', 'https://api.iconify.design/mdi/circle.svg?color=%23FF0000&width=300'),
+  t('colours', 'blue', 'https://api.iconify.design/mdi/circle.svg?color=%230000FF&width=300'),
+  t('colours', 'yellow', 'https://api.iconify.design/mdi/circle.svg?color=%23FFFF00&width=300'),
+  t('colours', 'green', 'https://api.iconify.design/mdi/circle.svg?color=%2300FF00&width=300'),
+  t('colours', 'orange', 'https://api.iconify.design/mdi/circle.svg?color=%23FF8800&width=300'),
+  t('colours', 'purple', 'https://api.iconify.design/mdi/circle.svg?color=%23AA00FF&width=300'),
+  t('colours', 'pink', 'https://api.iconify.design/mdi/circle.svg?color=%23FF00FF&width=300'),
+  t('colours', 'black', 'https://api.iconify.design/mdi/circle.svg?color=%23000000&width=300'),
+  t('colours', 'white', 'https://api.iconify.design/mdi/circle.svg?color=%23FFFFFF&width=300'),
+  t('colours', 'brown', 'https://api.iconify.design/mdi/circle.svg?color=%23663300&width=300'),
+
+  // Numbers
+  t('numbers', '1', 'https://api.iconify.design/mdi/numeric-1-circle.svg?color=%23000000&width=300'),
+  t('numbers', '2', 'https://api.iconify.design/mdi/numeric-2-circle.svg?color=%23000000&width=300'),
+  t('numbers', '3', 'https://api.iconify.design/mdi/numeric-3-circle.svg?color=%23000000&width=300'),
+  t('numbers', '4', 'https://api.iconify.design/mdi/numeric-4-circle.svg?color=%23000000&width=300'),
+  t('numbers', '5', 'https://api.iconify.design/mdi/numeric-5-circle.svg?color=%23000000&width=300'),
+  t('numbers', '6', 'https://api.iconify.design/mdi/numeric-6-circle.svg?color=%23000000&width=300'),
+  t('numbers', '7', 'https://api.iconify.design/mdi/numeric-7-circle.svg?color=%23000000&width=300'),
+  t('numbers', '8', 'https://api.iconify.design/mdi/numeric-8-circle.svg?color=%23000000&width=300'),
+  t('numbers', '9', 'https://api.iconify.design/mdi/numeric-9-circle.svg?color=%23000000&width=300'),
+  t('numbers', '10', 'https://api.iconify.design/mdi/numeric-10-circle.svg?color=%23000000&width=300'),
+
+  // Animals
+  t('animals', 'dog', 'https://api.iconify.design/mdi/dog.svg?color=%23000000&width=300'),
+  t('animals', 'cat', 'https://api.iconify.design/mdi/cat.svg?color=%23000000&width=300'),
+  t('animals', 'bird', 'https://api.iconify.design/mdi/bird.svg?color=%23000000&width=300'),
+  t('animals', 'fish', 'https://api.iconify.design/mdi/fish.svg?color=%23000000&width=300'),
+  t('animals', 'horse', 'https://api.iconify.design/mdi/horse-variant.svg?color=%23000000&width=300'),
+  t('animals', 'cow', 'https://api.iconify.design/mdi/cow.svg?color=%23000000&width=300'),
+  t('animals', 'pig', 'https://api.iconify.design/mdi/pig.svg?color=%23000000&width=300'),
+  t('animals', 'chicken', 'https://api.iconify.design/mdi/chicken.svg?color=%23000000&width=300'),
+  t('animals', 'duck', 'https://api.iconify.design/mdi/duck.svg?color=%23000000&width=300'),
+  t('animals', 'rabbit', 'https://api.iconify.design/mdi/rabbit.svg?color=%23000000&width=300'),
+  t('animals', 'bear', 'https://api.iconify.design/mdi/panda.svg?color=%23000000&width=300'),
+  t('animals', 'lion', 'https://api.iconify.design/mdi/lion.svg?color=%23000000&width=300'),
+  t('animals', 'elephant', 'https://api.iconify.design/mdi/elephant.svg?color=%23000000&width=300'),
+  t('animals', 'monkey', 'https://api.iconify.design/mdi/monkey.svg?color=%23000000&width=300'),
+
+  // Clothing
+  t('clothing', 'shirt', 'https://api.iconify.design/mdi/tshirt-crew.svg?color=%23000000&width=300'),
+  t('clothing', 'pants', 'https://api.iconify.design/mdi/human-male-height.svg?color=%23000000&width=300'),
+  t('clothing', 'dress', 'https://api.iconify.design/mdi/human-female-dance.svg?color=%23000000&width=300'),
+  t('clothing', 'shoes', 'https://api.iconify.design/mdi/shoe-formal.svg?color=%23000000&width=300'),
+  t('clothing', 'socks', 'https://api.iconify.design/mdi/foot-print.svg?color=%23000000&width=300'),
+  t('clothing', 'coat', 'https://api.iconify.design/mdi/coat-rack.svg?color=%23000000&width=300'),
+  t('clothing', 'hat', 'https://api.iconify.design/mdi/hat-fedora.svg?color=%23000000&width=300'),
+  t('clothing', 'gloves', 'https://api.iconify.design/mdi/hand-back-left.svg?color=%23000000&width=300'),
+
+  // Weather
+  t('weather', 'sunny', 'https://api.iconify.design/mdi/weather-sunny.svg?color=%23000000&width=300'),
+  t('weather', 'cloudy', 'https://api.iconify.design/mdi/weather-cloudy.svg?color=%23000000&width=300'),
+  t('weather', 'rainy', 'https://api.iconify.design/mdi/weather-rainy.svg?color=%23000000&width=300'),
+  t('weather', 'snowy', 'https://api.iconify.design/mdi/weather-snowy.svg?color=%23000000&width=300'),
+  t('weather', 'windy', 'https://api.iconify.design/mdi/weather-windy.svg?color=%23000000&width=300'),
+  t('weather', 'hot', 'https://api.iconify.design/mdi/thermometer-high.svg?color=%23000000&width=300'),
+  t('weather', 'cold', 'https://api.iconify.design/mdi/snowflake.svg?color=%23000000&width=300'),
+
+  // Time
+  t('time', 'morning', 'https://api.iconify.design/mdi/weather-sunset-up.svg?color=%23000000&width=300'),
+  t('time', 'afternoon', 'https://api.iconify.design/mdi/weather-sunny.svg?color=%23000000&width=300'),
+  t('time', 'evening', 'https://api.iconify.design/mdi/weather-sunset-down.svg?color=%23000000&width=300'),
+  t('time', 'night', 'https://api.iconify.design/mdi/weather-night.svg?color=%23000000&width=300'),
+  t('time', 'today', 'https://api.iconify.design/mdi/calendar-today.svg?color=%23000000&width=300'),
+  t('time', 'tomorrow', 'https://api.iconify.design/mdi/calendar-arrow-right.svg?color=%23000000&width=300'),
+  t('time', 'yesterday', 'https://api.iconify.design/mdi/calendar-arrow-left.svg?color=%23000000&width=300'),
+  t('time', 'now', 'https://api.iconify.design/mdi/clock-outline.svg?color=%23000000&width=300'),
+  t('time', 'later', 'https://api.iconify.design/mdi/clock-time-four.svg?color=%23000000&width=300'),
+
+  // Toys
+  t('toys', 'ball', 'https://api.iconify.design/mdi/soccer.svg?color=%23000000&width=300'),
+  t('toys', 'doll', 'https://api.iconify.design/mdi/human-female.svg?color=%23000000&width=300'),
+  t('toys', 'blocks', 'https://api.iconify.design/mdi/cube-outline.svg?color=%23000000&width=300'),
+  t('toys', 'puzzle', 'https://api.iconify.design/mdi/puzzle.svg?color=%23000000&width=300'),
+  t('toys', 'car', 'https://api.iconify.design/mdi/car-side.svg?color=%23000000&width=300'),
+  t('toys', 'truck', 'https://api.iconify.design/mdi/truck.svg?color=%23000000&width=300'),
+  t('toys', 'train', 'https://api.iconify.design/mdi/train-car.svg?color=%23000000&width=300'),
+  t('toys', 'bike', 'https://api.iconify.design/mdi/bike.svg?color=%23000000&width=300'),
+  t('toys', 'swing', 'https://api.iconify.design/mdi/human-handsup.svg?color=%23000000&width=300'),
+  t('toys', 'slide', 'https://api.iconify.design/mdi/slide.svg?color=%23000000&width=300'),
+];
