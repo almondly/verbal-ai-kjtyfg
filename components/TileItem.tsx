@@ -45,12 +45,12 @@ const TileItem = memo(function TileItem({
 
   // Responsive font size based on screen width
   const getResponsiveFontSize = () => {
-    if (width >= 1400) return 18; // Large tablets/desktops
-    if (width >= 1200) return 17; // Medium tablets
-    if (width >= 1000) return 16; // Small tablets
-    if (width >= 820) return 15;  // Large phones landscape
-    if (width >= 680) return 14;  // Medium phones landscape
-    return 13; // Small phones
+    if (width >= 1400) return 16; // Large tablets/desktops
+    if (width >= 1200) return 15; // Medium tablets
+    if (width >= 1000) return 14; // Small tablets
+    if (width >= 820) return 13;  // Large phones landscape
+    if (width >= 680) return 12;  // Medium phones landscape
+    return 11; // Small phones
   };
 
   const bg = getCategoryColor();
@@ -86,14 +86,14 @@ const TileItem = memo(function TileItem({
             <Image 
               source={{ uri: tile.imageUri }} 
               style={styles.image} 
-              resizeMode="cover"
-              onError={() => console.log(`Failed to load image for tile: ${tile.text}`)}
+              resizeMode="contain"
+              onError={(error) => console.log(`Failed to load image for tile: ${tile.text}`, error.nativeEvent.error)}
             />
           ) : (
             <Icon name="chatbubble-ellipses-outline" size={34} color={colors.text} />
           )}
         </View>
-        <Text style={[styles.text, { fontSize }]} numberOfLines={2}>
+        <Text style={[styles.text, { fontSize }]} numberOfLines={2} ellipsizeMode="tail">
           {tile.text}
         </Text>
       </TouchableOpacity>
@@ -105,15 +105,15 @@ export default TileItem;
 
 const styles = StyleSheet.create({
   tileWrap: {
-    paddingHorizontal: 1,
-    paddingVertical: 1,
+    paddingHorizontal: 2,
+    paddingVertical: 2,
   },
   tile: {
     aspectRatio: 1,
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 6,
+    padding: 8,
   },
   imageWrap: {
     width: '100%',
@@ -123,16 +123,15 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   image: {
-    width: '80%',
-    height: '80%',
-    borderRadius: 8,
-    backgroundColor: '#f0f0f0', // Light background for loading state
+    width: '100%',
+    height: '100%',
   },
   text: {
     fontFamily: 'Montserrat_600SemiBold',
     color: colors.text,
     textAlign: 'center',
     marginTop: 2,
-    lineHeight: 18,
+    lineHeight: 16,
+    paddingHorizontal: 2,
   },
 });
