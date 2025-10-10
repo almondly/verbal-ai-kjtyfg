@@ -22,329 +22,329 @@ const categoryColor: Record<string, string> = {
   toys: '#FF99CC',
 };
 
-// Helper to build tiles quickly with ARASAAC pictogram images
-const t = (category: string, text: string, arasaacId?: number): Tile => ({
+// Helper to build tiles quickly with universal pictogram images
+const t = (category: string, text: string, imageUri?: string): Tile => ({
   id: `${category}-${text.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
   text,
   category,
   color: categoryColor[category] || '#FFFFFF',
-  imageUri: arasaacId ? `https://static.arasaac.org/pictograms/${arasaacId}/${arasaacId}_300.png` : undefined,
+  imageUri,
 });
 
 export const defaultTiles: Tile[] = [
   // Core - Essential communication words
-  t('core', 'I', 8502),           // I/me pointing to self
-  t('core', 'you', 8687),          // you pointing to other
-  t('core', 'he', 8485),           // he/male person
-  t('core', 'she', 8622),          // she/female person
-  t('core', 'we', 8679),           // we/group of people
-  t('core', 'they', 8650),         // they/multiple people
-  t('core', 'it', 8509),           // it/object
-  t('core', 'me', 8541),           // me/self
-  t('core', 'my', 8555),           // my/possession
-  t('core', 'mine', 8547),         // mine/ownership
-  t('core', 'your', 8688),         // your/belonging to you
-  t('core', 'want', 8677),         // want/desire
-  t('core', 'need', 8558),         // need/necessity
-  t('core', 'like', 8524),         // like/enjoy
-  t('core', "don't", 8421),        // don't/negative
-  t('core', 'help', 8486),         // help/assistance
-  t('core', 'more', 8551),         // more/additional
-  t('core', 'again', 8289),        // again/repeat
-  t('core', 'different', 8414),    // different/not same
-  t('core', 'same', 8612),         // same/identical
-  t('core', 'this', 8652),         // this/near object
-  t('core', 'that', 8649),         // that/far object
-  t('core', 'here', 8487),         // here/this location
-  t('core', 'there', 8648),        // there/that location
-  t('core', 'go', 8471),           // go/move
-  t('core', 'stop', 8638),         // stop/halt
-  t('core', 'come', 8377),         // come/approach
-  t('core', 'look', 8527),         // look/see
-  t('core', 'put', 8594),          // put/place
-  t('core', 'make', 8532),         // make/create
-  t('core', 'turn', 8664),         // turn/rotate
-  t('core', 'open', 8568),         // open/unlock
-  t('core', 'close', 8373),        // close/shut
-  t('core', 'all done', 8293),     // all done/finished
-  t('core', 'finished', 8452),     // finished/complete
-  t('core', 'please', 8584),       // please/polite request
-  t('core', 'thank you', 8647),    // thank you/gratitude
-  t('core', 'yes', 8686),          // yes/affirmative
-  t('core', 'no', 8560),           // no/negative
-  t('core', 'because', 8318),      // because/reason
-  t('core', 'and', 8298),          // and/plus
-  t('core', 'or', 8569),           // or/alternative
-  t('core', 'with', 8683),         // with/together
-  t('core', 'without', 8684),      // without/lacking
-  t('core', 'big', 8324),          // big/large
-  t('core', 'small', 8627),        // small/little
-  t('core', 'fast', 8447),         // fast/quick
-  t('core', 'slow', 8626),         // slow/gradual
-  t('core', 'good', 8472),         // good/positive
-  t('core', 'bad', 8313),          // bad/negative
-  t('core', 'favourite', 8448),    // favourite/preferred
-  t('core', 'hello', 8485),        // hello/greeting
-  t('core', 'goodbye', 8473),      // goodbye/farewell
+  t('core', 'I', 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=300&fit=crop'),
+  t('core', 'you', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop'),
+  t('core', 'he', 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=300&fit=crop'),
+  t('core', 'she', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&h=300&fit=crop'),
+  t('core', 'we', 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=300&h=300&fit=crop'),
+  t('core', 'they', 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=300&h=300&fit=crop'),
+  t('core', 'it', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=300&fit=crop'),
+  t('core', 'me', 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=300&h=300&fit=crop'),
+  t('core', 'my', 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&h=300&fit=crop'),
+  t('core', 'mine', 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&h=300&fit=crop'),
+  t('core', 'your', 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300&h=300&fit=crop'),
+  t('core', 'want', 'https://images.unsplash.com/photo-1532635241-17e820acc59f?w=300&h=300&fit=crop'),
+  t('core', 'need', 'https://images.unsplash.com/photo-1516534775068-ba3e7458af70?w=300&h=300&fit=crop'),
+  t('core', 'like', 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=300&h=300&fit=crop'),
+  t('core', "don't", 'https://images.unsplash.com/photo-1577563908411-5077b6dc7624?w=300&h=300&fit=crop'),
+  t('core', 'help', 'https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=300&h=300&fit=crop'),
+  t('core', 'more', 'https://images.unsplash.com/photo-1553729459-efe14ef6055d?w=300&h=300&fit=crop'),
+  t('core', 'again', 'https://images.unsplash.com/photo-1501139083538-0139583c060f?w=300&h=300&fit=crop'),
+  t('core', 'different', 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=300&h=300&fit=crop'),
+  t('core', 'same', 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=300&h=300&fit=crop'),
+  t('core', 'this', 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=300&h=300&fit=crop'),
+  t('core', 'that', 'https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?w=300&h=300&fit=crop'),
+  t('core', 'here', 'https://images.unsplash.com/photo-1524661135-423995f22d0b?w=300&h=300&fit=crop'),
+  t('core', 'there', 'https://images.unsplash.com/photo-1569163139394-de4798aa62b6?w=300&h=300&fit=crop'),
+  t('core', 'go', 'https://images.unsplash.com/photo-1502101872923-d48509bff386?w=300&h=300&fit=crop'),
+  t('core', 'stop', 'https://images.unsplash.com/photo-1615486511262-2d3e1f0e2f8e?w=300&h=300&fit=crop'),
+  t('core', 'come', 'https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=300&h=300&fit=crop'),
+  t('core', 'look', 'https://images.unsplash.com/photo-1574169208507-84376144848b?w=300&h=300&fit=crop'),
+  t('core', 'put', 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=300&h=300&fit=crop'),
+  t('core', 'make', 'https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?w=300&h=300&fit=crop'),
+  t('core', 'turn', 'https://images.unsplash.com/photo-1503455637927-730bce8583c0?w=300&h=300&fit=crop'),
+  t('core', 'open', 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=300&fit=crop'),
+  t('core', 'close', 'https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=300&h=300&fit=crop'),
+  t('core', 'all done', 'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=300&h=300&fit=crop'),
+  t('core', 'finished', 'https://images.unsplash.com/photo-1521791136064-7986c2920216?w=300&h=300&fit=crop'),
+  t('core', 'please', 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=300&h=300&fit=crop'),
+  t('core', 'thank you', 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=300&h=300&fit=crop'),
+  t('core', 'yes', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop'),
+  t('core', 'no', 'https://images.unsplash.com/photo-1552058544-f2b08422138a?w=300&h=300&fit=crop'),
+  t('core', 'because', 'https://images.unsplash.com/photo-1516534775068-ba3e7458af70?w=300&h=300&fit=crop'),
+  t('core', 'and', 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=300&h=300&fit=crop'),
+  t('core', 'or', 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=300&h=300&fit=crop'),
+  t('core', 'with', 'https://images.unsplash.com/photo-1491438590914-bc09fcaaf77a?w=300&h=300&fit=crop'),
+  t('core', 'without', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop'),
+  t('core', 'big', 'https://images.unsplash.com/photo-1551782450-a2132b4ba21d?w=300&h=300&fit=crop'),
+  t('core', 'small', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=300&fit=crop'),
+  t('core', 'fast', 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=300&h=300&fit=crop'),
+  t('core', 'slow', 'https://images.unsplash.com/photo-1437622368342-7a3d73a34c8f?w=300&h=300&fit=crop'),
+  t('core', 'good', 'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=300&h=300&fit=crop'),
+  t('core', 'bad', 'https://images.unsplash.com/photo-1577563908411-5077b6dc7624?w=300&h=300&fit=crop'),
+  t('core', 'favourite', 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=300&h=300&fit=crop'),
+  t('core', 'hello', 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=300&h=300&fit=crop'),
+  t('core', 'goodbye', 'https://images.unsplash.com/photo-1521791136064-7986c2920216?w=300&h=300&fit=crop'),
 
   // People - Family and social connections
-  t('people', 'mum', 8553),        // mum/mother
-  t('people', 'dad', 8402),        // dad/father
-  t('people', 'grandma', 8475),    // grandma/grandmother
-  t('people', 'grandpa', 8476),    // grandpa/grandfather
-  t('people', 'brother', 8339),    // brother/male sibling
-  t('people', 'sister', 8625),     // sister/female sibling
-  t('people', 'baby', 8312),       // baby/infant
-  t('people', 'friend', 8460),     // friend/companion
-  t('people', 'teacher', 8646),    // teacher/educator
-  t('people', 'student', 8639),    // student/pupil
-  t('people', 'principal', 8588),  // principal/headmaster
-  t('people', 'nurse', 8563),      // nurse/medical staff
-  t('people', 'bus driver', 8343), // bus driver/driver
-  t('people', 'coach', 8374),      // coach/trainer
-  t('people', 'neighbour', 8559),  // neighbour/nearby person
-  t('people', 'doctor', 8419),     // doctor/physician
-  t('people', 'dentist', 8410),    // dentist/tooth doctor
-  t('people', 'police', 8585),     // police/officer
-  t('people', 'firefighter', 8453),// firefighter/fire service
-  t('people', 'mail carrier', 8531),// mail carrier/postman
+  t('people', 'mum', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&h=300&fit=crop'),
+  t('people', 'dad', 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=300&fit=crop'),
+  t('people', 'grandma', 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=300&h=300&fit=crop'),
+  t('people', 'grandpa', 'https://images.unsplash.com/photo-1595433707802-6b2626ef1c91?w=300&h=300&fit=crop'),
+  t('people', 'brother', 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300&h=300&fit=crop'),
+  t('people', 'sister', 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&h=300&fit=crop'),
+  t('people', 'baby', 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=300&h=300&fit=crop'),
+  t('people', 'friend', 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=300&h=300&fit=crop'),
+  t('people', 'teacher', 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=300&h=300&fit=crop'),
+  t('people', 'student', 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=300&h=300&fit=crop'),
+  t('people', 'principal', 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=300&h=300&fit=crop'),
+  t('people', 'nurse', 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=300&h=300&fit=crop'),
+  t('people', 'bus driver', 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=300&h=300&fit=crop'),
+  t('people', 'coach', 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=300&fit=crop'),
+  t('people', 'neighbour', 'https://images.unsplash.com/photo-1491438590914-bc09fcaaf77a?w=300&h=300&fit=crop'),
+  t('people', 'doctor', 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=300&h=300&fit=crop'),
+  t('people', 'dentist', 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=300&h=300&fit=crop'),
+  t('people', 'police', 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=300&h=300&fit=crop'),
+  t('people', 'firefighter', 'https://images.unsplash.com/photo-1541450805095-1b6c0c4c8f27?w=300&h=300&fit=crop'),
+  t('people', 'mail carrier', 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=300&h=300&fit=crop'),
 
   // Actions - Verbs and activities
-  t('actions', 'eat', 8428),       // eat/consume food
-  t('actions', 'drink', 8422),     // drink/consume liquid
-  t('actions', 'play', 8583),      // play/have fun
-  t('actions', 'read', 8598),      // read/look at text
-  t('actions', 'write', 8685),     // write/make text
-  t('actions', 'draw', 8423),      // draw/make picture
-  t('actions', 'colour', 8376),    // colour/add color
-  t('actions', 'cut', 8401),       // cut/use scissors
-  t('actions', 'paste', 8577),     // paste/glue
-  t('actions', 'build', 8341),     // build/construct
-  t('actions', 'ride', 8605),      // ride/travel on
-  t('actions', 'walk', 8676),      // walk/move on foot
-  t('actions', 'run', 8610),       // run/move fast
-  t('actions', 'jump', 8512),      // jump/leap
-  t('actions', 'sit', 8624),       // sit/be seated
-  t('actions', 'stand', 8636),     // stand/be upright
-  t('actions', 'turn', 8663),      // turn/rotate
-  t('actions', 'show', 8622),      // show/display
-  t('actions', 'give', 8469),      // give/hand over
-  t('actions', 'take', 8645),      // take/grab
-  t('actions', 'say', 8613),       // say/speak
-  t('actions', 'talk', 8644),      // talk/converse
-  t('actions', 'listen', 8525),    // listen/hear
-  t('actions', 'look', 8526),      // look/observe
-  t('actions', 'point', 8586),     // point/indicate
-  t('actions', 'wait', 8675),      // wait/pause
-  t('actions', 'wash', 8678),      // wash/clean
-  t('actions', 'brush', 8340),     // brush/clean with brush
-  t('actions', 'sleep', 8625),     // sleep/rest
-  t('actions', 'wake', 8674),      // wake/wake up
-  t('actions', 'help', 8487),      // help/assist
+  t('actions', 'eat', 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=300&h=300&fit=crop'),
+  t('actions', 'drink', 'https://images.unsplash.com/photo-1544145945-f90425340c7e?w=300&h=300&fit=crop'),
+  t('actions', 'play', 'https://images.unsplash.com/photo-1587280501635-68a0e82cd5ff?w=300&h=300&fit=crop'),
+  t('actions', 'read', 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=300&h=300&fit=crop'),
+  t('actions', 'write', 'https://images.unsplash.com/photo-1455390582262-044cdead277a?w=300&h=300&fit=crop'),
+  t('actions', 'draw', 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=300&h=300&fit=crop'),
+  t('actions', 'colour', 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=300&h=300&fit=crop'),
+  t('actions', 'cut', 'https://images.unsplash.com/photo-1589578527966-fdac0f44566c?w=300&h=300&fit=crop'),
+  t('actions', 'paste', 'https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?w=300&h=300&fit=crop'),
+  t('actions', 'build', 'https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?w=300&h=300&fit=crop'),
+  t('actions', 'ride', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=300&fit=crop'),
+  t('actions', 'walk', 'https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=300&h=300&fit=crop'),
+  t('actions', 'run', 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=300&h=300&fit=crop'),
+  t('actions', 'jump', 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=300&h=300&fit=crop'),
+  t('actions', 'sit', 'https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=300&h=300&fit=crop'),
+  t('actions', 'stand', 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300&h=300&fit=crop'),
+  t('actions', 'turn', 'https://images.unsplash.com/photo-1503455637927-730bce8583c0?w=300&h=300&fit=crop'),
+  t('actions', 'show', 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=300&h=300&fit=crop'),
+  t('actions', 'give', 'https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=300&h=300&fit=crop'),
+  t('actions', 'take', 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=300&h=300&fit=crop'),
+  t('actions', 'say', 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=300&h=300&fit=crop'),
+  t('actions', 'talk', 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=300&h=300&fit=crop'),
+  t('actions', 'listen', 'https://images.unsplash.com/photo-1574169208507-84376144848b?w=300&h=300&fit=crop'),
+  t('actions', 'look', 'https://images.unsplash.com/photo-1574169208507-84376144848b?w=300&h=300&fit=crop'),
+  t('actions', 'point', 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=300&h=300&fit=crop'),
+  t('actions', 'wait', 'https://images.unsplash.com/photo-1501139083538-0139583c060f?w=300&h=300&fit=crop'),
+  t('actions', 'wash', 'https://images.unsplash.com/photo-1584820927498-cfe5211fd8bf?w=300&h=300&fit=crop'),
+  t('actions', 'brush', 'https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?w=300&h=300&fit=crop'),
+  t('actions', 'sleep', 'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=300&h=300&fit=crop'),
+  t('actions', 'wake', 'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=300&h=300&fit=crop'),
+  t('actions', 'help', 'https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=300&h=300&fit=crop'),
 
   // Feelings - Emotions and states
-  t('feelings', 'happy', 8481),    // happy/joyful
-  t('feelings', 'sad', 8611),      // sad/unhappy
-  t('feelings', 'angry', 8299),    // angry/mad
-  t('feelings', 'frustrated', 8461),// frustrated/annoyed
-  t('feelings', 'excited', 8442),  // excited/enthusiastic
-  t('feelings', 'tired', 8656),    // tired/exhausted
-  t('feelings', 'bored', 8335),    // bored/uninterested
-  t('feelings', 'sick', 8623),     // sick/ill
-  t('feelings', 'scared', 8614),   // scared/afraid
-  t('feelings', 'worried', 8684),  // worried/anxious
-  t('feelings', 'calm', 8348),     // calm/peaceful
-  t('feelings', 'proud', 8591),    // proud/satisfied
-  t('feelings', 'silly', 8624),    // silly/playful
-  t('feelings', 'surprised', 8642),// surprised/shocked
-  t('feelings', 'okay', 8566),     // okay/fine
-  t('feelings', 'hurt', 8498),     // hurt/in pain
-  t('feelings', 'hungry', 8497),   // hungry/need food
-  t('feelings', 'thirsty', 8653),  // thirsty/need drink
-  t('feelings', 'hot', 8494),      // hot/warm
-  t('feelings', 'cold', 8375),     // cold/chilly
+  t('feelings', 'happy', 'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=300&h=300&fit=crop'),
+  t('feelings', 'sad', 'https://images.unsplash.com/photo-1577563908411-5077b6dc7624?w=300&h=300&fit=crop'),
+  t('feelings', 'angry', 'https://images.unsplash.com/photo-1552058544-f2b08422138a?w=300&h=300&fit=crop'),
+  t('feelings', 'frustrated', 'https://images.unsplash.com/photo-1577563908411-5077b6dc7624?w=300&h=300&fit=crop'),
+  t('feelings', 'excited', 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=300&h=300&fit=crop'),
+  t('feelings', 'tired', 'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=300&h=300&fit=crop'),
+  t('feelings', 'bored', 'https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=300&h=300&fit=crop'),
+  t('feelings', 'sick', 'https://images.unsplash.com/photo-1584820927498-cfe5211fd8bf?w=300&h=300&fit=crop'),
+  t('feelings', 'scared', 'https://images.unsplash.com/photo-1577563908411-5077b6dc7624?w=300&h=300&fit=crop'),
+  t('feelings', 'worried', 'https://images.unsplash.com/photo-1577563908411-5077b6dc7624?w=300&h=300&fit=crop'),
+  t('feelings', 'calm', 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=300&fit=crop'),
+  t('feelings', 'proud', 'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=300&h=300&fit=crop'),
+  t('feelings', 'silly', 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=300&h=300&fit=crop'),
+  t('feelings', 'surprised', 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=300&h=300&fit=crop'),
+  t('feelings', 'okay', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop'),
+  t('feelings', 'hurt', 'https://images.unsplash.com/photo-1577563908411-5077b6dc7624?w=300&h=300&fit=crop'),
+  t('feelings', 'hungry', 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=300&h=300&fit=crop'),
+  t('feelings', 'thirsty', 'https://images.unsplash.com/photo-1544145945-f90425340c7e?w=300&h=300&fit=crop'),
+  t('feelings', 'hot', 'https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?w=300&h=300&fit=crop'),
+  t('feelings', 'cold', 'https://images.unsplash.com/photo-1483664852095-d6cc6870702d?w=300&h=300&fit=crop'),
 
   // Food - Expanded food and drink vocabulary
-  t('food', 'apple', 8302),        // apple/red fruit
-  t('food', 'banana', 8314),       // banana/yellow fruit
-  t('food', 'bread', 8337),        // bread/loaf
-  t('food', 'milk', 8546),         // milk/dairy drink
-  t('food', 'water', 8677),        // water/clear liquid
-  t('food', 'juice', 8511),        // juice/fruit drink
-  t('food', 'breakfast', 8338),    // breakfast/morning meal
-  t('food', 'lunch', 8529),        // lunch/midday meal
-  t('food', 'dinner', 8415),       // dinner/evening meal
-  t('food', 'snack', 8628),        // snack/small food
-  t('food', 'sandwich', 8612),     // sandwich/bread with filling
-  t('food', 'pizza', 8582),        // pizza/Italian food
-  t('food', 'pasta', 8576),        // pasta/noodles
-  t('food', 'rice', 8604),         // rice/grain
-  t('food', 'chicken', 8365),      // chicken/poultry
-  t('food', 'fish', 8454),         // fish/seafood
-  t('food', 'vegetables', 8671),   // vegetables/veggies
-  t('food', 'fruit', 8462),        // fruit/fresh produce
-  t('food', 'cake', 8346),         // cake/dessert
-  t('food', 'biscuit', 8325),      // biscuit/cookie
-  t('food', 'ice cream', 8499),    // ice cream/frozen dessert
-  t('food', 'tea', 8645),          // tea/hot drink
-  t('food', 'coffee', 8376),       // coffee/hot drink
+  t('food', 'apple', 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=300&h=300&fit=crop'),
+  t('food', 'banana', 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=300&h=300&fit=crop'),
+  t('food', 'bread', 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=300&h=300&fit=crop'),
+  t('food', 'milk', 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=300&h=300&fit=crop'),
+  t('food', 'water', 'https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=300&h=300&fit=crop'),
+  t('food', 'juice', 'https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=300&h=300&fit=crop'),
+  t('food', 'breakfast', 'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=300&h=300&fit=crop'),
+  t('food', 'lunch', 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&h=300&fit=crop'),
+  t('food', 'dinner', 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=300&h=300&fit=crop'),
+  t('food', 'snack', 'https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=300&h=300&fit=crop'),
+  t('food', 'sandwich', 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=300&h=300&fit=crop'),
+  t('food', 'pizza', 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=300&h=300&fit=crop'),
+  t('food', 'pasta', 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=300&h=300&fit=crop'),
+  t('food', 'rice', 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=300&h=300&fit=crop'),
+  t('food', 'chicken', 'https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=300&h=300&fit=crop'),
+  t('food', 'fish', 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=300&h=300&fit=crop'),
+  t('food', 'vegetables', 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=300&h=300&fit=crop'),
+  t('food', 'fruit', 'https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=300&h=300&fit=crop'),
+  t('food', 'cake', 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=300&h=300&fit=crop'),
+  t('food', 'biscuit', 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=300&h=300&fit=crop'),
+  t('food', 'ice cream', 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=300&h=300&fit=crop'),
+  t('food', 'tea', 'https://images.unsplash.com/photo-1564890369478-c89ca6d9cde9?w=300&h=300&fit=crop'),
+  t('food', 'coffee', 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=300&h=300&fit=crop'),
 
   // Home - Household items and rooms
-  t('home', 'bed', 8319),          // bed/sleeping furniture
-  t('home', 'chair', 8359),        // chair/seat
-  t('home', 'table', 8643),        // table/flat surface
-  t('home', 'sofa', 8630),         // sofa/couch
-  t('home', 'television', 8647),   // television/TV
-  t('home', 'toilet', 8657),       // toilet/bathroom fixture
-  t('home', 'kitchen', 8516),      // kitchen/cooking room
-  t('home', 'bathroom', 8317),     // bathroom/wash room
-  t('home', 'bedroom', 8320),      // bedroom/sleeping room
-  t('home', 'living room', 8526),  // living room/lounge
-  t('home', 'garage', 8465),       // garage/car storage
-  t('home', 'garden', 8466),       // garden/outdoor space
-  t('home', 'door', 8420),         // door/entrance
-  t('home', 'window', 8681),       // window/glass opening
-  t('home', 'refrigerator', 8600), // refrigerator/fridge
+  t('home', 'bed', 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=300&h=300&fit=crop'),
+  t('home', 'chair', 'https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=300&h=300&fit=crop'),
+  t('home', 'table', 'https://images.unsplash.com/photo-1530018607912-eff2daa1bac4?w=300&h=300&fit=crop'),
+  t('home', 'sofa', 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=300&h=300&fit=crop'),
+  t('home', 'television', 'https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=300&h=300&fit=crop'),
+  t('home', 'toilet', 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=300&h=300&fit=crop'),
+  t('home', 'kitchen', 'https://images.unsplash.com/photo-1556911220-bff31c812dba?w=300&h=300&fit=crop'),
+  t('home', 'bathroom', 'https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=300&h=300&fit=crop'),
+  t('home', 'bedroom', 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=300&h=300&fit=crop'),
+  t('home', 'living room', 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=300&h=300&fit=crop'),
+  t('home', 'garage', 'https://images.unsplash.com/photo-1590674899484-d5640e854abe?w=300&h=300&fit=crop'),
+  t('home', 'garden', 'https://images.unsplash.com/photo-1558904541-efa843a96f01?w=300&h=300&fit=crop'),
+  t('home', 'door', 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=300&fit=crop'),
+  t('home', 'window', 'https://images.unsplash.com/photo-1545259741-2ea3ebf61fa3?w=300&h=300&fit=crop'),
+  t('home', 'refrigerator', 'https://images.unsplash.com/photo-1571175443880-49e1d25b2bc5?w=300&h=300&fit=crop'),
 
   // School - Educational items and activities
-  t('school', 'book', 8334),       // book/reading material
-  t('school', 'pencil', 8579),     // pencil/writing tool
-  t('school', 'eraser', 8437),     // eraser/rubber
-  t('school', 'marker', 8536),     // marker/felt pen
-  t('school', 'notebook', 8562),   // notebook/exercise book
-  t('school', 'backpack', 8311),   // backpack/school bag
-  t('school', 'canteen', 8350),    // canteen/cafeteria
-  t('school', 'playground', 8583), // playground/play area
-  t('school', 'assembly', 8305),   // assembly/gathering
-  t('school', 'sport', 8635),      // sport/physical activity
-  t('school', 'classroom', 8371),  // classroom/learning room
-  t('school', 'desk', 8411),       // desk/work table
+  t('school', 'book', 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=300&h=300&fit=crop'),
+  t('school', 'pencil', 'https://images.unsplash.com/photo-1455390582262-044cdead277a?w=300&h=300&fit=crop'),
+  t('school', 'eraser', 'https://images.unsplash.com/photo-1589578527966-fdac0f44566c?w=300&h=300&fit=crop'),
+  t('school', 'marker', 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=300&h=300&fit=crop'),
+  t('school', 'notebook', 'https://images.unsplash.com/photo-1517842645767-c639042777db?w=300&h=300&fit=crop'),
+  t('school', 'backpack', 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300&h=300&fit=crop'),
+  t('school', 'canteen', 'https://images.unsplash.com/photo-1567521464027-f127ff144326?w=300&h=300&fit=crop'),
+  t('school', 'playground', 'https://images.unsplash.com/photo-1587280501635-68a0e82cd5ff?w=300&h=300&fit=crop'),
+  t('school', 'assembly', 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=300&h=300&fit=crop'),
+  t('school', 'sport', 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=300&h=300&fit=crop'),
+  t('school', 'classroom', 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=300&h=300&fit=crop'),
+  t('school', 'desk', 'https://images.unsplash.com/photo-1530018607912-eff2daa1bac4?w=300&h=300&fit=crop'),
 
   // Body - Body parts
-  t('body', 'head', 8484),         // head/top of body
-  t('body', 'face', 8445),         // face/front of head
-  t('body', 'eyes', 8444),         // eyes/vision organs
-  t('body', 'ears', 8427),         // ears/hearing organs
-  t('body', 'nose', 8561),         // nose/smell organ
-  t('body', 'mouth', 8552),        // mouth/eating organ
-  t('body', 'teeth', 8646),        // teeth/chewing tools
-  t('body', 'hands', 8480),        // hands/grasping tools
-  t('body', 'fingers', 8451),      // fingers/hand digits
-  t('body', 'arms', 8304),         // arms/upper limbs
-  t('body', 'legs', 8522),         // legs/lower limbs
-  t('body', 'feet', 8449),         // feet/walking tools
-  t('body', 'toes', 8656),         // toes/foot digits
-  t('body', 'stomach', 8637),      // stomach/belly
-  t('body', 'back', 8310),         // back/rear of body
+  t('body', 'head', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop'),
+  t('body', 'face', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop'),
+  t('body', 'eyes', 'https://images.unsplash.com/photo-1574169208507-84376144848b?w=300&h=300&fit=crop'),
+  t('body', 'ears', 'https://images.unsplash.com/photo-1574169208507-84376144848b?w=300&h=300&fit=crop'),
+  t('body', 'nose', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop'),
+  t('body', 'mouth', 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=300&h=300&fit=crop'),
+  t('body', 'teeth', 'https://images.unsplash.com/photo-1606811971618-4486d14f3f99?w=300&h=300&fit=crop'),
+  t('body', 'hands', 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=300&h=300&fit=crop'),
+  t('body', 'fingers', 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=300&h=300&fit=crop'),
+  t('body', 'arms', 'https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=300&h=300&fit=crop'),
+  t('body', 'legs', 'https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=300&h=300&fit=crop'),
+  t('body', 'feet', 'https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=300&h=300&fit=crop'),
+  t('body', 'toes', 'https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=300&h=300&fit=crop'),
+  t('body', 'stomach', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop'),
+  t('body', 'back', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop'),
 
   // Places - Locations and destinations
-  t('places', 'park', 8575),       // park/outdoor space
-  t('places', 'school', 8615),     // school/learning place
-  t('places', 'home', 8492),       // home/house
-  t('places', 'shop', 8621),       // shop/store
-  t('places', 'library', 8523),    // library/book place
-  t('places', 'hospital', 8493),   // hospital/medical place
-  t('places', 'beach', 8318),      // beach/seaside
-  t('places', 'playground', 8584), // playground/play area
-  t('places', 'restaurant', 8603), // restaurant/eating place
-  t('places', 'cinema', 8369),     // cinema/movie theater
+  t('places', 'park', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=300&fit=crop'),
+  t('places', 'school', 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=300&h=300&fit=crop'),
+  t('places', 'home', 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=300&h=300&fit=crop'),
+  t('places', 'shop', 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=300&h=300&fit=crop'),
+  t('places', 'library', 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=300&h=300&fit=crop'),
+  t('places', 'hospital', 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=300&h=300&fit=crop'),
+  t('places', 'beach', 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=300&h=300&fit=crop'),
+  t('places', 'playground', 'https://images.unsplash.com/photo-1587280501635-68a0e82cd5ff?w=300&h=300&fit=crop'),
+  t('places', 'restaurant', 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=300&h=300&fit=crop'),
+  t('places', 'cinema', 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=300&h=300&fit=crop'),
 
   // Routines - Daily activities
-  t('routines', 'wake up', 8673),      // wake up/get up
-  t('routines', 'get dressed', 8468),  // get dressed/put on clothes
-  t('routines', 'brush teeth', 8341),  // brush teeth/dental hygiene
-  t('routines', 'wash face', 8677),    // wash face/clean face
-  t('routines', 'have breakfast', 8339),// have breakfast/eat morning meal
-  t('routines', 'go to school', 8616), // go to school/attend school
-  t('routines', 'have lunch', 8530),   // have lunch/eat midday meal
-  t('routines', 'have dinner', 8416),  // have dinner/eat evening meal
-  t('routines', 'take a bath', 8315),  // take a bath/bathe
-  t('routines', 'go to bed', 8318),    // go to bed/sleep time
+  t('routines', 'wake up', 'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=300&h=300&fit=crop'),
+  t('routines', 'get dressed', 'https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=300&h=300&fit=crop'),
+  t('routines', 'brush teeth', 'https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?w=300&h=300&fit=crop'),
+  t('routines', 'wash face', 'https://images.unsplash.com/photo-1584820927498-cfe5211fd8bf?w=300&h=300&fit=crop'),
+  t('routines', 'have breakfast', 'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=300&h=300&fit=crop'),
+  t('routines', 'go to school', 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=300&h=300&fit=crop'),
+  t('routines', 'have lunch', 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&h=300&fit=crop'),
+  t('routines', 'have dinner', 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=300&h=300&fit=crop'),
+  t('routines', 'take a bath', 'https://images.unsplash.com/photo-1584820927498-cfe5211fd8bf?w=300&h=300&fit=crop'),
+  t('routines', 'go to bed', 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=300&h=300&fit=crop'),
 
   // Questions - Question words
-  t('questions', 'what', 8680),    // what/which thing
-  t('questions', 'where', 8679),   // where/which place
-  t('questions', 'when', 8678),    // when/which time
-  t('questions', 'who', 8682),     // who/which person
-  t('questions', 'why', 8683),     // why/for what reason
-  t('questions', 'how', 8495),     // how/in what way
-  t('questions', 'which', 8680),   // which/what one
+  t('questions', 'what', 'https://images.unsplash.com/photo-1516534775068-ba3e7458af70?w=300&h=300&fit=crop'),
+  t('questions', 'where', 'https://images.unsplash.com/photo-1524661135-423995f22d0b?w=300&h=300&fit=crop'),
+  t('questions', 'when', 'https://images.unsplash.com/photo-1501139083538-0139583c060f?w=300&h=300&fit=crop'),
+  t('questions', 'who', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop'),
+  t('questions', 'why', 'https://images.unsplash.com/photo-1516534775068-ba3e7458af70?w=300&h=300&fit=crop'),
+  t('questions', 'how', 'https://images.unsplash.com/photo-1516534775068-ba3e7458af70?w=300&h=300&fit=crop'),
+  t('questions', 'which', 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=300&h=300&fit=crop'),
 
   // Time - Time-related vocabulary
-  t('time', 'morning', 8550),      // morning/early day
-  t('time', 'afternoon', 8290),    // afternoon/midday
-  t('time', 'evening', 8438),      // evening/late day
-  t('time', 'night', 8559),        // night/dark time
-  t('time', 'today', 8655),        // today/this day
-  t('time', 'tomorrow', 8658),     // tomorrow/next day
-  t('time', 'yesterday', 8687),    // yesterday/previous day
-  t('time', 'now', 8561),          // now/current time
-  t('time', 'later', 8520),        // later/future time
-  t('time', 'soon', 8631),         // soon/near future
+  t('time', 'morning', 'https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=300&h=300&fit=crop'),
+  t('time', 'afternoon', 'https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?w=300&h=300&fit=crop'),
+  t('time', 'evening', 'https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?w=300&h=300&fit=crop'),
+  t('time', 'night', 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=300&h=300&fit=crop'),
+  t('time', 'today', 'https://images.unsplash.com/photo-1501139083538-0139583c060f?w=300&h=300&fit=crop'),
+  t('time', 'tomorrow', 'https://images.unsplash.com/photo-1501139083538-0139583c060f?w=300&h=300&fit=crop'),
+  t('time', 'yesterday', 'https://images.unsplash.com/photo-1501139083538-0139583c060f?w=300&h=300&fit=crop'),
+  t('time', 'now', 'https://images.unsplash.com/photo-1501139083538-0139583c060f?w=300&h=300&fit=crop'),
+  t('time', 'later', 'https://images.unsplash.com/photo-1501139083538-0139583c060f?w=300&h=300&fit=crop'),
+  t('time', 'soon', 'https://images.unsplash.com/photo-1501139083538-0139583c060f?w=300&h=300&fit=crop'),
 
   // Colours - Colour vocabulary
-  t('colours', 'red', 8599),       // red/red color
-  t('colours', 'blue', 8330),      // blue/blue color
-  t('colours', 'green', 8477),     // green/green color
-  t('colours', 'yellow', 8686),    // yellow/yellow color
-  t('colours', 'orange', 8570),    // orange/orange color
-  t('colours', 'purple', 8593),    // purple/purple color
-  t('colours', 'pink', 8581),      // pink/pink color
-  t('colours', 'brown', 8338),     // brown/brown color
-  t('colours', 'black', 8326),     // black/black color
-  t('colours', 'white', 8680),     // white/white color
-  t('colours', 'grey', 8478),      // grey/grey color
+  t('colours', 'red', 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=300&h=300&fit=crop'),
+  t('colours', 'blue', 'https://images.unsplash.com/photo-1535025639604-9a804c092faa?w=300&h=300&fit=crop'),
+  t('colours', 'green', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=300&fit=crop'),
+  t('colours', 'yellow', 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=300&h=300&fit=crop'),
+  t('colours', 'orange', 'https://images.unsplash.com/photo-1582979512210-99b6a53386f9?w=300&h=300&fit=crop'),
+  t('colours', 'purple', 'https://images.unsplash.com/photo-1557672172-298e090bd0f1?w=300&h=300&fit=crop'),
+  t('colours', 'pink', 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=300&h=300&fit=crop'),
+  t('colours', 'brown', 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=300&h=300&fit=crop'),
+  t('colours', 'black', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=300&fit=crop'),
+  t('colours', 'white', 'https://images.unsplash.com/photo-1483664852095-d6cc6870702d?w=300&h=300&fit=crop'),
+  t('colours', 'grey', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=300&fit=crop'),
 
   // Numbers - Number vocabulary
-  t('numbers', 'one', 8567),       // one/1
-  t('numbers', 'two', 8665),       // two/2
-  t('numbers', 'three', 8654),     // three/3
-  t('numbers', 'four', 8458),      // four/4
-  t('numbers', 'five', 8455),      // five/5
-  t('numbers', 'six', 8624),       // six/6
-  t('numbers', 'seven', 8621),     // seven/7
-  t('numbers', 'eight', 8429),     // eight/8
-  t('numbers', 'nine', 8559),      // nine/9
-  t('numbers', 'ten', 8646),       // ten/10
+  t('numbers', 'one', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=300&fit=crop'),
+  t('numbers', 'two', 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=300&h=300&fit=crop'),
+  t('numbers', 'three', 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=300&h=300&fit=crop'),
+  t('numbers', 'four', 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=300&h=300&fit=crop'),
+  t('numbers', 'five', 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=300&h=300&fit=crop'),
+  t('numbers', 'six', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=300&fit=crop'),
+  t('numbers', 'seven', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=300&fit=crop'),
+  t('numbers', 'eight', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=300&fit=crop'),
+  t('numbers', 'nine', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=300&fit=crop'),
+  t('numbers', 'ten', 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=300&h=300&fit=crop'),
 
   // Animals - Animal vocabulary
-  t('animals', 'dog', 8418),       // dog/canine
-  t('animals', 'cat', 8354),       // cat/feline
-  t('animals', 'bird', 8324),      // bird/avian
-  t('animals', 'fish', 8453),      // fish/aquatic
-  t('animals', 'rabbit', 8595),    // rabbit/bunny
-  t('animals', 'horse', 8492),     // horse/equine
-  t('animals', 'cow', 8394),       // cow/bovine
-  t('animals', 'sheep', 8620),     // sheep/ovine
-  t('animals', 'pig', 8580),       // pig/porcine
-  t('animals', 'chicken', 8364),   // chicken/hen
+  t('animals', 'dog', 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=300&h=300&fit=crop'),
+  t('animals', 'cat', 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=300&h=300&fit=crop'),
+  t('animals', 'bird', 'https://images.unsplash.com/photo-1552728089-57bdde30beb3?w=300&h=300&fit=crop'),
+  t('animals', 'fish', 'https://images.unsplash.com/photo-1524704654690-b56c05c78a00?w=300&h=300&fit=crop'),
+  t('animals', 'rabbit', 'https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?w=300&h=300&fit=crop'),
+  t('animals', 'horse', 'https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?w=300&h=300&fit=crop'),
+  t('animals', 'cow', 'https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=300&h=300&fit=crop'),
+  t('animals', 'sheep', 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=300&h=300&fit=crop'),
+  t('animals', 'pig', 'https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=300&h=300&fit=crop'),
+  t('animals', 'chicken', 'https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?w=300&h=300&fit=crop'),
 
   // Clothing - Clothing vocabulary
-  t('clothing', 'shirt', 8620),    // shirt/top
-  t('clothing', 'trousers', 8662), // trousers/pants
-  t('clothing', 'dress', 8421),    // dress/frock
-  t('clothing', 'skirt', 8623),    // skirt/bottom
-  t('clothing', 'shoes', 8619),    // shoes/footwear
-  t('clothing', 'socks', 8629),    // socks/foot covering
-  t('clothing', 'hat', 8482),      // hat/head covering
-  t('clothing', 'coat', 8373),     // coat/jacket
-  t('clothing', 'jumper', 8510),   // jumper/sweater
+  t('clothing', 'shirt', 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300&h=300&fit=crop'),
+  t('clothing', 'trousers', 'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=300&h=300&fit=crop'),
+  t('clothing', 'dress', 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=300&h=300&fit=crop'),
+  t('clothing', 'skirt', 'https://images.unsplash.com/photo-1583496661160-fb5886a0aaaa?w=300&h=300&fit=crop'),
+  t('clothing', 'shoes', 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=300&h=300&fit=crop'),
+  t('clothing', 'socks', 'https://images.unsplash.com/photo-1586350977771-b3b0abd50c82?w=300&h=300&fit=crop'),
+  t('clothing', 'hat', 'https://images.unsplash.com/photo-1521369909029-2afed882baee?w=300&h=300&fit=crop'),
+  t('clothing', 'coat', 'https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=300&h=300&fit=crop'),
+  t('clothing', 'jumper', 'https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=300&h=300&fit=crop'),
 
   // Weather - Weather vocabulary
-  t('weather', 'sunny', 8641),     // sunny/bright
-  t('weather', 'rainy', 8596),     // rainy/wet
-  t('weather', 'cloudy', 8372),    // cloudy/overcast
-  t('weather', 'windy', 8680),     // windy/breezy
-  t('weather', 'snowy', 8627),     // snowy/snow
-  t('weather', 'hot', 8493),       // hot/warm
-  t('weather', 'cold', 8374),      // cold/chilly
+  t('weather', 'sunny', 'https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?w=300&h=300&fit=crop'),
+  t('weather', 'rainy', 'https://images.unsplash.com/photo-1534274988757-a28bf1a57c17?w=300&h=300&fit=crop'),
+  t('weather', 'cloudy', 'https://images.unsplash.com/photo-1534088568595-a066f410bcda?w=300&h=300&fit=crop'),
+  t('weather', 'windy', 'https://images.unsplash.com/photo-1527482797697-8795b05a13fe?w=300&h=300&fit=crop'),
+  t('weather', 'snowy', 'https://images.unsplash.com/photo-1483664852095-d6cc6870702d?w=300&h=300&fit=crop'),
+  t('weather', 'hot', 'https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?w=300&h=300&fit=crop'),
+  t('weather', 'cold', 'https://images.unsplash.com/photo-1483664852095-d6cc6870702d?w=300&h=300&fit=crop'),
 
   // Toys - Toy vocabulary
-  t('toys', 'ball', 8313),         // ball/sphere
-  t('toys', 'doll', 8419),         // doll/toy person
-  t('toys', 'car', 8351),          // car/toy vehicle
-  t('toys', 'blocks', 8329),       // blocks/building toys
-  t('toys', 'puzzle', 8592),       // puzzle/jigsaw
-  t('toys', 'game', 8464),         // game/play activity
-  t('toys', 'teddy bear', 8645),   // teddy bear/stuffed bear
+  t('toys', 'ball', 'https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=300&h=300&fit=crop'),
+  t('toys', 'doll', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=300&fit=crop'),
+  t('toys', 'car', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=300&fit=crop'),
+  t('toys', 'blocks', 'https://images.unsplash.com/photo-1587280501635-68a0e82cd5ff?w=300&h=300&fit=crop'),
+  t('toys', 'puzzle', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=300&fit=crop'),
+  t('toys', 'game', 'https://images.unsplash.com/photo-1587280501635-68a0e82cd5ff?w=300&h=300&fit=crop'),
+  t('toys', 'teddy bear', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=300&fit=crop'),
 ];
