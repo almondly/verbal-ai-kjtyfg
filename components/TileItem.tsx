@@ -11,7 +11,7 @@ interface Props {
   onPress: () => void;
   onLongPress?: () => void;
   isAdd?: boolean;
-  itemPercent?: number; // dynamic width from grid for responsive columns
+  itemPercent?: number;
 }
 
 const TileItem = memo(function TileItem({
@@ -26,45 +26,55 @@ const TileItem = memo(function TileItem({
   const [imageError, setImageError] = useState(false);
 
   const handlePressIn = () => {
-    Animated.spring(scale, { toValue: 0.96, useNativeDriver: true, speed: 50, bounciness: 8 }).start();
+    Animated.spring(scale, { 
+      toValue: 0.95, 
+      useNativeDriver: true, 
+      speed: 50, 
+      bounciness: 4 
+    }).start();
   };
 
   const handlePressOut = () => {
-    Animated.spring(scale, { toValue: 1, useNativeDriver: true, speed: 50, bounciness: 8 }).start();
+    Animated.spring(scale, { 
+      toValue: 1, 
+      useNativeDriver: true, 
+      speed: 50, 
+      bounciness: 4 
+    }).start();
   };
 
   // Get the category color for this tile
   const getCategoryColor = () => {
-    if (isAdd) return '#F3F4F6';
-    if (tile.color) return tile.color; // Use tile's color if it has one
+    if (isAdd) return colors.borderLight;
+    if (tile.color) return tile.color;
     if (tile.category) {
       const category = categories.find(cat => cat.id === tile.category);
       if (category) return category.color;
     }
-    return '#FFFFFF'; // fallback
+    return colors.borderLight;
   };
 
-  // Responsive font size based on screen width
+  // Responsive font size - AAC style (larger and bolder)
   const getResponsiveFontSize = () => {
-    if (width >= 1400) return 16; // Large tablets/desktops
-    if (width >= 1200) return 15; // Medium tablets
-    if (width >= 1000) return 14; // Small tablets
-    if (width >= 820) return 13;  // Large phones landscape
-    if (width >= 680) return 12;  // Medium phones landscape
-    return 11; // Small phones
+    if (width >= 1400) return 18;
+    if (width >= 1200) return 17;
+    if (width >= 1000) return 16;
+    if (width >= 820) return 15;
+    if (width >= 680) return 14;
+    return 13;
   };
 
-  // Responsive image size based on screen width
+  // Responsive image size - AAC style (larger images)
   const getResponsiveImageSize = () => {
-    if (width >= 1400) return 80; // Large tablets/desktops
-    if (width >= 1200) return 70; // Medium tablets
-    if (width >= 1000) return 60; // Small tablets
-    if (width >= 820) return 55;  // Large phones landscape
-    if (width >= 680) return 50;  // Medium phones landscape
-    return 45; // Small phones
+    if (width >= 1400) return 90;
+    if (width >= 1200) return 80;
+    if (width >= 1000) return 70;
+    if (width >= 820) return 65;
+    if (width >= 680) return 60;
+    return 55;
   };
 
-  const bg = getCategoryColor();
+  const borderColor = getCategoryColor();
   const fontSize = getResponsiveFontSize();
   const imageSize = getResponsiveImageSize();
 
@@ -73,7 +83,6 @@ const TileItem = memo(function TileItem({
       style={[
         styles.tileWrap,
         { width: `${itemPercent}%`, transform: [{ scale }] },
-        { position: 'relative', zIndex: 10 }, // bring in front
       ]}
     >
       <TouchableOpacity
@@ -81,19 +90,19 @@ const TileItem = memo(function TileItem({
         onLongPress={onLongPress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
-        activeOpacity={0.8}
+        activeOpacity={0.85}
         style={[
           styles.tile, 
           { 
-            backgroundColor: bg,
-            borderColor: bg,
-            borderWidth: 2,
+            backgroundColor: colors.backgroundAlt,
+            borderColor: borderColor,
+            borderWidth: 3,
           }
         ]}
       >
         <View style={styles.imageWrap}>
           {isAdd ? (
-            <Icon name="add-circle-outline" size={34} color={colors.text} />
+            <Icon name="add-circle-outline" size={imageSize * 0.6} color={colors.text} />
           ) : tile.imageUri && !imageError ? (
             <Image
               source={{ uri: tile.imageUri }}
@@ -105,12 +114,18 @@ const TileItem = memo(function TileItem({
               }}
             />
           ) : (
-            <Icon name="chatbubble-ellipses-outline" size={34} color={colors.text} />
+            <Icon name="chatbubble-ellipses-outline" size={imageSize * 0.6} color={colors.textSecondary} />
           )}
         </View>
-        <Text style={[styles.text, { fontSize }]} numberOfLines={2} ellipsizeMode="tail">
-          {tile.text}
-        </Text>
+        <View style={styles.textContainer}>
+          <Text 
+            style={[styles.text, { fontSize }]} 
+            numberOfLines={2} 
+            ellipsizeMode="tail"
+          >
+            {tile.text}
+          </Text>
+        </View>
       </TouchableOpacity>
     </Animated.View>
   );
@@ -120,29 +135,34 @@ export default TileItem;
 
 const styles = StyleSheet.create({
   tileWrap: {
-    paddingHorizontal: 2,
-    paddingVertical: 2,
+    padding: 4,
   },
   tile: {
     aspectRatio: 1,
-    borderRadius: 14,
+    borderRadius: 10,
     alignItems: 'center',
-    justifyContent: 'center',
-    padding: 8,
+    justifyContent: 'space-between',
+    padding: 10,
+    boxShadow: '0px 2px 4px rgba(0,0,0,0.15)',
   },
   imageWrap: {
-    width: '100%',
     flex: 1,
+    width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 4,
+    marginBottom: 6,
+  },
+  textContainer: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 36,
   },
   text: {
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Montserrat_700Bold',
     color: colors.text,
     textAlign: 'center',
-    marginTop: 2,
-    lineHeight: 16,
-    paddingHorizontal: 2,
+    lineHeight: 18,
+    paddingHorizontal: 4,
   },
 });

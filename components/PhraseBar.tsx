@@ -21,19 +21,27 @@ export default function PhraseBar({ sentence, onSpeak, onClear, onBackspace }: P
       <View style={styles.actions}>
         {onBackspace && (
           <TouchableOpacity 
-            style={[styles.actionBtn, styles.backspaceBtn, { opacity: sentence.length > 0 ? 1 : 0.5 }]} 
+            style={[styles.actionBtn, styles.backspaceBtn, { opacity: sentence.length > 0 ? 1 : 0.4 }]} 
             onPress={onBackspace} 
-            activeOpacity={0.9}
+            activeOpacity={0.85}
             disabled={sentence.length === 0}
           >
-            <Icon name="backspace-outline" size={24} color={colors.text} />
+            <Icon name="backspace-outline" size={26} color={colors.text} />
           </TouchableOpacity>
         )}
-        <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.secondary }]} onPress={onSpeak} activeOpacity={0.9}>
-          <Icon name="volume-high-outline" size={28} color="#fff" />
+        <TouchableOpacity 
+          style={[styles.actionBtn, styles.speakBtn]} 
+          onPress={onSpeak} 
+          activeOpacity={0.85}
+        >
+          <Icon name="volume-high-outline" size={30} color="#FFFFFF" />
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.accent }]} onPress={onClear} activeOpacity={0.9}>
-          <Icon name="close-outline" size={32} color={colors.text} />
+        <TouchableOpacity 
+          style={[styles.actionBtn, styles.clearBtn]} 
+          onPress={onClear} 
+          activeOpacity={0.85}
+        >
+          <Icon name="close-outline" size={30} color="#FFFFFF" />
         </TouchableOpacity>
       </View>
     </View>
@@ -44,26 +52,28 @@ const styles = StyleSheet.create({
   bar: {
     width: '100%',
     backgroundColor: colors.backgroundAlt,
-    borderRadius: 16,
-    paddingVertical: 12,
+    borderRadius: 10,
+    paddingVertical: 14,
     paddingHorizontal: 16,
-    boxShadow: '0px 6px 12px rgba(0,0,0,0.06)',
+    boxShadow: '0px 2px 6px rgba(0,0,0,0.15)',
+    borderWidth: 2,
+    borderColor: colors.borderLight,
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: 16,
-    minHeight: 60,
+    alignItems: 'center',
+    marginBottom: 12,
+    minHeight: 64,
   },
   textContainer: {
     flex: 1,
     paddingRight: 12,
     justifyContent: 'center',
-    minHeight: 44,
+    minHeight: 48,
   },
   text: {
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Montserrat_700Bold',
     color: colors.text,
-    fontSize: 16,
-    lineHeight: 22,
+    fontSize: 18,
+    lineHeight: 24,
     flexWrap: 'wrap',
   },
   actions: {
@@ -72,15 +82,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   actionBtn: {
-    width: 52,
-    height: 52,
-    borderRadius: 14,
+    width: 56,
+    height: 56,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 2,
+    boxShadow: '0px 2px 4px rgba(0,0,0,0.15)',
   },
   backspaceBtn: {
     backgroundColor: colors.backgroundAlt,
-    borderWidth: 2,
-    borderColor: colors.primary + '40',
+    borderColor: colors.border,
+  },
+  speakBtn: {
+    backgroundColor: colors.primary,
+    borderColor: colors.border,
+  },
+  clearBtn: {
+    backgroundColor: colors.danger,
+    borderColor: colors.border,
   },
 });

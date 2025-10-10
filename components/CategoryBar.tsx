@@ -1,3 +1,4 @@
+
 import { ScrollView, Text, TouchableOpacity, StyleSheet, View, Animated } from 'react-native';
 import { useRef } from 'react';
 import Icon from './Icon';
@@ -16,7 +17,7 @@ export default function CategoryBar({ categories, selectedId, onSelect, style }:
 
   const animatePop = () => {
     Animated.sequence([
-      Animated.timing(scaleAnim, { toValue: 1.5, duration: 100, useNativeDriver: true }),
+      Animated.timing(scaleAnim, { toValue: 1.1, duration: 100, useNativeDriver: true }),
       Animated.timing(scaleAnim, { toValue: 1, duration: 100, useNativeDriver: true }),
     ]).start();
   };
@@ -37,7 +38,7 @@ export default function CategoryBar({ categories, selectedId, onSelect, style }:
               key={cat.id}
               style={{
                 transform: [{ scale: active ? scaleAnim : 1 }],
-                marginRight: index < categories.length - 1 ? 14 : 0, // a bit more spacing
+                marginRight: index < categories.length - 1 ? 10 : 0,
               }}
             >
               <TouchableOpacity
@@ -45,31 +46,27 @@ export default function CategoryBar({ categories, selectedId, onSelect, style }:
                   styles.chip,
                   {
                     backgroundColor: active ? cat.color : colors.backgroundAlt,
-                    borderColor: cat.color,
+                    borderColor: active ? colors.border : colors.borderLight,
                     borderWidth: active ? 3 : 2,
-
-                    // ✅ Glow all around (spread more vertically too)
-                    shadowColor: cat.color,
-                    shadowOffset: { width: 0, height: 0 },
-                    shadowOpacity: active ? 0.35 : 0.15,
-                    shadowRadius: active ? 14 : 7,
-                    elevation: active ? 8 : 3,
                   },
                 ]}
                 onPress={() => {
                   onSelect(cat.id);
                   animatePop();
                 }}
-                activeOpacity={0.8}
+                activeOpacity={0.85}
               >
                 <Icon 
                   name={cat.icon as any} 
-                  size={24} 
+                  size={26} 
                   color={colors.text} 
                 />
                 <Text style={[
                   styles.chipText, 
-                  { color: colors.text }
+                  { 
+                    color: colors.text,
+                    fontFamily: active ? 'Montserrat_700Bold' : 'Montserrat_600SemiBold'
+                  }
                 ]}>
                   {cat.label}
                 </Text>
@@ -85,34 +82,30 @@ export default function CategoryBar({ categories, selectedId, onSelect, style }:
 const styles = StyleSheet.create({
   wrapper: {
     width: '100%',
-    paddingHorizontal: 14,
-    paddingVertical: 16, // ✅ more vertical breathing space
-    backgroundColor: colors.background,
-    borderRadius: 16, // ✅ slightly rounder frame
-
-    // subtle wrapper shadow (so chip glow dominates)
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 1,
+    paddingHorizontal: 8,
+    paddingVertical: 12,
+    backgroundColor: colors.backgroundAlt,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: colors.borderLight,
+    boxShadow: '0px 2px 4px rgba(0,0,0,0.15)',
   },
   row: {
     alignItems: 'center',
     paddingHorizontal: 6,
-    paddingVertical: 6, // ✅ stop clipping vertical glow
+    paddingVertical: 4,
   },
   chip: {
-    width: 72,
-    height: 72,
-    borderRadius: 12,
+    width: 76,
+    height: 76,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
+    boxShadow: '0px 2px 4px rgba(0,0,0,0.1)',
   },
   chipText: {
     fontSize: 11,
-    fontFamily: 'Montserrat_600SemiBold',
-    marginTop: 3,
+    marginTop: 4,
     textAlign: 'center',
   },
 });

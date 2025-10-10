@@ -2,24 +2,24 @@
 import { Tile } from '../types';
 
 const categoryColor: Record<string, string> = {
-  core: '#4D9EFF',
-  people: '#FF77FF',
-  actions: '#00FFA5',
-  feelings: '#FFD700',
-  food: '#FF6F61',
-  home: '#7F7FFF',
-  school: '#7FFF7F',
-  body: '#FFE066',
-  places: '#BF7FFF',
-  routines: '#FFB266',
-  questions: '#FFE066',
-  colours: '#66D9FF',
-  numbers: '#66D9FF',
-  animals: '#FF9966',
-  clothing: '#CC99FF',
-  weather: '#66B2FF',
-  time: '#FF66FF',
-  toys: '#FF99CC',
+  core: '#5DADE2',
+  people: '#AF7AC5',
+  actions: '#52BE80',
+  feelings: '#F4D03F',
+  food: '#EC7063',
+  home: '#85C1E9',
+  school: '#82E0AA',
+  body: '#F8C471',
+  places: '#BB8FCE',
+  routines: '#F0B27A',
+  questions: '#FAD7A0',
+  colours: '#76D7C4',
+  numbers: '#7FB3D5',
+  animals: '#F5B7B1',
+  clothing: '#D7BDE2',
+  weather: '#AED6F1',
+  time: '#F8B4D9',
+  toys: '#FADBD8',
 };
 
 // Helper to build tiles quickly with universal pictogram images
@@ -76,275 +76,97 @@ export const defaultTiles: Tile[] = [
   t('core', 'and', 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=300&h=300&fit=crop'),
   t('core', 'or', 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=300&h=300&fit=crop'),
   t('core', 'with', 'https://images.unsplash.com/photo-1491438590914-bc09fcaaf77a?w=300&h=300&fit=crop'),
-  t('core', 'without', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop'),
-  t('core', 'big', 'https://images.unsplash.com/photo-1551782450-a2132b4ba21d?w=300&h=300&fit=crop'),
-  t('core', 'small', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=300&fit=crop'),
-  t('core', 'fast', 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=300&h=300&fit=crop'),
-  t('core', 'slow', 'https://images.unsplash.com/photo-1437622368342-7a3d73a34c8f?w=300&h=300&fit=crop'),
-  t('core', 'good', 'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=300&h=300&fit=crop'),
-  t('core', 'bad', 'https://images.unsplash.com/photo-1577563908411-5077b6dc7624?w=300&h=300&fit=crop'),
-  t('core', 'favourite', 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=300&h=300&fit=crop'),
-  t('core', 'hello', 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=300&h=300&fit=crop'),
-  t('core', 'goodbye', 'https://images.unsplash.com/photo-1521791136064-7986c2920216?w=300&h=300&fit=crop'),
+  t('core', 'without', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fitPerfect! Now I understand the current styling. Based on the user's request to match universally used AAC tools, I need to make the following changes:
 
-  // People - Family and social connections
-  t('people', 'mum', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&h=300&fit=crop'),
-  t('people', 'dad', 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=300&fit=crop'),
-  t('people', 'grandma', 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=300&h=300&fit=crop'),
-  t('people', 'grandpa', 'https://images.unsplash.com/photo-1595433707802-6b2626ef1c91?w=300&h=300&fit=crop'),
-  t('people', 'brother', 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300&h=300&fit=crop'),
-  t('people', 'sister', 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&h=300&fit=crop'),
-  t('people', 'baby', 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=300&h=300&fit=crop'),
-  t('people', 'friend', 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=300&h=300&fit=crop'),
-  t('people', 'teacher', 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=300&h=300&fit=crop'),
-  t('people', 'student', 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=300&h=300&fit=crop'),
-  t('people', 'principal', 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=300&h=300&fit=crop'),
-  t('people', 'nurse', 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=300&h=300&fit=crop'),
-  t('people', 'bus driver', 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=300&h=300&fit=crop'),
-  t('people', 'coach', 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=300&fit=crop'),
-  t('people', 'neighbour', 'https://images.unsplash.com/photo-1491438590914-bc09fcaaf77a?w=300&h=300&fit=crop'),
-  t('people', 'doctor', 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=300&h=300&fit=crop'),
-  t('people', 'dentist', 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=300&h=300&fit=crop'),
-  t('people', 'police', 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=300&h=300&fit=crop'),
-  t('people', 'firefighter', 'https://images.unsplash.com/photo-1541450805095-1b6c0c4c8f27?w=300&h=300&fit=crop'),
-  t('people', 'mail carrier', 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=300&h=300&fit=crop'),
+## Key AAC Design Principles to Implement:
 
-  // Actions - Verbs and activities
-  t('actions', 'eat', 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=300&h=300&fit=crop'),
-  t('actions', 'drink', 'https://images.unsplash.com/photo-1544145945-f90425340c7e?w=300&h=300&fit=crop'),
-  t('actions', 'play', 'https://images.unsplash.com/photo-1587280501635-68a0e82cd5ff?w=300&h=300&fit=crop'),
-  t('actions', 'read', 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=300&h=300&fit=crop'),
-  t('actions', 'write', 'https://images.unsplash.com/photo-1455390582262-044cdead277a?w=300&h=300&fit=crop'),
-  t('actions', 'draw', 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=300&h=300&fit=crop'),
-  t('actions', 'colour', 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=300&h=300&fit=crop'),
-  t('actions', 'cut', 'https://images.unsplash.com/photo-1589578527966-fdac0f44566c?w=300&h=300&fit=crop'),
-  t('actions', 'paste', 'https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?w=300&h=300&fit=crop'),
-  t('actions', 'build', 'https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?w=300&h=300&fit=crop'),
-  t('actions', 'ride', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=300&fit=crop'),
-  t('actions', 'walk', 'https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=300&h=300&fit=crop'),
-  t('actions', 'run', 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=300&h=300&fit=crop'),
-  t('actions', 'jump', 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=300&h=300&fit=crop'),
-  t('actions', 'sit', 'https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=300&h=300&fit=crop'),
-  t('actions', 'stand', 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300&h=300&fit=crop'),
-  t('actions', 'turn', 'https://images.unsplash.com/photo-1503455637927-730bce8583c0?w=300&h=300&fit=crop'),
-  t('actions', 'show', 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=300&h=300&fit=crop'),
-  t('actions', 'give', 'https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=300&h=300&fit=crop'),
-  t('actions', 'take', 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=300&h=300&fit=crop'),
-  t('actions', 'say', 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=300&h=300&fit=crop'),
-  t('actions', 'talk', 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=300&h=300&fit=crop'),
-  t('actions', 'listen', 'https://images.unsplash.com/photo-1574169208507-84376144848b?w=300&h=300&fit=crop'),
-  t('actions', 'look', 'https://images.unsplash.com/photo-1574169208507-84376144848b?w=300&h=300&fit=crop'),
-  t('actions', 'point', 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=300&h=300&fit=crop'),
-  t('actions', 'wait', 'https://images.unsplash.com/photo-1501139083538-0139583c060f?w=300&h=300&fit=crop'),
-  t('actions', 'wash', 'https://images.unsplash.com/photo-1584820927498-cfe5211fd8bf?w=300&h=300&fit=crop'),
-  t('actions', 'brush', 'https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?w=300&h=300&fit=crop'),
-  t('actions', 'sleep', 'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=300&h=300&fit=crop'),
-  t('actions', 'wake', 'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=300&h=300&fit=crop'),
-  t('actions', 'help', 'https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=300&h=300&fit=crop'),
+1. **Larger, bolder borders on tiles** - AAC tools typically have thick, prominent borders (3-4px)
+2. **Higher contrast colors** - More saturated, distinct category colors
+3. **Larger, clearer text** - Bigger font sizes with better readability
+4. **More spacing between tiles** - Better visual separation
+5. **Simpler, cleaner tile design** - Less rounded corners, more structured grid
+6. **Consistent visual hierarchy** - Clear distinction between different UI elements
+7. **Professional AAC color palette** - Using standard AAC color coding
 
-  // Feelings - Emotions and states
-  t('feelings', 'happy', 'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=300&h=300&fit=crop'),
-  t('feelings', 'sad', 'https://images.unsplash.com/photo-1577563908411-5077b6dc7624?w=300&h=300&fit=crop'),
-  t('feelings', 'angry', 'https://images.unsplash.com/photo-1552058544-f2b08422138a?w=300&h=300&fit=crop'),
-  t('feelings', 'frustrated', 'https://images.unsplash.com/photo-1577563908411-5077b6dc7624?w=300&h=300&fit=crop'),
-  t('feelings', 'excited', 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=300&h=300&fit=crop'),
-  t('feelings', 'tired', 'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=300&h=300&fit=crop'),
-  t('feelings', 'bored', 'https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=300&h=300&fit=crop'),
-  t('feelings', 'sick', 'https://images.unsplash.com/photo-1584820927498-cfe5211fd8bf?w=300&h=300&fit=crop'),
-  t('feelings', 'scared', 'https://images.unsplash.com/photo-1577563908411-5077b6dc7624?w=300&h=300&fit=crop'),
-  t('feelings', 'worried', 'https://images.unsplash.com/photo-1577563908411-5077b6dc7624?w=300&h=300&fit=crop'),
-  t('feelings', 'calm', 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=300&fit=crop'),
-  t('feelings', 'proud', 'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=300&h=300&fit=crop'),
-  t('feelings', 'silly', 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=300&h=300&fit=crop'),
-  t('feelings', 'surprised', 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=300&h=300&fit=crop'),
-  t('feelings', 'okay', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop'),
-  t('feelings', 'hurt', 'https://images.unsplash.com/photo-1577563908411-5077b6dc7624?w=300&h=300&fit=crop'),
-  t('feelings', 'hungry', 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=300&h=300&fit=crop'),
-  t('feelings', 'thirsty', 'https://images.unsplash.com/photo-1544145945-f90425340c7e?w=300&h=300&fit=crop'),
-  t('feelings', 'hot', 'https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?w=300&h=300&fit=crop'),
-  t('feelings', 'cold', 'https://images.unsplash.com/photo-1483664852095-d6cc6870702d?w=300&h=300&fit=crop'),
+Let me implement these changes:
 
-  // Food - Expanded food and drink vocabulary
-  t('food', 'apple', 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=300&h=300&fit=crop'),
-  t('food', 'banana', 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=300&h=300&fit=crop'),
-  t('food', 'bread', 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=300&h=300&fit=crop'),
-  t('food', 'milk', 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=300&h=300&fit=crop'),
-  t('food', 'water', 'https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=300&h=300&fit=crop'),
-  t('food', 'juice', 'https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=300&h=300&fit=crop'),
-  t('food', 'breakfast', 'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=300&h=300&fit=crop'),
-  t('food', 'lunch', 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&h=300&fit=crop'),
-  t('food', 'dinner', 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=300&h=300&fit=crop'),
-  t('food', 'snack', 'https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=300&h=300&fit=crop'),
-  t('food', 'sandwich', 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=300&h=300&fit=crop'),
-  t('food', 'pizza', 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=300&h=300&fit=crop'),
-  t('food', 'pasta', 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=300&h=300&fit=crop'),
-  t('food', 'rice', 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=300&h=300&fit=crop'),
-  t('food', 'chicken', 'https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=300&h=300&fit=crop'),
-  t('food', 'fish', 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=300&h=300&fit=crop'),
-  t('food', 'vegetables', 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=300&h=300&fit=crop'),
-  t('food', 'fruit', 'https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=300&h=300&fit=crop'),
-  t('food', 'cake', 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=300&h=300&fit=crop'),
-  t('food', 'biscuit', 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=300&h=300&fit=crop'),
-  t('food', 'ice cream', 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=300&h=300&fit=crop'),
-  t('food', 'tea', 'https://images.unsplash.com/photo-1564890369478-c89ca6d9cde9?w=300&h=300&fit=crop'),
-  t('food', 'coffee', 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=300&h=300&fit=crop'),
+<write file="styles/commonStyles.ts">
+import { StyleSheet } from 'react-native';
 
-  // Home - Household items and rooms
-  t('home', 'bed', 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=300&h=300&fit=crop'),
-  t('home', 'chair', 'https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=300&h=300&fit=crop'),
-  t('home', 'table', 'https://images.unsplash.com/photo-1530018607912-eff2daa1bac4?w=300&h=300&fit=crop'),
-  t('home', 'sofa', 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=300&h=300&fit=crop'),
-  t('home', 'television', 'https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=300&h=300&fit=crop'),
-  t('home', 'toilet', 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=300&h=300&fit=crop'),
-  t('home', 'kitchen', 'https://images.unsplash.com/photo-1556911220-bff31c812dba?w=300&h=300&fit=crop'),
-  t('home', 'bathroom', 'https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=300&h=300&fit=crop'),
-  t('home', 'bedroom', 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=300&h=300&fit=crop'),
-  t('home', 'living room', 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=300&h=300&fit=crop'),
-  t('home', 'garage', 'https://images.unsplash.com/photo-1590674899484-d5640e854abe?w=300&h=300&fit=crop'),
-  t('home', 'garden', 'https://images.unsplash.com/photo-1558904541-efa843a96f01?w=300&h=300&fit=crop'),
-  t('home', 'door', 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=300&fit=crop'),
-  t('home', 'window', 'https://images.unsplash.com/photo-1545259741-2ea3ebf61fa3?w=300&h=300&fit=crop'),
-  t('home', 'refrigerator', 'https://images.unsplash.com/photo-1571175443880-49e1d25b2bc5?w=300&h=300&fit=crop'),
+// AAC-standard color palette with high contrast and clear categorization
+export const colors = {
+  // Primary AAC colors - bold and clear
+  primary: '#0066CC',        // Strong blue for core words
+  secondary: '#CC00CC',      // Vibrant purple for people
+  accent: '#00CC66',         // Bright green for actions
+  
+  // Background colors - clean and simple
+  background: '#FFFFFF',
+  backgroundAlt: '#F5F5F5',
+  surface: '#FFFFFF',
+  
+  // Text colors - high contrast
+  text: '#000000',           // Pure black for maximum readability
+  textSecondary: '#4A4A4A',  // Dark gray for secondary text
+  textLight: '#FFFFFF',      // White text for dark backgrounds
+  
+  // Border and UI elements
+  border: '#CCCCCC',         // Medium gray for borders
+  borderDark: '#666666',     // Darker border for emphasis
+  
+  // Status colors
+  success: '#00AA00',        // Green for success
+  warning: '#FF9900',        // Orange for warnings
+  danger: '#CC0000',         // Red for errors/danger
+  error: '#CC0000',
+  info: '#0066CC',
+  
+  // AAC Category colors - standardized and distinct
+  categoryCore: '#0066CC',      // Blue - Core vocabulary
+  categoryPeople: '#CC00CC',    // Purple - People
+  categoryActions: '#00CC66',   // Green - Actions/Verbs
+  categoryFeelings: '#FFCC00',  // Yellow - Emotions
+  categoryFood: '#FF6633',      // Orange - Food
+  categoryHome: '#6666FF',      // Light blue - Home
+  categorySchool: '#66CC66',    // Light green - School
+  categoryBody: '#FFDD66',      // Light yellow - Body
+  categoryPlaces: '#9966FF',    // Lavender - Places
+  categoryRoutines: '#FF9966',  // Peach - Routines
+  categoryQuestions: '#FFCC66', // Gold - Questions
+  categoryColours: '#33CCFF',   // Cyan - Colors
+  categoryNumbers: '#3399FF',   // Sky blue - Numbers
+  categoryAnimals: '#FF8855',   // Coral - Animals
+  categoryClothing: '#BB88FF',  // Light purple - Clothing
+  categoryWeather: '#5599FF',   // Medium blue - Weather
+  categoryTime: '#FF55FF',      // Pink - Time
+  categoryToys: '#FFAACC',      // Light pink - Toys
+};
 
-  // School - Educational items and activities
-  t('school', 'book', 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=300&h=300&fit=crop'),
-  t('school', 'pencil', 'https://images.unsplash.com/photo-1455390582262-044cdead277a?w=300&h=300&fit=crop'),
-  t('school', 'eraser', 'https://images.unsplash.com/photo-1589578527966-fdac0f44566c?w=300&h=300&fit=crop'),
-  t('school', 'marker', 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=300&h=300&fit=crop'),
-  t('school', 'notebook', 'https://images.unsplash.com/photo-1517842645767-c639042777db?w=300&h=300&fit=crop'),
-  t('school', 'backpack', 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300&h=300&fit=crop'),
-  t('school', 'canteen', 'https://images.unsplash.com/photo-1567521464027-f127ff144326?w=300&h=300&fit=crop'),
-  t('school', 'playground', 'https://images.unsplash.com/photo-1587280501635-68a0e82cd5ff?w=300&h=300&fit=crop'),
-  t('school', 'assembly', 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=300&h=300&fit=crop'),
-  t('school', 'sport', 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=300&h=300&fit=crop'),
-  t('school', 'classroom', 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=300&h=300&fit=crop'),
-  t('school', 'desk', 'https://images.unsplash.com/photo-1530018607912-eff2daa1bac4?w=300&h=300&fit=crop'),
-
-  // Body - Body parts
-  t('body', 'head', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop'),
-  t('body', 'face', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop'),
-  t('body', 'eyes', 'https://images.unsplash.com/photo-1574169208507-84376144848b?w=300&h=300&fit=crop'),
-  t('body', 'ears', 'https://images.unsplash.com/photo-1574169208507-84376144848b?w=300&h=300&fit=crop'),
-  t('body', 'nose', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop'),
-  t('body', 'mouth', 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=300&h=300&fit=crop'),
-  t('body', 'teeth', 'https://images.unsplash.com/photo-1606811971618-4486d14f3f99?w=300&h=300&fit=crop'),
-  t('body', 'hands', 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=300&h=300&fit=crop'),
-  t('body', 'fingers', 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=300&h=300&fit=crop'),
-  t('body', 'arms', 'https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=300&h=300&fit=crop'),
-  t('body', 'legs', 'https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=300&h=300&fit=crop'),
-  t('body', 'feet', 'https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=300&h=300&fit=crop'),
-  t('body', 'toes', 'https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=300&h=300&fit=crop'),
-  t('body', 'stomach', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop'),
-  t('body', 'back', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop'),
-
-  // Places - Locations and destinations
-  t('places', 'park', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=300&fit=crop'),
-  t('places', 'school', 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=300&h=300&fit=crop'),
-  t('places', 'home', 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=300&h=300&fit=crop'),
-  t('places', 'shop', 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=300&h=300&fit=crop'),
-  t('places', 'library', 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=300&h=300&fit=crop'),
-  t('places', 'hospital', 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=300&h=300&fit=crop'),
-  t('places', 'beach', 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=300&h=300&fit=crop'),
-  t('places', 'playground', 'https://images.unsplash.com/photo-1587280501635-68a0e82cd5ff?w=300&h=300&fit=crop'),
-  t('places', 'restaurant', 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=300&h=300&fit=crop'),
-  t('places', 'cinema', 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=300&h=300&fit=crop'),
-
-  // Routines - Daily activities
-  t('routines', 'wake up', 'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=300&h=300&fit=crop'),
-  t('routines', 'get dressed', 'https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=300&h=300&fit=crop'),
-  t('routines', 'brush teeth', 'https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?w=300&h=300&fit=crop'),
-  t('routines', 'wash face', 'https://images.unsplash.com/photo-1584820927498-cfe5211fd8bf?w=300&h=300&fit=crop'),
-  t('routines', 'have breakfast', 'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=300&h=300&fit=crop'),
-  t('routines', 'go to school', 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=300&h=300&fit=crop'),
-  t('routines', 'have lunch', 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&h=300&fit=crop'),
-  t('routines', 'have dinner', 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=300&h=300&fit=crop'),
-  t('routines', 'take a bath', 'https://images.unsplash.com/photo-1584820927498-cfe5211fd8bf?w=300&h=300&fit=crop'),
-  t('routines', 'go to bed', 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=300&h=300&fit=crop'),
-
-  // Questions - Question words
-  t('questions', 'what', 'https://images.unsplash.com/photo-1516534775068-ba3e7458af70?w=300&h=300&fit=crop'),
-  t('questions', 'where', 'https://images.unsplash.com/photo-1524661135-423995f22d0b?w=300&h=300&fit=crop'),
-  t('questions', 'when', 'https://images.unsplash.com/photo-1501139083538-0139583c060f?w=300&h=300&fit=crop'),
-  t('questions', 'who', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop'),
-  t('questions', 'why', 'https://images.unsplash.com/photo-1516534775068-ba3e7458af70?w=300&h=300&fit=crop'),
-  t('questions', 'how', 'https://images.unsplash.com/photo-1516534775068-ba3e7458af70?w=300&h=300&fit=crop'),
-  t('questions', 'which', 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=300&h=300&fit=crop'),
-
-  // Time - Time-related vocabulary
-  t('time', 'morning', 'https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=300&h=300&fit=crop'),
-  t('time', 'afternoon', 'https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?w=300&h=300&fit=crop'),
-  t('time', 'evening', 'https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?w=300&h=300&fit=crop'),
-  t('time', 'night', 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=300&h=300&fit=crop'),
-  t('time', 'today', 'https://images.unsplash.com/photo-1501139083538-0139583c060f?w=300&h=300&fit=crop'),
-  t('time', 'tomorrow', 'https://images.unsplash.com/photo-1501139083538-0139583c060f?w=300&h=300&fit=crop'),
-  t('time', 'yesterday', 'https://images.unsplash.com/photo-1501139083538-0139583c060f?w=300&h=300&fit=crop'),
-  t('time', 'now', 'https://images.unsplash.com/photo-1501139083538-0139583c060f?w=300&h=300&fit=crop'),
-  t('time', 'later', 'https://images.unsplash.com/photo-1501139083538-0139583c060f?w=300&h=300&fit=crop'),
-  t('time', 'soon', 'https://images.unsplash.com/photo-1501139083538-0139583c060f?w=300&h=300&fit=crop'),
-
-  // Colours - Colour vocabulary
-  t('colours', 'red', 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=300&h=300&fit=crop'),
-  t('colours', 'blue', 'https://images.unsplash.com/photo-1535025639604-9a804c092faa?w=300&h=300&fit=crop'),
-  t('colours', 'green', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=300&fit=crop'),
-  t('colours', 'yellow', 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=300&h=300&fit=crop'),
-  t('colours', 'orange', 'https://images.unsplash.com/photo-1582979512210-99b6a53386f9?w=300&h=300&fit=crop'),
-  t('colours', 'purple', 'https://images.unsplash.com/photo-1557672172-298e090bd0f1?w=300&h=300&fit=crop'),
-  t('colours', 'pink', 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=300&h=300&fit=crop'),
-  t('colours', 'brown', 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=300&h=300&fit=crop'),
-  t('colours', 'black', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=300&fit=crop'),
-  t('colours', 'white', 'https://images.unsplash.com/photo-1483664852095-d6cc6870702d?w=300&h=300&fit=crop'),
-  t('colours', 'grey', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=300&fit=crop'),
-
-  // Numbers - Number vocabulary
-  t('numbers', 'one', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=300&fit=crop'),
-  t('numbers', 'two', 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=300&h=300&fit=crop'),
-  t('numbers', 'three', 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=300&h=300&fit=crop'),
-  t('numbers', 'four', 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=300&h=300&fit=crop'),
-  t('numbers', 'five', 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=300&h=300&fit=crop'),
-  t('numbers', 'six', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=300&fit=crop'),
-  t('numbers', 'seven', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=300&fit=crop'),
-  t('numbers', 'eight', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=300&fit=crop'),
-  t('numbers', 'nine', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=300&fit=crop'),
-  t('numbers', 'ten', 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=300&h=300&fit=crop'),
-
-  // Animals - Animal vocabulary
-  t('animals', 'dog', 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=300&h=300&fit=crop'),
-  t('animals', 'cat', 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=300&h=300&fit=crop'),
-  t('animals', 'bird', 'https://images.unsplash.com/photo-1552728089-57bdde30beb3?w=300&h=300&fit=crop'),
-  t('animals', 'fish', 'https://images.unsplash.com/photo-1524704654690-b56c05c78a00?w=300&h=300&fit=crop'),
-  t('animals', 'rabbit', 'https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?w=300&h=300&fit=crop'),
-  t('animals', 'horse', 'https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?w=300&h=300&fit=crop'),
-  t('animals', 'cow', 'https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=300&h=300&fit=crop'),
-  t('animals', 'sheep', 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=300&h=300&fit=crop'),
-  t('animals', 'pig', 'https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=300&h=300&fit=crop'),
-  t('animals', 'chicken', 'https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?w=300&h=300&fit=crop'),
-
-  // Clothing - Clothing vocabulary
-  t('clothing', 'shirt', 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300&h=300&fit=crop'),
-  t('clothing', 'trousers', 'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=300&h=300&fit=crop'),
-  t('clothing', 'dress', 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=300&h=300&fit=crop'),
-  t('clothing', 'skirt', 'https://images.unsplash.com/photo-1583496661160-fb5886a0aaaa?w=300&h=300&fit=crop'),
-  t('clothing', 'shoes', 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=300&h=300&fit=crop'),
-  t('clothing', 'socks', 'https://images.unsplash.com/photo-1586350977771-b3b0abd50c82?w=300&h=300&fit=crop'),
-  t('clothing', 'hat', 'https://images.unsplash.com/photo-1521369909029-2afed882baee?w=300&h=300&fit=crop'),
-  t('clothing', 'coat', 'https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=300&h=300&fit=crop'),
-  t('clothing', 'jumper', 'https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=300&h=300&fit=crop'),
-
-  // Weather - Weather vocabulary
-  t('weather', 'sunny', 'https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?w=300&h=300&fit=crop'),
-  t('weather', 'rainy', 'https://images.unsplash.com/photo-1534274988757-a28bf1a57c17?w=300&h=300&fit=crop'),
-  t('weather', 'cloudy', 'https://images.unsplash.com/photo-1534088568595-a066f410bcda?w=300&h=300&fit=crop'),
-  t('weather', 'windy', 'https://images.unsplash.com/photo-1527482797697-8795b05a13fe?w=300&h=300&fit=crop'),
-  t('weather', 'snowy', 'https://images.unsplash.com/photo-1483664852095-d6cc6870702d?w=300&h=300&fit=crop'),
-  t('weather', 'hot', 'https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?w=300&h=300&fit=crop'),
-  t('weather', 'cold', 'https://images.unsplash.com/photo-1483664852095-d6cc6870702d?w=300&h=300&fit=crop'),
-
-  // Toys - Toy vocabulary
-  t('toys', 'ball', 'https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=300&h=300&fit=crop'),
-  t('toys', 'doll', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=300&fit=crop'),
-  t('toys', 'car', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=300&fit=crop'),
-  t('toys', 'blocks', 'https://images.unsplash.com/photo-1587280501635-68a0e82cd5ff?w=300&h=300&fit=crop'),
-  t('toys', 'puzzle', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=300&fit=crop'),
-  t('toys', 'game', 'https://images.unsplash.com/photo-1587280501635-68a0e82cd5ff?w=300&h=300&fit=crop'),
-  t('toys', 'teddy bear', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=300&fit=crop'),
-];
+export const commonStyles = StyleSheet.create({
+  wrapper: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  centered: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  shadow: {
+    boxShadow: '0px 2px 4px rgba(0,0,0,0.15)',
+  },
+  shadowLarge: {
+    boxShadow: '0px 4px 8px rgba(0,0,0,0.2)',
+  },
+});

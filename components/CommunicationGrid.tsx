@@ -2,6 +2,7 @@
 import { View, StyleSheet, useWindowDimensions } from 'react-native';
 import TileItem from './TileItem';
 import { Tile } from '../types';
+import { colors } from '../styles/commonStyles';
 
 interface Props {
   tiles: Tile[];
@@ -24,7 +25,7 @@ export default function CommunicationGrid({ tiles, onPressTile, onPressAdd, onRe
   const columns = getColumns(width);
   const itemPercent = 100 / columns;
 
-  const addTile: Tile = { id: '__add__', text: 'Add', color: '#E5E7EB' };
+  const addTile: Tile = { id: '__add__', text: 'Add Tile', color: colors.borderLight };
   const items = [addTile, ...tiles];
 
   return (
@@ -50,8 +51,8 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginHorizontal: -1,
+    paddingHorizontal: 4,
     paddingTop: 4,
-    backgroundColor: 'transparent',
+    backgroundColor: colors.background,
   },
 });
