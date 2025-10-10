@@ -1,10 +1,11 @@
 
 import { memo, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Animated, useWindowDimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Animated, useWindowDimensions } from 'react-native';
 import { Tile } from '../types';
 import { colors } from '../styles/commonStyles';
 import { categories } from '../data/categories';
 import Icon from './Icon';
+import { SvgUri } from 'react-native-svg';
 
 interface Props {
   tile: Tile;
@@ -53,8 +54,22 @@ const TileItem = memo(function TileItem({
     return 11; // Small phones
   };
 
+  // Responsive image size based on screen width
+  const getResponsiveImageSize = () => {
+    if (width >= 1400) return 80; // Large tablets/desktops
+    if (width >= 1200) return 70; // Medium tablets
+    if (width >= 1000) return 60; // Small tablets
+    if (width >= 820) return 55;  // Large phones landscape
+    if (width >= 680) return 50;  // Medium phones landscape
+    return 45; // Small phones
+  };
+
   const bg = getCategoryColor();
   const fontSize = getResponsiveFontSize();
+  const imageSize = getResponsiveImageSize();
+
+  // Check if the image is an SVG
+  const isSvg = tile.imageUri?.endsWith('.svg');
 
   return (
     <Animated.View
@@ -83,12 +98,18 @@ const TileItem = memo(function TileItem({
           {isAdd ? (
             <Icon name="add-circle-outline" size={34} color={colors.text} />
           ) : tile.imageUri ? (
-            <Image 
-              source={{ uri: tile.imageUri }} 
-              style={styles.image} 
-              resizeMode="contain"
-              onError={(error) => console.log(`Failed to load image for tile: ${tile.text}`, error.nativeEvent.error)}
-            />
+            isSvg ? (
+              <SvgUri
+                uri={tile.imageUri}
+                width={imageSize}
+                height={imageSize}
+                onError={(error) => {
+                  console.log(`Failed to load SVG for tile: ${tile.text}`, error);
+                }}
+              />
+            ) : (
+              <Icon name="chatbubble-ellipses-outline" size={34} color={colors.text} />
+            )
           ) : (
             <Icon name="chatbubble-ellipses-outline" size={34} color={colors.text} />
           )}
@@ -121,10 +142,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 4,
-  },
-  image: {
-    width: '100%',
-    height: '100%',
   },
   text: {
     fontFamily: 'Montserrat_600SemiBold',
