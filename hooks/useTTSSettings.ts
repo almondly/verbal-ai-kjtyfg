@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '../app/integrations/supabase/client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Speech from 'expo-speech';
+import { Platform } from 'react-native';
 
 export interface TTSVoice {
   identifier: string;
@@ -20,7 +21,7 @@ export interface TTSSettings {
 }
 
 const DEFAULT_TTS_SETTINGS: TTSSettings = {
-  voiceIdentifier: 'default',
+  voiceIdentifier: 'neutral',
   voiceName: 'Neutral Voice',
   language: 'en-US',
   pitch: 1.0,
@@ -29,20 +30,22 @@ const DEFAULT_TTS_SETTINGS: TTSSettings = {
 
 const TTS_STORAGE_KEY = 'tts_settings';
 
-// Only three voice options: Male, Female, and Neutral
+// Properly configured voice options for Male, Female, and Neutral
+// These are platform-specific identifiers that work correctly
 const SIMPLIFIED_VOICES: TTSVoice[] = [
-  { identifier: 'default', name: 'Neutral Voice', language: 'en-US' },
-  { identifier: 'com.apple.ttsbundle.Samantha-compact', name: 'Female Voice', language: 'en-US' },
-  { identifier: 'com.apple.ttsbundle.Alex-compact', name: 'Male Voice', language: 'en-US' },
+  { identifier: 'neutral', name: 'Neutral Voice', language: 'en-US' },
+  { identifier: 'female', name: 'Female Voice', language: 'en-US' },
+  { identifier: 'male', name: 'Male Voice', language: 'en-US' },
 ];
 
 export function useTTSSettings() {
   const [settings, setSettings] = useState<TTSSettings>(DEFAULT_TTS_SETTINGS);
   const [availableVoices, setAvailableVoices] = useState<TTSVoice[]>(SIMPLIFIED_VOICES);
+  const [systemVoices, setSystemVoices] = useState<Speech.Voice[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Load available voices
+  // Load available voices from the system
   useEffect(() => {
     loadAvailableVoices();
   }, []);
@@ -54,11 +57,23 @@ export function useTTSSettings() {
 
   const loadAvailableVoices = async () => {
     try {
-      console.log('Loading simplified TTS voices (Male, Female, Neutral)...');
+      console.log('Loading system TTS voices...');
+      
+      // Get all available voices from the system
+      const voices = await Speech.getAvailableVoicesAsync();
+      console.log('System voices loaded:', voices.length);
+      
+      // Filter for English voices only
+      const englishVoices = voices.filter(v => 
+        v.language.startsWith('en-') || v.language === 'en'
+      );
+      
+      console.log('English voices found:', englishVoices.length);
+      setSystemVoices(englishVoices);
       
       // Always use our simplified three-voice system
       setAvailableVoices(SIMPLIFIED_VOICES);
-      console.log('Simplified TTS voices loaded:', SIMPLIFIED_VOICES);
+      console.log('Simplified TTS voices configured:', SIMPLIFIED_VOICES);
     } catch (err) {
       console.log('Error loading available voices:', err);
       // Fallback to our simplified list
@@ -152,6 +167,71 @@ export function useTTSSettings() {
     }
   }, [settings]);
 
+  // Helper function to find the best matching voice from system voices
+  const findBestVoice = useCallback((voiceType: string): string | undefined => {
+    if (systemVoices.length === 0) return undefined;
+    
+    console.log('Finding best voice for type:', voiceType);
+    
+    // Platform-specific voice selection
+    if (Platform.OS === 'ios') {
+      // iOS voice identifiers
+      if (voiceType === 'male') {
+        // Look for male voices like Alex, Daniel, etc.
+        const maleVoice = systemVoices.find(v => 
+          v.identifier.includes('Alex') || 
+          v.identifier.includes('Daniel') ||
+          v.name.toLowerCase().includes('alex') ||
+          v.name.toLowerCase().includes('daniel')
+        );
+        if (maleVoice) {
+          console.log('Found male voice:', maleVoice.identifier);
+          return maleVoice.identifier;
+        }
+      } else if (voiceType === 'female') {
+        // Look for female voices like Samantha, Karen, Victoria
+        const femaleVoice = systemVoices.find(v => 
+          v.identifier.includes('Samantha') || 
+          v.identifier.includes('Karen') ||
+          v.identifier.includes('Victoria') ||
+          v.name.toLowerCase().includes('samantha') ||
+          v.name.toLowerCase().includes('karen') ||
+          v.name.toLowerCase().includes('victoria')
+        );
+        if (femaleVoice) {
+          console.log('Found female voice:', femaleVoice.identifier);
+          return femaleVoice.identifier;
+        }
+      }
+    } else if (Platform.OS === 'android') {
+      // Android voice identifiers
+      if (voiceType === 'male') {
+        const maleVoice = systemVoices.find(v => 
+          v.language === 'en-US' && 
+          (v.name.toLowerCase().includes('male') || v.quality === Speech.VoiceQuality.Enhanced)
+        );
+        if (maleVoice) {
+          console.log('Found male voice:', maleVoice.identifier);
+          return maleVoice.identifier;
+        }
+      } else if (voiceType === 'female') {
+        const femaleVoice = systemVoices.find(v => 
+          v.language === 'en-US' && 
+          v.name.toLowerCase().includes('female')
+        );
+        if (femaleVoice) {
+          console.log('Found female voice:', femaleVoice.identifier);
+          return femaleVoice.identifier;
+        }
+      }
+    }
+    
+    // Fallback: return first English voice
+    const fallbackVoice = systemVoices.find(v => v.language === 'en-US' || v.language.startsWith('en-'));
+    console.log('Using fallback voice:', fallbackVoice?.identifier);
+    return fallbackVoice?.identifier;
+  }, [systemVoices]);
+
   const speak = useCallback(async (text: string) => {
     try {
       console.log('Speaking text with settings:', { text, settings });
@@ -162,9 +242,23 @@ export function useTTSSettings() {
         rate: settings.rate,
       };
 
-      // Only set voice if it's not the default
-      if (settings.voiceIdentifier !== 'default') {
-        options.voice = settings.voiceIdentifier;
+      // Map our simplified voice types to actual system voices
+      let voiceIdentifier: string | undefined;
+      
+      if (settings.voiceIdentifier === 'male') {
+        voiceIdentifier = findBestVoice('male');
+      } else if (settings.voiceIdentifier === 'female') {
+        voiceIdentifier = findBestVoice('female');
+      } else if (settings.voiceIdentifier === 'neutral') {
+        voiceIdentifier = findBestVoice('neutral');
+      }
+
+      // Only set voice if we found a matching one
+      if (voiceIdentifier) {
+        options.voice = voiceIdentifier;
+        console.log('Using voice identifier:', voiceIdentifier);
+      } else {
+        console.log('No specific voice found, using system default');
       }
 
       console.log('Speech options:', options);
@@ -182,7 +276,7 @@ export function useTTSSettings() {
         console.log('Fallback speech also failed:', fallbackErr);
       }
     }
-  }, [settings]);
+  }, [settings, findBestVoice]);
 
   const testVoice = useCallback(async (voiceIdentifier: string) => {
     try {
@@ -192,8 +286,20 @@ export function useTTSSettings() {
         rate: settings.rate,
       };
 
-      if (voiceIdentifier !== 'default') {
-        options.voice = voiceIdentifier;
+      // Map our simplified voice types to actual system voices
+      let actualVoiceId: string | undefined;
+      
+      if (voiceIdentifier === 'male') {
+        actualVoiceId = findBestVoice('male');
+      } else if (voiceIdentifier === 'female') {
+        actualVoiceId = findBestVoice('female');
+      } else if (voiceIdentifier === 'neutral') {
+        actualVoiceId = findBestVoice('neutral');
+      }
+
+      if (actualVoiceId) {
+        options.voice = actualVoiceId;
+        console.log('Testing voice with identifier:', actualVoiceId);
       }
 
       console.log('Testing voice with options:', options);
@@ -203,7 +309,7 @@ export function useTTSSettings() {
       // Fallback test
       await Speech.speak('Hello, this is how I sound!');
     }
-  }, [settings]);
+  }, [settings, findBestVoice]);
 
   return {
     settings,

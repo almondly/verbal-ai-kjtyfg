@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform, useWindowDimensions, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as ScreenOrientation from 'expo-screen-orientation';
@@ -8,15 +8,16 @@ import EmotionFace from '../components/EmotionFace';
 import LandscapeGuard from '../components/LandscapeGuard';
 import { colors, commonStyles } from '../styles/commonStyles';
 import { useEmotionSettings } from '../hooks/useEmotionSettings';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const FRONT_PAGE_IMAGE_KEY = 'front_page_image';
+// Admin-controlled branding images
+// To add your own images, place PNG files in assets/images/branding/ folder
+// and update the paths below
+const ADMIN_LOGO = require('../assets/images/natively-dark.png');
 
 export default function MainMenu() {
   const router = useRouter();
   const { settings } = useEmotionSettings();
   const { width, height } = useWindowDimensions();
-  const [frontPageImage, setFrontPageImage] = useState<string | null>(null);
 
   useEffect(() => {
     // Lock orientation on native platforms only
@@ -28,21 +29,7 @@ export default function MainMenu() {
         console.log('Failed to lock screen orientation in main menu:', error);
       }
     }
-
-    // Load front page image
-    loadFrontPageImage();
   }, []);
-
-  const loadFrontPageImage = async () => {
-    try {
-      const stored = await AsyncStorage.getItem(FRONT_PAGE_IMAGE_KEY);
-      if (stored) {
-        setFrontPageImage(stored);
-      }
-    } catch (error) {
-      console.log('Error loading front page image:', error);
-    }
-  };
 
   const handleStartCommunication = () => {
     console.log('Starting communication');
@@ -70,15 +57,12 @@ export default function MainMenu() {
           {/* Logo / Emotion Display - MUCH LARGER */}
           <View style={styles.emotionSection}>
             <View style={styles.emotionContainer}>
-              {frontPageImage ? (
-                <Image 
-                  source={{ uri: frontPageImage }} 
-                  style={[styles.logoImage, { width: faceSize, height: faceSize }]}
-                  resizeMode="contain"
-                />
-              ) : (
-                <EmotionFace emotion={settings.selectedEmotion} size={faceSize} />
-              )}
+              {/* Display admin-controlled logo image */}
+              <Image 
+                source={ADMIN_LOGO} 
+                style={[styles.logoImage, { width: faceSize * 0.8, height: faceSize * 0.8 }]}
+                resizeMode="contain"
+              />
             </View>
           </View>
 
