@@ -1,13 +1,15 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { colors } from '../styles/commonStyles';
 import { AdvancedSuggestion } from '../hooks/useAdvancedAI';
 import Icon from './Icon';
+import TenseSwitcher from './TenseSwitcher';
 
 interface Props {
   suggestions: AdvancedSuggestion[];
   onPressSuggestion: (text: string) => void;
+  onRemoveWord?: (word: string) => void;
   style?: any;
   showDetails?: boolean;
 }
@@ -24,6 +26,8 @@ const getTypeIcon = (type: string) => {
       return 'heart-outline';
     case 'full_sentence':
       return 'text-outline';
+    case 'tense_variation':
+      return 'time-outline';
     default:
       return 'bulb-outline';
   }
@@ -37,10 +41,13 @@ const getConfidenceColor = (confidence: number) => {
 
 export default function AdvancedSuggestionsRow({ 
   suggestions, 
-  onPressSuggestion, 
+  onPressSuggestion,
+  onRemoveWord,
   style,
   showDetails = false 
 }: Props) {
+  const [selectedWord, setSelectedWord] = useState<string | null>(null);
+
   if (suggestions.length === 0) {
     return (
       <View style={[styles.emptyContainer, style]}>
@@ -51,8 +58,24 @@ export default function AdvancedSuggestionsRow({
     );
   }
 
+  const handleTenseSelect = (newWord: string, tense: string) => {
+    if (onRemoveWord && selectedWord) {
+      onRemoveWord(selectedWord);
+    }
+    onPressSuggestion(newWord);
+    setSelectedWord(null);
+  };
+
   return (
     <View style={[styles.container, style]}>
+      {selectedWord && (
+        <TenseSwitcher
+          word={selectedWord}
+          onSelectTense={handleTenseSelect}
+          style={styles.tenseSwitcher}
+        />
+      )}
+      
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -61,27 +84,32 @@ export default function AdvancedSuggestionsRow({
       >
         {suggestions.slice(0, 10).map((suggestion, index) => {
           const isFullSentence = suggestion.type === 'full_sentence';
+          const isTenseVariation = suggestion.type === 'tense_variation';
+          
           return (
             <TouchableOpacity
               key={`${suggestion.text}-${index}`}
               style={[
                 styles.suggestion,
                 isFullSentence && styles.fullSentenceSuggestion,
+                isTenseVariation && styles.tenseVariationSuggestion,
                 { borderLeftColor: getConfidenceColor(suggestion.confidence) }
               ]}
               onPress={() => onPressSuggestion(suggestion.text)}
+              onLongPress={() => setSelectedWord(suggestion.text)}
               activeOpacity={0.8}
             >
               <View style={styles.suggestionHeader}>
                 <Icon
                   name={getTypeIcon(suggestion.type)}
                   size={14}
-                  color={isFullSentence ? colors.primary : colors.textSecondary}
+                  color={isFullSentence ? colors.primary : isTenseVariation ? colors.warning : colors.textSecondary}
                   style={styles.typeIcon}
                 />
                 <Text style={[
                   styles.confidenceText,
-                  isFullSentence && styles.fullSentenceConfidence
+                  isFullSentence && styles.fullSentenceConfidence,
+                  isTenseVariation && styles.tenseVariationConfidence
                 ]}>
                   {Math.round(suggestion.confidence * 100)}%
                 </Text>
@@ -89,7 +117,8 @@ export default function AdvancedSuggestionsRow({
               <Text 
                 style={[
                   styles.suggestionText,
-                  isFullSentence && styles.fullSentenceText
+                  isFullSentence && styles.fullSentenceText,
+                  isTenseVariation && styles.tenseVariationText
                 ]} 
                 numberOfLines={isFullSentence ? 3 : 2}
               >
@@ -98,10 +127,19 @@ export default function AdvancedSuggestionsRow({
               {isFullSentence && (
                 <Text style={styles.fullSentenceLabel}>Full Sentence</Text>
               )}
+              {isTenseVariation && suggestion.context && (
+                <Text style={styles.tenseLabel}>{suggestion.context}</Text>
+              )}
             </TouchableOpacity>
           );
         })}
       </ScrollView>
+      
+      {selectedWord && (
+        <Text style={styles.hintText}>
+          Long press a word to change its tense
+        </Text>
+      )}
     </View>
   );
 }
@@ -113,6 +151,9 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 8,
     boxShadow: '0px 2px 6px rgba(0,0,0,0.06)',
+  },
+  tenseSwitcher: {
+    marginBottom: 8,
   },
   row: {
     alignItems: 'center',
@@ -136,6 +177,11 @@ const styles = StyleSheet.create({
     borderLeftColor: colors.primary,
     borderLeftWidth: 4,
   },
+  tenseVariationSuggestion: {
+    backgroundColor: '#FFF7ED',
+    borderLeftColor: colors.warning,
+    borderLeftWidth: 3,
+  },
   suggestionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -153,6 +199,9 @@ const styles = StyleSheet.create({
   fullSentenceConfidence: {
     color: colors.primary,
   },
+  tenseVariationConfidence: {
+    color: colors.warning,
+  },
   suggestionText: {
     fontSize: 13,
     fontFamily: 'Montserrat_600SemiBold',
@@ -164,12 +213,30 @@ const styles = StyleSheet.create({
     lineHeight: 15,
     color: colors.primary,
   },
+  tenseVariationText: {
+    fontSize: 13,
+    color: colors.warning,
+  },
   fullSentenceLabel: {
     fontSize: 9,
     fontFamily: 'Montserrat_500Medium',
     color: colors.primary,
     marginTop: 4,
     textTransform: 'uppercase',
+  },
+  tenseLabel: {
+    fontSize: 9,
+    fontFamily: 'Montserrat_500Medium',
+    color: colors.warning,
+    marginTop: 4,
+  },
+  hintText: {
+    fontSize: 11,
+    fontFamily: 'Montserrat_400Regular',
+    color: colors.textSecondary,
+    textAlign: 'center',
+    marginTop: 8,
+    fontStyle: 'italic',
   },
   emptyContainer: {
     backgroundColor: colors.backgroundAlt,

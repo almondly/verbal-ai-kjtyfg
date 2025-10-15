@@ -31,7 +31,7 @@ export default function CommunicationScreen() {
     })();
   }, []);
 
-  const { getAdvancedSuggestions, getTimeBasedSuggestions } = useAdvancedAI();
+  const { getAdvancedSuggestions, getTimeBasedSuggestions, recordUserInput } = useAdvancedAI();
   const { currentEmotion, setCurrentEmotion } = useEmotionSettings();
   const [sentence, setSentence] = useState<Tile[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -104,7 +104,10 @@ export default function CommunicationScreen() {
     
     const normalized = normalizeForTTS(text);
     await speak(normalized);
-  }, [sentence, speak]);
+    
+    // Record the sentence for AI learning
+    await recordUserInput(text, selectedCategory !== 'all' ? selectedCategory : undefined);
+  }, [sentence, speak, recordUserInput, selectedCategory]);
 
   const normalizeForTTS = (text: string): string => {
     return text
@@ -193,6 +196,16 @@ export default function CommunicationScreen() {
                     color: colors.primary,
                   };
                   handleTilePress(tile);
+                }}
+                onRemoveWord={(word) => {
+                  // Remove the word from the sentence when tense is changed
+                  setSentence(prev => {
+                    const index = prev.findIndex(t => t.text.toLowerCase() === word.toLowerCase());
+                    if (index !== -1) {
+                      return prev.filter((_, i) => i !== index);
+                    }
+                    return prev;
+                  });
                 }}
                 style={styles.suggestions}
               />

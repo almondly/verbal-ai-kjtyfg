@@ -20,7 +20,7 @@ import {
 export interface AdvancedSuggestion {
   text: string;
   confidence: number;
-  type: 'completion' | 'next_word' | 'common_phrase' | 'contextual' | 'temporal' | 'synonym' | 'preference' | 'full_sentence';
+  type: 'completion' | 'next_word' | 'common_phrase' | 'contextual' | 'temporal' | 'synonym' | 'preference' | 'full_sentence' | 'tense_variation';
   context?: string;
 }
 
@@ -305,8 +305,12 @@ export function useAdvancedAI() {
       const words = sentence.toLowerCase().trim().split(/\s+/).filter(Boolean);
       const currentHour = new Date().getHours();
       const dayOfWeek = new Date().getDay();
+      const tenseContext = detectTenseContext(words);
       
-      // Record the full phrase
+      // Detect sentence topics for better context learning
+      const topics = detectSentenceTopics(words);
+      
+      // Record the full phrase with enhanced metadata
       const { error: phraseError } = await supabase
         .from('user_patterns')
         .upsert({
@@ -318,6 +322,8 @@ export function useAdvancedAI() {
             context, 
             hour: currentHour,
             dayOfWeek,
+            tense: tenseContext,
+            topics,
             lastUsed: new Date().toISOString()
           },
           updated_at: new Date().toISOString()
@@ -329,7 +335,7 @@ export function useAdvancedAI() {
         console.log('Error recording phrase:', phraseError);
       }
 
-      // Record individual word usage
+      // Record individual word usage with enhanced context
       for (let i = 0; i < words.length; i++) {
         const { error: wordError } = await supabase
           .from('user_patterns')
@@ -343,6 +349,8 @@ export function useAdvancedAI() {
               dayOfWeek,
               position: i,
               sentenceLength: words.length,
+              tense: tenseContext,
+              topics,
               lastUsed: new Date().toISOString()
             },
             updated_at: new Date().toISOString()
@@ -371,6 +379,8 @@ export function useAdvancedAI() {
               hour: currentHour,
               dayOfWeek,
               position: i,
+              tense: tenseContext,
+              topics,
               lastUsed: new Date().toISOString()
             },
             updated_at: new Date().toISOString()
@@ -395,6 +405,8 @@ export function useAdvancedAI() {
             time_data: [{ hour: currentHour, count: 1 }],
             day_of_week: dayOfWeek,
             context,
+            tense: tenseContext,
+            topics,
             lastUsed: new Date().toISOString()
           },
           updated_at: new Date().toISOString()
@@ -405,15 +417,65 @@ export function useAdvancedAI() {
       if (temporalError) {
         console.log('Error recording temporal pattern:', temporalError);
       }
+      
+      // Record topic-based patterns for context learning
+      for (const topic of topics) {
+        const { error: topicError } = await supabase
+          .from('user_patterns')
+          .upsert({
+            pattern_type: 'topic',
+            pattern_key: topic,
+            frequency: 1,
+            metadata: {
+              sentence: sentence.toLowerCase(),
+              words,
+              hour: currentHour,
+              dayOfWeek,
+              lastUsed: new Date().toISOString()
+            },
+            updated_at: new Date().toISOString()
+          }, {
+            onConflict: 'pattern_type,pattern_key'
+          });
+
+        if (topicError) {
+          console.log('Error recording topic:', topicError);
+        }
+      }
 
       // Update local patterns
       await loadUserPatterns();
       
-      console.log('Recorded user input:', { sentence, words: words.length, context });
+      console.log('Recorded user input:', { sentence, words: words.length, context, tense: tenseContext, topics });
     } catch (err) {
       console.log('Error recording user input:', err);
     }
   }, []);
+  
+  // Helper function to detect sentence topics for context learning
+  const detectSentenceTopics = (words: string[]): string[] => {
+    const topics: string[] = [];
+    
+    // Topic categories with keywords
+    const topicKeywords = {
+      'school': ['school', 'class', 'teacher', 'learn', 'study', 'homework', 'book', 'pencil'],
+      'food': ['eat', 'drink', 'hungry', 'thirsty', 'food', 'water', 'lunch', 'dinner', 'breakfast', 'snack'],
+      'family': ['mum', 'dad', 'mom', 'mother', 'father', 'brother', 'sister', 'family', 'grandma', 'grandpa'],
+      'play': ['play', 'game', 'toy', 'fun', 'outside', 'park', 'playground', 'ball', 'swing'],
+      'feelings': ['happy', 'sad', 'angry', 'scared', 'excited', 'tired', 'love', 'like', 'feel'],
+      'home': ['home', 'house', 'bed', 'room', 'bathroom', 'kitchen', 'tv', 'sleep'],
+      'help': ['help', 'need', 'want', 'please', 'can', 'could', 'would'],
+      'time': ['morning', 'afternoon', 'evening', 'night', 'today', 'tomorrow', 'now', 'later'],
+    };
+    
+    for (const [topic, keywords] of Object.entries(topicKeywords)) {
+      if (words.some(word => keywords.includes(word.toLowerCase()))) {
+        topics.push(topic);
+      }
+    }
+    
+    return topics;
+  };
 
   // Ultra-enhanced duplicate detection with advanced fuzzy matching
   const removeDuplicateWords = (words: string[], currentSentence: string[] = []): string[] => {
@@ -712,6 +774,34 @@ export function useAdvancedAI() {
           });
         }
       });
+      
+      // 3.5. Topic-based context learning suggestions
+      const currentTopics = detectSentenceTopics(currentWords);
+      if (currentTopics.length > 0) {
+        // Fetch phrases related to current topics
+        const { data: topicData } = await supabase
+          .from('user_patterns')
+          .select('*')
+          .eq('pattern_type', 'topic')
+          .in('pattern_key', currentTopics)
+          .order('frequency', { ascending: false })
+          .limit(5);
+        
+        topicData?.forEach((pattern, index) => {
+          const relatedWords = pattern.metadata?.words || [];
+          relatedWords.slice(0, 3).forEach((word: string) => {
+            if (!suggestions.some(s => areSimilarWords(s.text.toLowerCase(), word.toLowerCase())) &&
+                !currentWords.some(w => areSimilarWords(w.toLowerCase(), word.toLowerCase()))) {
+              suggestions.push({
+                text: word,
+                confidence: Math.max(0.75, 0.85 - index * 0.05),
+                type: 'contextual',
+                context: `Related to ${currentTopics.join(', ')}`
+              });
+            }
+          });
+        });
+      }
 
       // 4. Enhanced phrase completions from user patterns
       if (currentText) {
@@ -797,25 +887,35 @@ export function useAdvancedAI() {
         });
       }
       
-      // 7.5. Word variation suggestions (tenses, plurals, etc.)
-      if (lastWord) {
-        const variations = generateWordVariations(lastWord);
+      // 7.5. Enhanced tense variation suggestions with all tenses
+      if (lastWord && isLikelyVerb(lastWord)) {
+        const baseForm = getBaseForm(lastWord);
         
-        // Apply tense context to verb variations
-        if (isLikelyVerb(lastWord)) {
-          const baseForm = getBaseForm(lastWord);
-          const contextualForm = getVerbFormForContext(baseForm, tenseContext);
-          
-          if (contextualForm && contextualForm !== lastWord && 
-              !suggestions.some(s => areSimilarWords(s.text.toLowerCase(), contextualForm.toLowerCase()))) {
+        // Generate all tense variations
+        const tenseVariations = [
+          { tense: 'present', form: getVerbFormForContext(baseForm, 'present'), label: 'Present' },
+          { tense: 'past', form: getVerbFormForContext(baseForm, 'past'), label: 'Past' },
+          { tense: 'future', form: getVerbFormForContext(baseForm, 'future'), label: 'Future' },
+        ];
+        
+        tenseVariations.forEach(({ tense, form, label }) => {
+          if (form && form.toLowerCase() !== lastWord.toLowerCase() && 
+              !suggestions.some(s => areSimilarWords(s.text.toLowerCase(), form.toLowerCase()))) {
+            // Higher confidence for contextually appropriate tense
+            const confidence = tense === tenseContext ? 0.85 : 0.65;
             suggestions.push({
-              text: contextualForm,
-              confidence: 0.75,
-              type: 'synonym',
-              context: `${tenseContext} tense of "${lastWord}"`
+              text: form,
+              confidence,
+              type: 'tense_variation',
+              context: `${label} tense`
             });
           }
-        }
+        });
+      }
+      
+      // 7.6. Word variation suggestions (plurals, etc.)
+      if (lastWord) {
+        const variations = generateWordVariations(lastWord);
         
         // Add other variations
         variations.slice(0, 3).forEach((variation, index) => {
@@ -832,7 +932,7 @@ export function useAdvancedAI() {
         });
       }
       
-      // 7.6. Complete sentence suggestions from partial input
+      // 7.7. Complete sentence suggestions from partial input
       if (currentWords.length >= 1 && currentWords.length <= 3) {
         const completeSentences = generateCompleteSentences(currentWords, userPatterns.phrases, 2);
         
@@ -853,7 +953,7 @@ export function useAdvancedAI() {
         });
       }
       
-      // 7.7. N-gram based predictions
+      // 7.8. N-gram based predictions
       if (currentWords.length > 0) {
         const ngramPredictions = predictNextWords(currentWords, userPatterns.transitions, 3);
         
@@ -962,9 +1062,10 @@ export function useAdvancedAI() {
           }
           // Secondary sort by type priority
           const typePriority = {
-            'preference': 8,
-            'common_phrase': 7,
-            'full_sentence': 6,
+            'preference': 9,
+            'common_phrase': 8,
+            'full_sentence': 7,
+            'tense_variation': 6,
             'completion': 5,
             'next_word': 4,
             'temporal': 3,

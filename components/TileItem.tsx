@@ -5,6 +5,7 @@ import { Tile } from '../types';
 import { colors } from '../styles/commonStyles';
 import { categories } from '../data/categories';
 import Icon from './Icon';
+import { getUnsplashImageUrl } from '../utils/unsplashImages';
 
 interface Props {
   tile: Tile;
@@ -24,6 +25,7 @@ const TileItem = memo(function TileItem({
   const scale = useRef(new Animated.Value(1)).current;
   const { width } = useWindowDimensions();
   const [imageError, setImageError] = useState(false);
+  const [unsplashError, setUnsplashError] = useState(false);
 
   const handlePressIn = () => {
     Animated.spring(scale, { 
@@ -302,8 +304,9 @@ const TileItem = memo(function TileItem({
   const iconSize = getResponsiveIconSize();
   const iconName = isAdd ? 'add-circle' : getIconName();
 
-  // Check if we should display a custom image
+  // Determine which image to display (priority: custom imageUrl/imageUri > Unsplash > pictogram icon)
   const hasCustomImage = !isAdd && (tile.imageUrl || tile.imageUri) && !imageError;
+  const unsplashImageUrl = !isAdd && !hasCustomImage && !unsplashError ? getUnsplashImageUrl(tile.text) : null;
 
   return (
     <Animated.View
@@ -335,6 +338,16 @@ const TileItem = memo(function TileItem({
               onError={() => {
                 console.log('Failed to load custom image for tile:', tile.text);
                 setImageError(true);
+              }}
+            />
+          ) : unsplashImageUrl ? (
+            <Image
+              source={{ uri: unsplashImageUrl }}
+              style={styles.customImage}
+              resizeMode="cover"
+              onError={() => {
+                console.log('Failed to load Unsplash image for tile:', tile.text);
+                setUnsplashError(true);
               }}
             />
           ) : (
@@ -380,6 +393,7 @@ const styles = StyleSheet.create({
     height: '100%',
     maxWidth: 80,
     maxHeight: 80,
+    borderRadius: 8,
   },
   textContainer: {
     width: '100%',
