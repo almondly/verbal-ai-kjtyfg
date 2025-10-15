@@ -171,7 +171,7 @@ export default function SettingsScreen() {
     switch (activeTab) {
       case 'emotions':
         return (
-          <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false}>
+          <View style={styles.tabContentWrapper}>
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Current Emotion</Text>
               <View style={styles.currentEmotionContainer}>
@@ -210,12 +210,12 @@ export default function SettingsScreen() {
                 ))}
               </View>
             </View>
-          </ScrollView>
+          </View>
         );
 
       case 'voice':
         return (
-          <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false}>
+          <View style={styles.tabContentWrapper}>
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Text-to-Speech Voice</Text>
               <View style={styles.currentVoiceContainer}>
@@ -302,12 +302,12 @@ export default function SettingsScreen() {
                 </View>
               </View>
             </View>
-          </ScrollView>
+          </View>
         );
 
       case 'ai':
         return (
-          <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false}>
+          <View style={styles.tabContentWrapper}>
             {Object.entries(preferenceCategories).map(([categoryKey, category]) => (
               <View key={categoryKey} style={styles.section}>
                 <View style={styles.categoryHeader}>
@@ -358,16 +358,16 @@ export default function SettingsScreen() {
                 })}
               </View>
             ))}
-          </ScrollView>
+          </View>
         );
 
       case 'defaultTiles':
         return (
-          <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false}>
+          <View style={styles.tabContentWrapper}>
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Edit Default Tiles</Text>
               <Text style={styles.helperText}>
-                Tap any tile to customize its image using a pictogram or custom URL
+                Tap any tile to customize its image using a pictogram or custom URL. You can directly edit the image URL in the editor.
               </Text>
 
               {/* Category Filter */}
@@ -448,12 +448,12 @@ export default function SettingsScreen() {
                 ))}
               </View>
             </View>
-          </ScrollView>
+          </View>
         );
 
       case 'manage':
         return (
-          <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false}>
+          <View style={styles.tabContentWrapper}>
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Manage Data</Text>
               <View style={styles.row}>
@@ -474,7 +474,7 @@ export default function SettingsScreen() {
               </View>
               <Text style={styles.helper}>Long-press a tile to remove it.</Text>
             </View>
-          </ScrollView>
+          </View>
         );
 
       default:
@@ -533,10 +533,14 @@ export default function SettingsScreen() {
           </ScrollView>
         </View>
 
-        {/* Tab Content */}
-        <View style={styles.contentContainer}>
+        {/* Tab Content - Single ScrollView wrapper */}
+        <ScrollView 
+          style={styles.contentContainer}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
           {renderTabContent()}
-        </View>
+        </ScrollView>
 
         {/* Tile Editor Modal */}
         {editingTile && (
@@ -625,7 +629,10 @@ const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
   },
-  tabContent: {
+  scrollContent: {
+    paddingBottom: 40,
+  },
+  tabContentWrapper: {
     flex: 1,
   },
   section: {

@@ -76,6 +76,7 @@ export default function TileEditor({ visible, tile, onSave, onClose }: Props) {
       category: selectedCategory,
     };
 
+    console.log('Saving tile with imageUrl:', updatedTile.imageUrl);
     onSave(updatedTile);
     onClose();
   };
@@ -148,8 +149,47 @@ export default function TileEditor({ visible, tile, onSave, onClose }: Props) {
 
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Image</Text>
-              <Text style={styles.helperText}>Choose a pictogram, add a custom URL, or pick from gallery</Text>
+              <Text style={styles.helperText}>
+                You can directly edit the image URL below, browse pictograms, or pick from your gallery
+              </Text>
               
+              {/* Image URL Input - PROMINENT */}
+              <View style={styles.urlInputContainer}>
+                <View style={styles.urlInputHeader}>
+                  <Icon name="link-outline" size={20} color={colors.primary} />
+                  <Text style={styles.urlInputLabel}>Image URL (Direct Edit)</Text>
+                </View>
+                <TextInput
+                  placeholder="https://example.com/image.png or ARASAAC URL"
+                  placeholderTextColor="#9CA3AF"
+                  style={styles.urlInput}
+                  value={imageUrl}
+                  onChangeText={(text) => {
+                    setImageUrl(text);
+                    if (text.trim()) {
+                      setImageUri(undefined);
+                    }
+                  }}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  multiline
+                  numberOfLines={2}
+                />
+                {imageUrl.trim() && (
+                  <View style={styles.urlInfoBadge}>
+                    <Icon name="checkmark-circle" size={16} color={colors.success} />
+                    <Text style={styles.urlInfoText}>URL set</Text>
+                  </View>
+                )}
+              </View>
+
+              {/* Alternative Options */}
+              <View style={styles.divider}>
+                <View style={styles.dividerLine} />
+                <Text style={styles.dividerText}>OR</Text>
+                <View style={styles.dividerLine} />
+              </View>
+
               <View style={styles.imageOptionsRow}>
                 <TouchableOpacity 
                   style={[styles.imageOptionBtn, { flex: 1 }]} 
@@ -170,41 +210,27 @@ export default function TileEditor({ visible, tile, onSave, onClose }: Props) {
                 </TouchableOpacity>
               </View>
 
-              <View style={styles.urlInputContainer}>
-                <Text style={styles.urlInputLabel}>Or enter custom image URL:</Text>
-                <TextInput
-                  placeholder="https://example.com/image.png"
-                  placeholderTextColor="#9CA3AF"
-                  style={styles.urlInput}
-                  value={imageUrl}
-                  onChangeText={(text) => {
-                    setImageUrl(text);
-                    if (text.trim()) {
-                      setImageUri(undefined);
-                    }
-                  }}
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                />
-              </View>
-
+              {/* Image Preview */}
               {(imageUri || imageUrl) && (
                 <View style={styles.imagePreviewContainer}>
-                  <Image 
-                    source={{ uri: imageUri || imageUrl }} 
-                    style={styles.imagePreview} 
-                    resizeMode="contain"
-                  />
-                  <TouchableOpacity 
-                    style={styles.removeImageButton}
-                    onPress={() => {
-                      setImageUri(undefined);
-                      setImageUrl('');
-                    }}
-                    activeOpacity={0.8}
-                  >
-                    <Icon name="close-circle" size={24} color={colors.danger} />
-                  </TouchableOpacity>
+                  <Text style={styles.previewLabel}>Preview:</Text>
+                  <View style={styles.previewWrapper}>
+                    <Image 
+                      source={{ uri: imageUri || imageUrl }} 
+                      style={styles.imagePreview} 
+                      resizeMode="contain"
+                    />
+                    <TouchableOpacity 
+                      style={styles.removeImageButton}
+                      onPress={() => {
+                        setImageUri(undefined);
+                        setImageUrl('');
+                      }}
+                      activeOpacity={0.8}
+                    >
+                      <Icon name="close-circle" size={24} color={colors.danger} />
+                    </TouchableOpacity>
+                  </View>
                 </View>
               )}
             </View>
@@ -223,6 +249,7 @@ export default function TileEditor({ visible, tile, onSave, onClose }: Props) {
               onPress={handleSave}
               activeOpacity={0.9}
             >
+              <Icon name="save-outline" size={20} color="#FFFFFF" />
               <Text style={styles.saveBtnText}>Save Changes</Text>
             </TouchableOpacity>
           </View>
@@ -287,7 +314,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: 'Montserrat_400Regular',
     color: colors.textSecondary,
-    marginBottom: 12,
+    marginBottom: 16,
     fontStyle: 'italic',
   },
   input: {
@@ -338,56 +365,102 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: '#111827',
   },
+  urlInputContainer: {
+    backgroundColor: '#EEF2FF',
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 2,
+    borderColor: colors.primary,
+    marginBottom: 20,
+  },
+  urlInputHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8 as any,
+    marginBottom: 12,
+  },
+  urlInputLabel: {
+    fontSize: 16,
+    fontFamily: 'Montserrat_700Bold',
+    color: colors.primary,
+  },
+  urlInput: {
+    backgroundColor: colors.background,
+    borderColor: '#E5E7EB',
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    color: colors.text,
+    fontSize: 14,
+    fontFamily: 'Montserrat_400Regular',
+    minHeight: 60,
+  },
+  urlInfoBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6 as any,
+    marginTop: 8,
+  },
+  urlInfoText: {
+    fontSize: 13,
+    fontFamily: 'Montserrat_600SemiBold',
+    color: colors.success,
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#E5E7EB',
+  },
+  dividerText: {
+    fontSize: 12,
+    fontFamily: 'Montserrat_600SemiBold',
+    color: colors.textSecondary,
+    marginHorizontal: 12,
+  },
   imageOptionsRow: {
     flexDirection: 'row',
     gap: 12 as any,
-    marginBottom: 16,
+    marginBottom: 20,
   },
   imageOptionBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8 as any,
-    backgroundColor: '#EEF2FF',
+    backgroundColor: '#F9FAFB',
     paddingVertical: 14,
     paddingHorizontal: 16,
     borderRadius: 14,
     borderWidth: 2,
-    borderColor: colors.primary,
+    borderColor: '#E5E7EB',
   },
   imageOptionText: {
-    fontSize: 14,
-    fontFamily: 'Montserrat_600SemiBold',
-    color: colors.primary,
-  },
-  urlInputContainer: {
-    marginBottom: 16,
-  },
-  urlInputLabel: {
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: 'Montserrat_600SemiBold',
     color: colors.text,
-    marginBottom: 8,
-  },
-  urlInput: {
-    backgroundColor: '#F9FAFB',
-    borderColor: '#E5E7EB',
-    borderWidth: 1,
-    borderRadius: 14,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    color: colors.text,
-    fontSize: 14,
-    fontFamily: 'Montserrat_400Regular',
   },
   imagePreviewContainer: {
-    position: 'relative',
-    alignSelf: 'center',
     marginTop: 8,
   },
+  previewLabel: {
+    fontSize: 14,
+    fontFamily: 'Montserrat_600SemiBold',
+    color: colors.text,
+    marginBottom: 12,
+  },
+  previewWrapper: {
+    position: 'relative',
+    alignSelf: 'center',
+  },
   imagePreview: {
-    width: 140,
-    height: 140,
+    width: 160,
+    height: 160,
     borderRadius: 16,
     backgroundColor: '#F9FAFB',
     borderWidth: 2,
@@ -411,10 +484,12 @@ const styles = StyleSheet.create({
   },
   footerBtn: {
     flex: 1,
-    paddingVertical: 16,
-    borderRadius: 14,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 8 as any,
+    paddingVertical: 16,
+    borderRadius: 14,
   },
   cancelBtn: {
     backgroundColor: '#F3F4F6',
