@@ -77,20 +77,17 @@ export function useAdvancedAI() {
     'favourite': ['colour is', 'food is', 'activity is', 'animal is'],
     
     // Food and drink - Australian
-    'I\'m': ['hungry', 'thirsty', 'starving', 'peckish'],
     'want': ['some tucker', 'some water', 'a drink', 'a snack', 'lunch', 'tea'],
     'can': ['I have water', 'I have food', 'I have a snack', 'I have lunch', 'I have tea'],
     'what\'s': ['for lunch', 'for tea', 'for brekkie', 'for dinner'],
     'time': ['for lunch', 'for tea', 'for brekkie', 'to eat', 'to go'],
     
     // Feelings and emotions
-    'I': ['feel happy', 'feel sad', 'feel tired', 'feel excited', 'feel scared', 'feel angry'],
     'feel': ['happy', 'sad', 'tired', 'excited', 'scared', 'angry', 'good', 'bad', 'sick'],
     'am': ['happy', 'sad', 'tired', 'excited', 'scared', 'angry', 'hungry', 'thirsty'],
     
     // Actions
     'want': ['to go home', 'to play outside', 'to watch telly', 'to read', 'to draw', 'to sleep'],
-    'can': ['we go', 'we play', 'I play', 'I go', 'you help'],
     'let\'s': ['go', 'play', 'eat', 'have fun', 'do it'],
     'time': ['to go', 'to play', 'to eat', 'to sleep', 'to leave'],
     
@@ -104,17 +101,6 @@ export function useAdvancedAI() {
     'I': ['love mum', 'love dad', 'miss you', 'want mum', 'want dad'],
     'my': ['mum', 'dad', 'mate', 'friend', 'family', 'favourite'],
     
-    // Colours - Australian spelling
-    'my': ['favourite colour', 'favourite color'],
-    'what': ['colour is it', 'colour do you like'],
-    'favourite': ['colour', 'food', 'toy', 'game', 'animal'],
-    'like': ['red', 'blue', 'green', 'yellow', 'purple', 'pink', 'orange'],
-    
-    // Time expressions
-    'in': ['the morning', 'the arvo', 'the evening', 'the night'],
-    'this': ['morning', 'arvo', 'afternoon', 'evening', 'night'],
-    'right': ['now', 'here', 'there'],
-    
     // Politeness - Australian style
     'please': ['can I', 'help me', 'thank you'],
     'thank': ['you', 'you very much', 'you mate'],
@@ -126,26 +112,6 @@ export function useAdvancedAI() {
     'yes': ['please', 'I do', 'I can', 'I will', 'that\'s right'],
     'no': ['thank you', 'I don\'t', 'I can\'t', 'not now'],
     'maybe': ['later', 'tomorrow', 'next time'],
-    
-    // Activities
-    'play': ['outside', 'with toys', 'games', 'with mates', 'at the park'],
-    'watch': ['telly', 'TV', 'a movie', 'cartoons'],
-    'read': ['a book', 'a story', 'with me'],
-    'draw': ['a picture', 'with me', 'something'],
-    
-    // Help and assistance
-    'help': ['me please', 'me with this', 'I need help'],
-    'can': ['you help me', 'you show me', 'you teach me'],
-    'show': ['me', 'me how', 'me please'],
-    
-    // Weather - Australian context
-    'it\'s': ['hot', 'cold', 'raining', 'sunny', 'beautiful', 'stinking hot'],
-    'the': ['weather is nice', 'weather is bad', 'sun is out'],
-    
-    // School
-    'at': ['school', 'kindy', 'uni'],
-    'go': ['to school', 'to kindy', 'to class'],
-    'time': ['for school', 'for class', 'for learning'],
   };
 
   // Common full sentence templates
@@ -701,7 +667,7 @@ export function useAdvancedAI() {
 
   const getAdvancedSuggestions = useCallback(async (
     currentWords: string[],
-    availableWords: string[],
+    availableWords: string[] = [],
     maxSuggestions: number = 10
   ): Promise<AdvancedSuggestion[]> => {
     try {
@@ -872,7 +838,7 @@ export function useAdvancedAI() {
       });
 
       // 7. Enhanced synonym suggestions with multiple alternatives
-      if (lastWord) {
+      if (lastWord && availableWords.length > 0) {
         const synonyms = findAlternativeWords(lastWord, availableWords, currentWords);
         synonyms.forEach((synonym, index) => {
           if (!suggestions.some(s => areSimilarWords(s.text.toLowerCase(), synonym.toLowerCase()))) {
@@ -972,34 +938,37 @@ export function useAdvancedAI() {
       }
 
       // 8. Enhanced contextual suggestions with smart filtering
-      const filteredAvailableWords = removeDuplicateWords(availableWords, currentWords);
-      const contextualWords = filteredAvailableWords
-        .filter(word => {
-          // Prefer words that are semantically related to current context
-          if (currentWords.length > 0) {
-            return currentWords.some(cw => areAdvancedSemanticallySimilar(
-              normalizeWord(cw.toLowerCase()), 
-              normalizeWord(word.toLowerCase())
-            ));
-          }
-          return true;
-        })
-        .slice(0, 5);
+      if (availableWords.length > 0) {
+        const filteredAvailableWords = removeDuplicateWords(availableWords, currentWords);
+        const contextualWords = filteredAvailableWords
+          .filter(word => {
+            // Prefer words that are semantically related to current context
+            if (currentWords.length > 0) {
+              return currentWords.some(cw => areAdvancedSemanticallySimilar(
+                normalizeWord(cw.toLowerCase()), 
+                normalizeWord(word.toLowerCase())
+              ));
+            }
+            return true;
+          })
+          .slice(0, 5);
 
-      contextualWords.forEach((word, index) => {
-        if (!suggestions.some(s => areSimilarWords(s.text.toLowerCase(), word.toLowerCase()))) {
-          const confidence = Math.max(0.3, 0.45 - index * 0.05);
-          suggestions.push({
-            text: word,
-            confidence,
-            type: 'contextual',
-            context: 'Contextually relevant'
-          });
-        }
-      });
+        contextualWords.forEach((word, index) => {
+          if (!suggestions.some(s => areSimilarWords(s.text.toLowerCase(), word.toLowerCase()))) {
+            const confidence = Math.max(0.3, 0.45 - index * 0.05);
+            suggestions.push({
+              text: word,
+              confidence,
+              type: 'contextual',
+              context: 'Contextually relevant'
+            });
+          }
+        });
+      }
 
       // 9. Add high-frequency words as fallback
-      if (suggestions.length < maxSuggestions - 3) {
+      if (suggestions.length < maxSuggestions - 3 && availableWords.length > 0) {
+        const filteredAvailableWords = removeDuplicateWords(availableWords, currentWords);
         const fallbackWords = filteredAvailableWords
           .filter(word => !suggestions.some(s => areSimilarWords(s.text.toLowerCase(), word.toLowerCase())))
           .slice(0, maxSuggestions - suggestions.length - 3);

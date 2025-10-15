@@ -52,17 +52,31 @@ export default function KeyboardScreen() {
         const words = typedText.trim().split(/\s+/);
         const availableWords: string[] = [];
         const aiSuggestions = await getAdvancedSuggestions(words, availableWords);
-        setSuggestions(aiSuggestions.slice(0, 5));
+        setSuggestions(aiSuggestions.slice(0, 10));
       } else {
         // Get temporal suggestions when no text is typed
         const timeBasedSuggestions = await getTimeBasedSuggestions();
-        const temporalSuggestions = timeBasedSuggestions.slice(0, 5).map(phrase => ({
-          text: phrase,
-          confidence: 0.6,
+        const temporalSuggestions = timeBasedSuggestions.slice(0, 10).map((phrase, index) => ({
+          text: phrase.split(' ')[0], // Get first word
+          confidence: Math.max(0.6, 0.8 - index * 0.05),
           type: 'temporal' as const,
-          context: 'Common phrase'
+          context: 'Common starter'
         }));
-        setSuggestions(temporalSuggestions);
+        
+        // Add common starter words
+        const commonStarters = ['I', 'you', 'want', 'need', 'can', 'what', 'where', 'help', 'please', 'like'];
+        commonStarters.forEach((word, index) => {
+          if (!temporalSuggestions.some(s => s.text.toLowerCase() === word.toLowerCase())) {
+            temporalSuggestions.push({
+              text: word,
+              confidence: Math.max(0.5, 0.7 - index * 0.05),
+              type: 'contextual' as const,
+              context: 'Common word'
+            });
+          }
+        });
+        
+        setSuggestions(temporalSuggestions.slice(0, 10));
       }
     };
 
@@ -255,10 +269,15 @@ export default function KeyboardScreen() {
                 placeholderTextColor={colors.textSecondary}
                 value={typedText}
                 onChangeText={setTypedText}
-                multiline
-                autoFocus
-                autoCorrect
+                multiline={true}
+                autoFocus={true}
+                autoCorrect={true}
                 autoCapitalize="sentences"
+                editable={true}
+                selectTextOnFocus={false}
+                keyboardType="default"
+                returnKeyType="done"
+                blurOnSubmit={false}
               />
             </View>
 
@@ -418,6 +437,7 @@ const styles = StyleSheet.create({
     minHeight: 120,
     maxHeight: 200,
     textAlignVertical: 'top',
+    outlineStyle: 'none',
   },
   historySection: {
     marginTop: 8,

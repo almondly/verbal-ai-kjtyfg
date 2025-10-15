@@ -53,19 +53,47 @@ export default function CommunicationScreen() {
   useEffect(() => {
     (async () => {
       if (sentence.length === 0) {
-        setAdvancedSuggestions([]);
+        // Show initial suggestions when no sentence is built
+        const timeBased = await getTimeBasedSuggestions();
+        const initialSuggestions = timeBased.slice(0, 10).map((phrase, index) => ({
+          text: phrase.split(' ')[0], // Get first word of common phrases
+          confidence: Math.max(0.6, 0.8 - index * 0.05),
+          type: 'temporal' as const,
+          context: 'Common starter word'
+        }));
+        
+        // Add some common starter words if we don't have enough
+        const commonStarters = ['I', 'you', 'want', 'need', 'can', 'what', 'where', 'help', 'please', 'like'];
+        commonStarters.forEach((word, index) => {
+          if (!initialSuggestions.some(s => s.text.toLowerCase() === word.toLowerCase())) {
+            initialSuggestions.push({
+              text: word,
+              confidence: Math.max(0.5, 0.7 - index * 0.05),
+              type: 'contextual' as const,
+              context: 'Common word'
+            });
+          }
+        });
+        
+        setAdvancedSuggestions(initialSuggestions.slice(0, 10));
         return;
       }
 
       const words = sentence.map(t => t.text);
+      const availableWords = tiles.map(t => t.text);
       const [advanced, timeBased] = await Promise.all([
-        getAdvancedSuggestions(words),
-        getTimeBasedSuggestions(words),
+        getAdvancedSuggestions(words, availableWords),
+        getTimeBasedSuggestions(),
       ]);
 
-      const combined = [...advanced, ...timeBased]
+      const combined = [...advanced, ...timeBased.slice(0, 3).map((phrase, index) => ({
+        text: phrase,
+        confidence: Math.max(0.5, 0.7 - index * 0.05),
+        type: 'temporal' as const,
+        context: 'Common phrase'
+      }))]
         .sort((a, b) => b.confidence - a.confidence)
-        .slice(0, 8);
+        .slice(0, 10);
 
       setAdvancedSuggestions(combined);
     })();
@@ -168,12 +196,8 @@ export default function CommunicationScreen() {
           />
         </View>
 
-        {/* AI Sentence Predictor / Recommendations */}
+        {/* AI Sentence Predictor / Recommendations - NO TITLE */}
         <View style={styles.predictorContainer}>
-          <View style={styles.predictorHeader}>
-            <Icon name="bulb-outline" size={20} color={colors.primary} />
-            <Text style={styles.predictorTitle}>Sentence Predictor</Text>
-          </View>
           {advancedSuggestions.length > 0 ? (
             <AdvancedSuggestionsRow
               suggestions={advancedSuggestions}
@@ -182,6 +206,7 @@ export default function CommunicationScreen() {
                   id: `suggestion-${Date.now()}`,
                   text,
                   color: colors.primary,
+                  category: 'suggestion',
                 };
                 handleTilePress(tile);
               }}
@@ -308,19 +333,8 @@ const styles = StyleSheet.create({
     borderTopWidth: 2,
     borderBottomWidth: 2,
     borderColor: colors.borderLight,
-    minHeight: 120,
-    maxHeight: 140,
-  },
-  predictorHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8 as any,
-    marginBottom: 8,
-  },
-  predictorTitle: {
-    fontSize: 15,
-    fontFamily: 'Montserrat_700Bold',
-    color: colors.text,
+    minHeight: 100,
+    maxHeight: 120,
   },
   suggestions: {
     flex: 1,
