@@ -103,6 +103,8 @@ export default function KeyboardScreen() {
     
     // Add to history
     setSentenceHistory(prev => [typedText, ...prev.slice(0, 9)]);
+    
+    // Clear the text input after speaking
     setTypedText('');
   }, [typedText, speak, recordUserInput, settings.selectedEmotion]);
 

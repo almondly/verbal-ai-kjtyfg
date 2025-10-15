@@ -135,6 +135,9 @@ export default function CommunicationScreen() {
     
     // Record the sentence for AI learning
     await recordUserInput(text, selectedCategory !== 'all' ? selectedCategory : undefined);
+    
+    // Clear the sentence after speaking
+    setSentence([]);
   }, [sentence, speak, recordUserInput, selectedCategory]);
 
   const normalizeForTTS = (text: string): string => {
