@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, useWindowDimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, useWindowDimensions, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import Icon from '../components/Icon';
@@ -8,11 +8,15 @@ import EmotionFace from '../components/EmotionFace';
 import LandscapeGuard from '../components/LandscapeGuard';
 import { colors, commonStyles } from '../styles/commonStyles';
 import { useEmotionSettings } from '../hooks/useEmotionSettings';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const FRONT_PAGE_IMAGE_KEY = 'front_page_image';
 
 export default function MainMenu() {
   const router = useRouter();
   const { settings } = useEmotionSettings();
   const { width, height } = useWindowDimensions();
+  const [frontPageImage, setFrontPageImage] = useState<string | null>(null);
 
   useEffect(() => {
     // Lock orientation on native platforms only
@@ -24,7 +28,21 @@ export default function MainMenu() {
         console.log('Failed to lock screen orientation in main menu:', error);
       }
     }
+
+    // Load front page image
+    loadFrontPageImage();
   }, []);
+
+  const loadFrontPageImage = async () => {
+    try {
+      const stored = await AsyncStorage.getItem(FRONT_PAGE_IMAGE_KEY);
+      if (stored) {
+        setFrontPageImage(stored);
+      }
+    } catch (error) {
+      console.log('Error loading front page image:', error);
+    }
+  };
 
   const handleStartCommunication = () => {
     console.log('Starting communication');
@@ -49,10 +67,18 @@ export default function MainMenu() {
 
         {/* Main Content */}
         <View style={styles.content}>
-          {/* Emotion Display - MUCH LARGER */}
+          {/* Logo / Emotion Display - MUCH LARGER */}
           <View style={styles.emotionSection}>
             <View style={styles.emotionContainer}>
-              <EmotionFace emotion={settings.selectedEmotion} size={faceSize} />
+              {frontPageImage ? (
+                <Image 
+                  source={{ uri: frontPageImage }} 
+                  style={[styles.logoImage, { width: faceSize, height: faceSize }]}
+                  resizeMode="contain"
+                />
+              ) : (
+                <EmotionFace emotion={settings.selectedEmotion} size={faceSize} />
+              )}
             </View>
           </View>
 
@@ -111,6 +137,10 @@ const styles = StyleSheet.create({
   emotionContainer: {
     alignItems: 'center',
     padding: 10,
+  },
+  logoImage: {
+    maxWidth: '100%',
+    maxHeight: '100%',
   },
   buttonSection: {
     marginTop: 8,

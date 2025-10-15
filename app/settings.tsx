@@ -19,9 +19,10 @@ import TileEditor from '../components/TileEditor';
 import { Tile } from '../types';
 import { categories } from '../data/categories';
 
-type TabType = 'emotions' | 'voice' | 'ai' | 'manage' | 'defaultTiles';
+type TabType = 'emotions' | 'voice' | 'ai' | 'manage' | 'defaultTiles' | 'branding';
 
 const CUSTOM_EMOTIONS_KEY = 'custom_emotions';
+const FRONT_PAGE_IMAGE_KEY = 'front_page_image';
 
 // Get all emotions from the feelings category
 const emotionOptions = defaultTiles
@@ -35,6 +36,7 @@ export default function SettingsScreen() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabType>('emotions');
   const [customEmotions, setCustomEmotions] = useState<Record<string, string>>({});
+  const [frontPageImage, setFrontPageImage] = useState<string | null>(null);
   const [editingTile, setEditingTile] = useState<Tile | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   
@@ -59,8 +61,9 @@ export default function SettingsScreen() {
       }
     }
     
-    // Load custom emotions
+    // Load custom emotions and front page image
     loadCustomEmotions();
+    loadFrontPageImage();
     
     console.log('Settings screen mounted successfully');
   }, []);
@@ -73,6 +76,17 @@ export default function SettingsScreen() {
       }
     } catch (error) {
       console.log('Error loading custom emotions:', error);
+    }
+  };
+
+  const loadFrontPageImage = async () => {
+    try {
+      const stored = await AsyncStorage.getItem(FRONT_PAGE_IMAGE_KEY);
+      if (stored) {
+        setFrontPageImage(stored);
+      }
+    } catch (error) {
+      console.log('Error loading front page image:', error);
     }
   };
 
@@ -113,6 +127,41 @@ export default function SettingsScreen() {
       console.log('Custom emotion image removed for:', emotion);
     } catch (e) {
       console.log('removeCustomEmotionImage error', e);
+    }
+  };
+
+  const pickFrontPageImage = async () => {
+    try {
+      const res = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (res.status !== 'granted') {
+        console.log('Permission not granted');
+        Alert.alert('Permission Required', 'Please grant permission to access your photo library.');
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        quality: 0.8,
+        aspect: [16, 9],
+      });
+      if (!result.canceled) {
+        const imageUri = result.assets[0].uri;
+        setFrontPageImage(imageUri);
+        await AsyncStorage.setItem(FRONT_PAGE_IMAGE_KEY, imageUri);
+        console.log('Front page image saved');
+      }
+    } catch (e) {
+      console.log('pickFrontPageImage error', e);
+    }
+  };
+
+  const removeFrontPageImage = async () => {
+    try {
+      setFrontPageImage(null);
+      await AsyncStorage.removeItem(FRONT_PAGE_IMAGE_KEY);
+      console.log('Front page image removed');
+    } catch (e) {
+      console.log('removeFrontPageImage error', e);
     }
   };
 
@@ -157,6 +206,7 @@ export default function SettingsScreen() {
 
   const tabs: { id: TabType; label: string; icon: string }[] = [
     { id: 'emotions', label: 'Emotions', icon: 'happy-outline' },
+    { id: 'branding', label: 'Branding', icon: 'image-outline' },
     { id: 'voice', label: 'Voice', icon: 'volume-high-outline' },
     { id: 'ai', label: 'AI Preferences', icon: 'brain-outline' },
     { id: 'defaultTiles', label: 'Default Tiles', icon: 'grid-outline' },
@@ -208,6 +258,85 @@ export default function SettingsScreen() {
                     )}
                   </TouchableOpacity>
                 ))}
+              </View>
+            </View>
+          </View>
+        );
+
+      case 'branding':
+        return (
+          <View style={styles.tabContentWrapper}>
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>App Branding</Text>
+              <Text style={styles.helperText}>
+                Customize your app with your own logo and branding images. These images will appear on the main menu and throughout the app.
+              </Text>
+            </View>
+
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Front Page / Logo Image</Text>
+              <Text style={styles.helperText}>
+                Upload a PNG or image file to use as your app logo on the main menu screen.
+              </Text>
+              
+              {frontPageImage ? (
+                <View style={styles.brandingImageContainer}>
+                  <Image 
+                    source={{ uri: frontPageImage }} 
+                    style={styles.brandingImage}
+                    resizeMode="contain"
+                  />
+                  <View style={styles.brandingImageActions}>
+                    <TouchableOpacity
+                      style={[styles.brandingButton, { backgroundColor: '#EEF2FF' }]}
+                      onPress={pickFrontPageImage}
+                      activeOpacity={0.8}
+                    >
+                      <Icon name="create-outline" size={20} color={colors.primary} />
+                      <Text style={[styles.brandingButtonText, { color: colors.primary }]}>Change Image</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.brandingButton, { backgroundColor: '#FEE2E2' }]}
+                      onPress={removeFrontPageImage}
+                      activeOpacity={0.8}
+                    >
+                      <Icon name="trash-outline" size={20} color={colors.danger} />
+                      <Text style={[styles.brandingButtonText, { color: colors.danger }]}>Remove</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              ) : (
+                <TouchableOpacity
+                  style={styles.uploadImageButton}
+                  onPress={pickFrontPageImage}
+                  activeOpacity={0.8}
+                >
+                  <Icon name="cloud-upload-outline" size={48} color={colors.primary} />
+                  <Text style={styles.uploadImageText}>Tap to Upload Logo Image</Text>
+                  <Text style={styles.uploadImageSubtext}>PNG, JPG, or other image formats</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Tips for Best Results</Text>
+              <View style={styles.tipsList}>
+                <View style={styles.tipItem}>
+                  <Icon name="checkmark-circle-outline" size={20} color={colors.success} />
+                  <Text style={styles.tipText}>Use high-resolution images for best quality</Text>
+                </View>
+                <View style={styles.tipItem}>
+                  <Icon name="checkmark-circle-outline" size={20} color={colors.success} />
+                  <Text style={styles.tipText}>PNG format with transparent background works best</Text>
+                </View>
+                <View style={styles.tipItem}>
+                  <Icon name="checkmark-circle-outline" size={20} color={colors.success} />
+                  <Text style={styles.tipText}>Square or landscape orientation recommended</Text>
+                </View>
+                <View style={styles.tipItem}>
+                  <Icon name="checkmark-circle-outline" size={20} color={colors.success} />
+                  <Text style={styles.tipText}>Keep file size under 5MB for optimal performance</Text>
+                </View>
               </View>
             </View>
           </View>
@@ -962,5 +1091,71 @@ const styles = StyleSheet.create({
     padding: 6,
     borderWidth: 1,
     borderColor: colors.primary,
+  },
+  brandingImageContainer: {
+    backgroundColor: '#F9FAFB',
+    borderRadius: 16,
+    padding: 24,
+    alignItems: 'center',
+  },
+  brandingImage: {
+    width: '100%',
+    maxWidth: 400,
+    height: 200,
+    marginBottom: 20,
+  },
+  brandingImageActions: {
+    flexDirection: 'row',
+    gap: 12 as any,
+  },
+  brandingButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8 as any,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 12,
+  },
+  brandingButtonText: {
+    fontSize: 14,
+    fontFamily: 'Montserrat_600SemiBold',
+  },
+  uploadImageButton: {
+    backgroundColor: '#F9FAFB',
+    borderRadius: 16,
+    padding: 48,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#E5E7EB',
+    borderStyle: 'dashed',
+  },
+  uploadImageText: {
+    fontSize: 16,
+    fontFamily: 'Montserrat_600SemiBold',
+    color: colors.text,
+    marginTop: 16,
+  },
+  uploadImageSubtext: {
+    fontSize: 13,
+    fontFamily: 'Montserrat_400Regular',
+    color: colors.textSecondary,
+    marginTop: 4,
+  },
+  tipsList: {
+    gap: 12 as any,
+  },
+  tipItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12 as any,
+    backgroundColor: '#F9FAFB',
+    padding: 12,
+    borderRadius: 12,
+  },
+  tipText: {
+    flex: 1,
+    fontSize: 14,
+    fontFamily: 'Montserrat_400Regular',
+    color: colors.text,
   },
 });

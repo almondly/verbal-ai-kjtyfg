@@ -8,9 +8,11 @@
  * - Context awareness
  * - Pronoun variations (I, you, he, she, we, they)
  * - Category-based contextual recommendations
+ * - Official AAC sentence database
  */
 
 import { detectTenseContext, getVerbFormForContext, getBaseForm } from './wordVariations';
+import { getContextualAACSentences, aacSentences } from './aacSentences';
 
 // Enhanced sentence templates with pronoun variations (Australian English)
 export const sentenceTemplates = [
@@ -244,6 +246,7 @@ export function findSentenceCompletions(currentWords: string[], maxCompletions: 
 
 /**
  * Generate complete sentence suggestions from partial input
+ * Now integrates AAC sentence database
  */
 export function generateCompleteSentences(
   currentWords: string[],
@@ -253,24 +256,30 @@ export function generateCompleteSentences(
   const suggestions: string[] = [];
   const currentText = currentWords.join(' ').toLowerCase();
   
-  // Find user phrases that start with current text
-  const matchingPhrases: { phrase: string; frequency: number }[] = [];
+  // First, try AAC sentences (highest priority)
+  const aacSuggestions = getContextualAACSentences(currentWords, maxSuggestions);
+  suggestions.push(...aacSuggestions);
   
-  userPhrases.forEach((frequency, phrase) => {
-    if (phrase.startsWith(currentText) && phrase !== currentText) {
-      matchingPhrases.push({ phrase, frequency });
-    }
-  });
+  // If we need more suggestions, find user phrases that start with current text
+  if (suggestions.length < maxSuggestions) {
+    const matchingPhrases: { phrase: string; frequency: number }[] = [];
+    
+    userPhrases.forEach((frequency, phrase) => {
+      if (phrase.startsWith(currentText) && phrase !== currentText && !suggestions.includes(phrase)) {
+        matchingPhrases.push({ phrase, frequency });
+      }
+    });
+    
+    // Sort by frequency
+    matchingPhrases.sort((a, b) => b.frequency - a.frequency);
+    
+    // Add top matching phrases
+    matchingPhrases.slice(0, maxSuggestions - suggestions.length).forEach(({ phrase }) => {
+      suggestions.push(phrase);
+    });
+  }
   
-  // Sort by frequency
-  matchingPhrases.sort((a, b) => b.frequency - a.frequency);
-  
-  // Add top matching phrases
-  matchingPhrases.slice(0, maxSuggestions).forEach(({ phrase }) => {
-    suggestions.push(phrase);
-  });
-  
-  // If we don't have enough suggestions, try template-based completion
+  // If we still don't have enough suggestions, try template-based completion
   if (suggestions.length < maxSuggestions) {
     const templateCompletions = findSentenceCompletions(currentWords, maxSuggestions - suggestions.length);
     
@@ -282,7 +291,7 @@ export function generateCompleteSentences(
     });
   }
   
-  return suggestions;
+  return suggestions.slice(0, maxSuggestions);
 }
 
 /**
@@ -397,6 +406,42 @@ export function scoreSuggestions(
       score += 0.3;
     }
     
+    // Boost score for AAC sentences
+    if (suggestion.type === 'aac_sentence') {
+      score += 0.4; // Higher priority for official AAC sentences
+    }
+    
     return { ...suggestion, score };
   }).sort((a, b) => b.score - a.score);
+}
+
+/**
+ * Get category-relevant words for contextual suggestions
+ */
+export function getCategoryRelevantWords(
+  currentWords: string[],
+  category: string,
+  availableWords: string[]
+): string[] {
+  // Category-specific word associations
+  const categoryKeywords: { [key: string]: string[] } = {
+    'core': ['I', 'you', 'want', 'need', 'like', 'help', 'more', 'go', 'stop', 'yes', 'no'],
+    'people': ['mom', 'dad', 'friend', 'teacher', 'family', 'brother', 'sister'],
+    'actions': ['eat', 'drink', 'play', 'sleep', 'walk', 'run', 'read', 'write', 'watch'],
+    'feelings': ['happy', 'sad', 'angry', 'scared', 'excited', 'tired', 'love'],
+    'food': ['water', 'juice', 'milk', 'apple', 'banana', 'bread', 'snack'],
+    'home': ['house', 'bed', 'bathroom', 'kitchen', 'TV', 'door', 'window'],
+    'school': ['book', 'pencil', 'paper', 'class', 'teacher', 'lunch', 'recess'],
+    'places': ['park', 'store', 'school', 'home', 'playground', 'car', 'bus'],
+  };
+  
+  const relevantKeywords = categoryKeywords[category] || [];
+  
+  // Filter available words that match the category
+  return availableWords.filter(word => 
+    relevantKeywords.some(keyword => 
+      word.toLowerCase().includes(keyword.toLowerCase()) ||
+      keyword.toLowerCase().includes(word.toLowerCase())
+    )
+  ).slice(0, 5);
 }

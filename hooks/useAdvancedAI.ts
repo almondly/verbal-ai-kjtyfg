@@ -17,6 +17,7 @@ import {
   scoreSuggestions,
   getCategoryRelevantWords
 } from '../utils/sentenceCompletion';
+import { getContextualAACSentences, aacSentences } from '../utils/aacSentences';
 
 export interface AdvancedSuggestion {
   text: string;
@@ -114,8 +115,11 @@ export function useAdvancedAI() {
     'maybe': ['later', 'tomorrow', 'next time'],
   };
 
-  // Common full sentence templates
+  // Common full sentence templates - now integrated with AAC database
   const fullSentenceTemplates: string[] = [
+    // High-frequency AAC sentences
+    ...aacSentences.filter(s => s.frequency === 'high').map(s => s.text),
+    // Additional custom templates
     'I want to go outside',
     'Can I have some water please',
     'I need help with this',
@@ -691,7 +695,38 @@ export function useAdvancedAI() {
         currentCategory 
       });
 
-      // 1. ChatGPT-style common phrase completions (HIGHEST PRIORITY)
+      // 0. AAC Official Sentences (HIGHEST PRIORITY - from official AAC resources)
+      const aacSuggestions = getContextualAACSentences(currentWords, 3);
+      aacSuggestions.forEach((sentence, index) => {
+        // Extract next word or suggest full sentence
+        const sentenceWords = sentence.split(' ');
+        const currentText = currentWords.join(' ').toLowerCase();
+        
+        if (sentence.toLowerCase().startsWith(currentText)) {
+          // Suggest next word from AAC sentence
+          const nextWord = sentenceWords[currentWords.length];
+          if (nextWord && !suggestions.some(s => areSimilarWords(s.text.toLowerCase(), nextWord.toLowerCase()))) {
+            suggestions.push({
+              text: nextWord,
+              confidence: Math.max(0.95, 0.99 - index * 0.02),
+              type: 'common_phrase',
+              context: `AAC: "${sentence}"`
+            });
+          }
+        } else if (currentWords.length <= 2) {
+          // Suggest full AAC sentence for short inputs
+          if (!suggestions.some(s => s.text.toLowerCase() === sentence.toLowerCase())) {
+            suggestions.push({
+              text: sentence,
+              confidence: Math.max(0.90, 0.96 - index * 0.02),
+              type: 'full_sentence',
+              context: 'Official AAC sentence'
+            });
+          }
+        }
+      });
+
+      // 1. ChatGPT-style common phrase completions (HIGH PRIORITY)
       if (lastWord && commonPhrases[lastWord]) {
         const phraseCompletions = commonPhrases[lastWord];
         phraseCompletions.forEach((completion, index) => {
@@ -1001,24 +1036,42 @@ export function useAdvancedAI() {
         });
       }
 
-      // 10. Add full sentence suggestions as last options (NEW FEATURE)
+      // 10. Add full sentence suggestions as last options (ENHANCED WITH AAC)
       if (currentWords.length >= 1 && currentWords.length <= 4) {
-        const relevantSentences = fullSentenceTemplates
-          .filter(sentence => {
-            const sentenceLower = sentence.toLowerCase();
-            // Check if sentence starts with current text or is contextually relevant
+        // Prioritize AAC sentences
+        const aacFullSentences = aacSentences
+          .filter(aacSent => {
+            const sentenceLower = aacSent.text.toLowerCase();
             return sentenceLower.startsWith(currentText) || 
                    currentWords.some(word => sentenceLower.includes(word.toLowerCase()));
           })
-          .slice(0, 3);
+          .sort((a, b) => {
+            // Sort by frequency: high > medium > low
+            const freqOrder = { high: 3, medium: 2, low: 1 };
+            return freqOrder[b.frequency] - freqOrder[a.frequency];
+          })
+          .slice(0, 5)
+          .map(s => s.text);
+
+        const relevantSentences = [
+          ...aacFullSentences,
+          ...fullSentenceTemplates
+            .filter(sentence => {
+              const sentenceLower = sentence.toLowerCase();
+              return (sentenceLower.startsWith(currentText) || 
+                     currentWords.some(word => sentenceLower.includes(word.toLowerCase()))) &&
+                     !aacFullSentences.includes(sentence);
+            })
+        ].slice(0, 5);
 
         relevantSentences.forEach((sentence, index) => {
           if (!suggestions.some(s => s.text.toLowerCase() === sentence.toLowerCase())) {
+            const isAAC = aacFullSentences.includes(sentence);
             suggestions.push({
               text: sentence,
-              confidence: Math.max(0.75, 0.85 - index * 0.05),
+              confidence: Math.max(0.75, (isAAC ? 0.90 : 0.85) - index * 0.05),
               type: 'full_sentence',
-              context: 'Complete sentence suggestion'
+              context: isAAC ? 'Official AAC sentence' : 'Complete sentence suggestion'
             });
           }
         });
