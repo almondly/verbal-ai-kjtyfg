@@ -128,8 +128,8 @@ export default function CommunicationScreen() {
   }, [router]);
 
   const handleOpenSettings = useCallback(() => {
-    setSettingsOpen(true);
-  }, []);
+    router.push('/settings');
+  }, [router]);
 
   return (
     <LandscapeGuard>
@@ -213,13 +213,13 @@ export default function CommunicationScreen() {
           </View>
         </View>
 
-        {/* Settings Sheet */}
+        {/* Settings Sheet - Only for adding tiles */}
         <TabbedSettingsSheet
           open={settingsOpen}
           onClose={() => setSettingsOpen(false)}
           onResetLearning={resetLearning}
           onResetTiles={resetTiles}
-          mode={selectedCategory !== 'all' ? 'add' : 'settings'}
+          mode="add"
           onAddTile={addTile}
           defaultCategoryId={selectedCategory !== 'all' ? selectedCategory : undefined}
           currentEmotion={currentEmotion}
