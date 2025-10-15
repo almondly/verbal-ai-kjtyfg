@@ -81,8 +81,10 @@ export default function CommunicationScreen() {
 
       const words = sentence.map(t => t.text);
       const availableWords = tiles.map(t => t.text);
+      
+      // Pass the current category to getAdvancedSuggestions for category-aware recommendations
       const [advanced, timeBased] = await Promise.all([
-        getAdvancedSuggestions(words, availableWords),
+        getAdvancedSuggestions(words, availableWords, 10, selectedCategory !== 'all' ? selectedCategory : undefined),
         getTimeBasedSuggestions(),
       ]);
 
@@ -97,7 +99,7 @@ export default function CommunicationScreen() {
 
       setAdvancedSuggestions(combined);
     })();
-  }, [sentence, tiles, getAdvancedSuggestions, getTimeBasedSuggestions]);
+  }, [sentence, tiles, getAdvancedSuggestions, getTimeBasedSuggestions, selectedCategory]);
 
   const handleTilePress = useCallback((tile: Tile) => {
     setSentence(prev => [...prev, tile]);
@@ -133,7 +135,7 @@ export default function CommunicationScreen() {
     const normalized = normalizeForTTS(text);
     await speak(normalized);
     
-    // Record the sentence for AI learning
+    // Record the sentence for AI learning with category context
     await recordUserInput(text, selectedCategory !== 'all' ? selectedCategory : undefined);
     
     // Clear the sentence after speaking

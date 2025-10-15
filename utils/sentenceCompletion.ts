@@ -1,14 +1,13 @@
 
 /**
- * Sentence Completion Engine
- * Provides intelligent sentence completion based on:
- * - Common sentence patterns
- * - User history
- * - Grammatical rules
- * - Context awareness
- * - Pronoun variations (I, you, he, she, we, they)
- * - Category-based contextual recommendations
- * - Official AAC sentence database
+ * Enhanced Sentence Completion Engine
+ * Provides intelligent, context-aware sentence completion based on:
+ * - Category-specific vocabulary and patterns
+ * - Common sentence patterns with grammatical awareness
+ * - User history and learning patterns
+ * - Grammatical rules and sentence structure
+ * - Context awareness from current category and partial sentence
+ * - Official AAC sentence database integration
  */
 
 import { detectTenseContext, getVerbFormForContext, getBaseForm } from './wordVariations';
@@ -411,37 +410,133 @@ export function scoreSuggestions(
       score += 0.4; // Higher priority for official AAC sentences
     }
     
+    // Boost score for category-contextual suggestions
+    if (suggestion.type === 'category_contextual') {
+      score += 0.35; // High priority for category-relevant words
+    }
+    
     return { ...suggestion, score };
   }).sort((a, b) => b.score - a.score);
 }
 
 /**
- * Get category-relevant words for contextual suggestions
+ * ENHANCED: Get category-relevant words for contextual suggestions
+ * This is the core of the category-aware recommendation system
  */
 export function getCategoryRelevantWords(
   currentWords: string[],
   category: string,
   availableWords: string[]
 ): string[] {
-  // Category-specific word associations
+  console.log('Getting category-relevant words for:', { category, currentWords, availableWordsCount: availableWords.length });
+  
+  // Enhanced category-specific word associations with more comprehensive vocabulary
   const categoryKeywords: { [key: string]: string[] } = {
-    'core': ['I', 'you', 'want', 'need', 'like', 'help', 'more', 'go', 'stop', 'yes', 'no'],
-    'people': ['mom', 'dad', 'friend', 'teacher', 'family', 'brother', 'sister'],
-    'actions': ['eat', 'drink', 'play', 'sleep', 'walk', 'run', 'read', 'write', 'watch'],
-    'feelings': ['happy', 'sad', 'angry', 'scared', 'excited', 'tired', 'love'],
-    'food': ['water', 'juice', 'milk', 'apple', 'banana', 'bread', 'snack'],
-    'home': ['house', 'bed', 'bathroom', 'kitchen', 'TV', 'door', 'window'],
-    'school': ['book', 'pencil', 'paper', 'class', 'teacher', 'lunch', 'recess'],
-    'places': ['park', 'store', 'school', 'home', 'playground', 'car', 'bus'],
+    'core': ['I', 'you', 'want', 'need', 'like', 'help', 'more', 'go', 'stop', 'yes', 'no', 'please', 'thank you'],
+    'people': ['mum', 'dad', 'mom', 'mother', 'father', 'friend', 'teacher', 'family', 'brother', 'sister', 'mate', 'grandma', 'grandpa'],
+    'actions': ['eat', 'drink', 'play', 'sleep', 'walk', 'run', 'read', 'write', 'watch', 'listen', 'sit', 'stand', 'jump', 'dance'],
+    'feelings': ['happy', 'sad', 'angry', 'scared', 'excited', 'tired', 'love', 'worried', 'calm', 'hurt', 'sick', 'good', 'bad'],
+    'food': ['water', 'juice', 'milk', 'apple', 'banana', 'bread', 'snack', 'lunch', 'dinner', 'breakfast', 'hungry', 'thirsty', 'eat', 'drink'],
+    'home': ['house', 'bed', 'bathroom', 'kitchen', 'TV', 'door', 'window', 'room', 'bedroom', 'toilet', 'sleep', 'rest'],
+    'school': ['book', 'pencil', 'paper', 'class', 'teacher', 'lunch', 'recess', 'learn', 'study', 'homework', 'read', 'write'],
+    'places': ['park', 'store', 'shop', 'school', 'home', 'playground', 'car', 'bus', 'outside', 'inside'],
+    'body': ['head', 'hand', 'foot', 'arm', 'leg', 'eye', 'ear', 'nose', 'mouth', 'hurt', 'pain', 'sick'],
+    'routines': ['morning', 'afternoon', 'evening', 'night', 'breakfast', 'lunch', 'dinner', 'bedtime', 'wake up', 'sleep'],
+    'questions': ['what', 'where', 'when', 'who', 'why', 'how', 'is', 'are', 'do', 'can', 'will'],
+    'colours': ['red', 'blue', 'green', 'yellow', 'orange', 'purple', 'pink', 'black', 'white', 'brown'],
+    'numbers': ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'more', 'less'],
+    'animals': ['dog', 'cat', 'bird', 'fish', 'horse', 'cow', 'pig', 'sheep', 'rabbit', 'pet'],
+    'clothing': ['shirt', 'pants', 'dress', 'shoes', 'socks', 'hat', 'coat', 'jacket', 'wear', 'put on'],
+    'weather': ['sunny', 'rainy', 'cloudy', 'windy', 'hot', 'cold', 'warm', 'cool', 'weather', 'outside'],
+    'time': ['now', 'later', 'today', 'tomorrow', 'yesterday', 'morning', 'afternoon', 'evening', 'night', 'time'],
+    'toys': ['toy', 'ball', 'doll', 'game', 'puzzle', 'blocks', 'play', 'fun'],
   };
   
   const relevantKeywords = categoryKeywords[category] || [];
+  console.log('Relevant keywords for category:', relevantKeywords);
   
-  // Filter available words that match the category
-  return availableWords.filter(word => 
-    relevantKeywords.some(keyword => 
-      word.toLowerCase().includes(keyword.toLowerCase()) ||
-      keyword.toLowerCase().includes(word.toLowerCase())
-    )
-  ).slice(0, 5);
+  // If no current words, return category keywords that are in available words
+  if (currentWords.length === 0) {
+    const matches = availableWords.filter(word => 
+      relevantKeywords.some(keyword => 
+        word.toLowerCase() === keyword.toLowerCase() ||
+        word.toLowerCase().includes(keyword.toLowerCase()) ||
+        keyword.toLowerCase().includes(word.toLowerCase())
+      )
+    ).slice(0, 8);
+    console.log('No current words, returning category matches:', matches);
+    return matches;
+  }
+  
+  // Analyze current sentence context
+  const lastWord = currentWords[currentWords.length - 1]?.toLowerCase();
+  const sentenceContext = currentWords.join(' ').toLowerCase();
+  
+  // Context-aware filtering based on sentence structure
+  const contextualMatches: { word: string; score: number }[] = [];
+  
+  availableWords.forEach(word => {
+    let score = 0;
+    const lowerWord = word.toLowerCase();
+    
+    // Check if word is in category keywords
+    const isInCategory = relevantKeywords.some(keyword => 
+      lowerWord === keyword.toLowerCase() ||
+      lowerWord.includes(keyword.toLowerCase()) ||
+      keyword.toLowerCase().includes(lowerWord)
+    );
+    
+    if (isInCategory) {
+      score += 10; // Base score for being in category
+      
+      // Contextual boosting based on sentence patterns
+      // Example: "I want" -> boost action words like "eat", "play", "go"
+      if (sentenceContext.includes('i want') || sentenceContext.includes('want to')) {
+        if (['eat', 'drink', 'play', 'sleep', 'go', 'read', 'watch'].includes(lowerWord)) {
+          score += 5;
+        }
+      }
+      
+      // Example: "I feel" -> boost feeling words
+      if (sentenceContext.includes('i feel') || sentenceContext.includes('feel')) {
+        if (['happy', 'sad', 'angry', 'scared', 'excited', 'tired', 'good', 'bad'].includes(lowerWord)) {
+          score += 5;
+        }
+      }
+      
+      // Example: "I need" -> boost need-related words
+      if (sentenceContext.includes('i need') || sentenceContext.includes('need')) {
+        if (['help', 'water', 'food', 'toilet', 'rest', 'break'].includes(lowerWord)) {
+          score += 5;
+        }
+      }
+      
+      // Example: "where is" -> boost location/people words
+      if (sentenceContext.includes('where is') || sentenceContext.includes('where')) {
+        if (['mum', 'dad', 'toilet', 'home', 'school', 'park'].includes(lowerWord)) {
+          score += 5;
+        }
+      }
+      
+      // Boost words that follow common patterns
+      if (lastWord === 'to' && ['go', 'play', 'eat', 'drink', 'sleep', 'read'].includes(lowerWord)) {
+        score += 3;
+      }
+      
+      if (lastWord === 'the' && ['toilet', 'park', 'shop', 'school', 'home'].includes(lowerWord)) {
+        score += 3;
+      }
+      
+      contextualMatches.push({ word, score });
+    }
+  });
+  
+  // Sort by score and return top matches
+  const results = contextualMatches
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 8)
+    .map(m => m.word);
+  
+  console.log('Category-relevant words found:', results);
+  return results;
 }

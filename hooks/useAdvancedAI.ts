@@ -726,7 +726,26 @@ export function useAdvancedAI() {
         }
       });
 
-      // 1. ChatGPT-style common phrase completions (HIGH PRIORITY)
+      // 1. CATEGORY-BASED CONTEXTUAL SUGGESTIONS (HIGH PRIORITY - NEW ENHANCED FEATURE)
+      if (currentCategory && currentCategory !== 'all' && currentCategory !== 'keyboard') {
+        console.log('Getting category-relevant words for category:', currentCategory);
+        const categoryWords = getCategoryRelevantWords(currentWords, currentCategory, availableWords);
+        console.log('Category words found:', categoryWords);
+        
+        categoryWords.forEach((word, index) => {
+          if (!suggestions.some(s => areSimilarWords(s.text.toLowerCase(), word.toLowerCase())) &&
+              !currentWords.some(w => areSimilarWords(w.toLowerCase(), word.toLowerCase()))) {
+            suggestions.push({
+              text: word,
+              confidence: Math.max(0.85, 0.95 - index * 0.03),
+              type: 'category_contextual',
+              context: `From ${currentCategory} category`
+            });
+          }
+        });
+      }
+
+      // 2. ChatGPT-style common phrase completions (HIGH PRIORITY)
       if (lastWord && commonPhrases[lastWord]) {
         const phraseCompletions = commonPhrases[lastWord];
         phraseCompletions.forEach((completion, index) => {
@@ -735,7 +754,7 @@ export function useAdvancedAI() {
               !currentWords.some(w => areSimilarWords(w.toLowerCase(), nextWord.toLowerCase()))) {
             suggestions.push({
               text: nextWord,
-              confidence: Math.max(0.92, 0.98 - index * 0.02),
+              confidence: Math.max(0.88, 0.94 - index * 0.02),
               type: 'common_phrase',
               context: `"${lastWord} ${completion}"`
             });
@@ -743,7 +762,7 @@ export function useAdvancedAI() {
         });
       }
 
-      // 2. Multi-word phrase matching for better context
+      // 3. Multi-word phrase matching for better context
       if (currentWords.length >= 2) {
         const lastTwoWords = currentWords.slice(-2).join(' ').toLowerCase();
         Object.entries(commonPhrases).forEach(([key, completions]) => {
@@ -754,7 +773,7 @@ export function useAdvancedAI() {
                   !currentWords.some(w => areSimilarWords(w.toLowerCase(), nextWord.toLowerCase()))) {
                 suggestions.push({
                   text: nextWord,
-                  confidence: Math.max(0.88, 0.95 - index * 0.02),
+                  confidence: Math.max(0.84, 0.91 - index * 0.02),
                   type: 'common_phrase',
                   context: `Completes phrase`
                 });
@@ -764,21 +783,21 @@ export function useAdvancedAI() {
         });
       }
 
-      // 3. AI Preference-based suggestions (ENHANCED)
+      // 4. AI Preference-based suggestions (ENHANCED)
       const contextualPreferenceSuggestions = getContextualSuggestions(currentText, currentHour);
       console.log('Contextual preference suggestions:', contextualPreferenceSuggestions);
       contextualPreferenceSuggestions.forEach((suggestion, index) => {
         if (!suggestions.some(s => areSimilarWords(s.text.toLowerCase(), suggestion.toLowerCase()))) {
           suggestions.push({
             text: suggestion,
-            confidence: Math.max(0.88, 0.93 - index * 0.03),
+            confidence: Math.max(0.84, 0.89 - index * 0.03),
             type: 'preference',
             context: 'Based on your preferences'
           });
         }
       });
       
-      // 3.5. Topic-based context learning suggestions
+      // 5. Topic-based context learning suggestions
       const currentTopics = detectSentenceTopics(currentWords);
       if (currentTopics.length > 0) {
         // Fetch phrases related to current topics
@@ -797,7 +816,7 @@ export function useAdvancedAI() {
                 !currentWords.some(w => areSimilarWords(w.toLowerCase(), word.toLowerCase()))) {
               suggestions.push({
                 text: word,
-                confidence: Math.max(0.75, 0.85 - index * 0.05),
+                confidence: Math.max(0.72, 0.82 - index * 0.05),
                 type: 'contextual',
                 context: `Related to ${currentTopics.join(', ')}`
               });
@@ -806,23 +825,7 @@ export function useAdvancedAI() {
         });
       }
 
-      // 3.6. CATEGORY-BASED CONTEXTUAL SUGGESTIONS (NEW FEATURE)
-      if (currentCategory && currentCategory !== 'all' && currentWords.length > 0) {
-        const categoryWords = getCategoryRelevantWords(currentWords, currentCategory, availableWords);
-        categoryWords.forEach((word, index) => {
-          if (!suggestions.some(s => areSimilarWords(s.text.toLowerCase(), word.toLowerCase())) &&
-              !currentWords.some(w => areSimilarWords(w.toLowerCase(), word.toLowerCase()))) {
-            suggestions.push({
-              text: word,
-              confidence: Math.max(0.80, 0.90 - index * 0.05),
-              type: 'category_contextual',
-              context: `From ${currentCategory} category`
-            });
-          }
-        });
-      }
-
-      // 4. Enhanced phrase completions from user patterns
+      // 6. Enhanced phrase completions from user patterns
       if (currentText) {
         userPatterns.phrases.forEach((frequency, phrase) => {
           if (phrase.startsWith(currentText) && phrase !== currentText) {
@@ -831,7 +834,7 @@ export function useAdvancedAI() {
               const nextWords = completion.split(' ');
               nextWords.slice(0, 2).forEach((nextWord, index) => {
                 if (!currentWords.some(w => areSimilarWords(w.toLowerCase(), nextWord.toLowerCase()))) {
-                  const confidence = Math.min(0.87, (frequency / 6) * (1 - index * 0.2));
+                  const confidence = Math.min(0.83, (frequency / 6) * (1 - index * 0.2));
                   suggestions.push({
                     text: nextWord,
                     confidence,
@@ -845,7 +848,7 @@ export function useAdvancedAI() {
         });
       }
 
-      // 5. Enhanced word transitions with context scoring
+      // 7. Enhanced word transitions with context scoring
       if (lastWord && userPatterns.transitions.has(lastWord)) {
         const nextWords = userPatterns.transitions.get(lastWord)!;
         nextWords.forEach((frequency, nextWord) => {
@@ -853,11 +856,11 @@ export function useAdvancedAI() {
               !currentWords.some(w => areSimilarWords(w.toLowerCase(), nextWord.toLowerCase()))) {
             
             // Boost confidence based on recent usage and context
-            let confidence = Math.min(0.82, frequency / 3);
+            let confidence = Math.min(0.78, frequency / 3);
             
             // Boost if it's a common transition at this time
             const timeBoost = getTimeBasedBoost(nextWord, currentHour);
-            confidence = Math.min(0.87, confidence + timeBoost);
+            confidence = Math.min(0.83, confidence + timeBoost);
             
             suggestions.push({
               text: nextWord,
@@ -869,7 +872,7 @@ export function useAdvancedAI() {
         });
       }
 
-      // 6. Enhanced temporal suggestions with day/time awareness
+      // 8. Enhanced temporal suggestions with day/time awareness
       userPatterns.temporalPatterns.forEach((timeData, phrase) => {
         const relevantTimes = timeData.filter(t => Math.abs(t.hour - currentHour) <= 1);
         if (relevantTimes.length > 0) {
@@ -878,7 +881,7 @@ export function useAdvancedAI() {
             if (!suggestions.some(s => areSimilarWords(s.text.toLowerCase(), word.toLowerCase())) &&
                 !currentWords.some(w => areSimilarWords(w.toLowerCase(), word.toLowerCase()))) {
               const totalCount = relevantTimes.reduce((sum, t) => sum + t.count, 0);
-              const confidence = Math.min(0.78, (totalCount / 3) * (1 - index * 0.15));
+              const confidence = Math.min(0.74, (totalCount / 3) * (1 - index * 0.15));
               suggestions.push({
                 text: word,
                 confidence,
@@ -890,7 +893,7 @@ export function useAdvancedAI() {
         }
       });
 
-      // 7. Enhanced synonym suggestions with multiple alternatives
+      // 9. Enhanced synonym suggestions with multiple alternatives
       if (lastWord && availableWords.length > 0) {
         const synonyms = findAlternativeWords(lastWord, availableWords, currentWords);
         synonyms.forEach((synonym, index) => {
@@ -906,7 +909,7 @@ export function useAdvancedAI() {
         });
       }
       
-      // 7.5. Enhanced tense variation suggestions with all tenses
+      // 10. Enhanced tense variation suggestions with all tenses
       if (lastWord && isLikelyVerb(lastWord)) {
         const baseForm = getBaseForm(lastWord);
         
@@ -921,7 +924,7 @@ export function useAdvancedAI() {
           if (form && form.toLowerCase() !== lastWord.toLowerCase() && 
               !suggestions.some(s => areSimilarWords(s.text.toLowerCase(), form.toLowerCase()))) {
             // Higher confidence for contextually appropriate tense
-            const confidence = tense === tenseContext ? 0.85 : 0.65;
+            const confidence = tense === tenseContext ? 0.81 : 0.61;
             suggestions.push({
               text: form,
               confidence,
@@ -932,7 +935,7 @@ export function useAdvancedAI() {
         });
       }
       
-      // 7.6. Word variation suggestions (plurals, etc.)
+      // 11. Word variation suggestions (plurals, etc.)
       if (lastWord) {
         const variations = generateWordVariations(lastWord);
         
@@ -951,7 +954,7 @@ export function useAdvancedAI() {
         });
       }
       
-      // 7.7. Complete sentence suggestions from partial input
+      // 12. Complete sentence suggestions from partial input
       if (currentWords.length >= 1 && currentWords.length <= 3) {
         const completeSentences = generateCompleteSentences(currentWords, userPatterns.phrases, 2);
         
@@ -972,14 +975,14 @@ export function useAdvancedAI() {
         });
       }
       
-      // 7.8. N-gram based predictions
+      // 13. N-gram based predictions
       if (currentWords.length > 0) {
         const ngramPredictions = predictNextWords(currentWords, userPatterns.transitions, 3);
         
         ngramPredictions.forEach(({ word, confidence: freq }) => {
           if (!suggestions.some(s => areSimilarWords(s.text.toLowerCase(), word.toLowerCase())) &&
               !currentWords.some(w => areSimilarWords(w.toLowerCase(), word.toLowerCase()))) {
-            const confidence = Math.min(0.8, freq / 5);
+            const confidence = Math.min(0.76, freq / 5);
             suggestions.push({
               text: word,
               confidence,
@@ -990,7 +993,7 @@ export function useAdvancedAI() {
         });
       }
 
-      // 8. Enhanced contextual suggestions with smart filtering
+      // 14. Enhanced contextual suggestions with smart filtering
       if (availableWords.length > 0) {
         const filteredAvailableWords = removeDuplicateWords(availableWords, currentWords);
         const contextualWords = filteredAvailableWords
@@ -1019,7 +1022,7 @@ export function useAdvancedAI() {
         });
       }
 
-      // 9. Add high-frequency words as fallback
+      // 15. Add high-frequency words as fallback
       if (suggestions.length < maxSuggestions - 3 && availableWords.length > 0) {
         const filteredAvailableWords = removeDuplicateWords(availableWords, currentWords);
         const fallbackWords = filteredAvailableWords
@@ -1036,7 +1039,7 @@ export function useAdvancedAI() {
         });
       }
 
-      // 10. Add full sentence suggestions as last options (ENHANCED WITH AAC)
+      // 16. Add full sentence suggestions as last options (ENHANCED WITH AAC)
       if (currentWords.length >= 1 && currentWords.length <= 4) {
         // Prioritize AAC sentences
         const aacFullSentences = aacSentences
