@@ -30,6 +30,8 @@ const getTypeIcon = (type: string) => {
       return 'time-outline';
     case 'common_phrase':
       return 'star-outline';
+    case 'category_contextual':
+      return 'folder-outline';
     default:
       return 'bulb-outline';
   }
@@ -82,6 +84,7 @@ export default function AdvancedSuggestionsRow({
         {suggestions.slice(0, 10).map((suggestion, index) => {
           const isFullSentence = suggestion.type === 'full_sentence';
           const isTenseVariation = suggestion.type === 'tense_variation';
+          const isCategoryContextual = suggestion.type === 'category_contextual';
           
           return (
             <TouchableOpacity
@@ -90,6 +93,7 @@ export default function AdvancedSuggestionsRow({
                 styles.suggestion,
                 isFullSentence && styles.fullSentenceSuggestion,
                 isTenseVariation && styles.tenseVariationSuggestion,
+                isCategoryContextual && styles.categoryContextualSuggestion,
                 { borderLeftColor: getConfidenceColor(suggestion.confidence) }
               ]}
               onPress={() => onPressSuggestion(suggestion.text)}
@@ -100,13 +104,19 @@ export default function AdvancedSuggestionsRow({
                 <Icon
                   name={getTypeIcon(suggestion.type)}
                   size={14}
-                  color={isFullSentence ? colors.primary : isTenseVariation ? colors.warning : colors.textSecondary}
+                  color={
+                    isFullSentence ? colors.primary : 
+                    isTenseVariation ? colors.warning : 
+                    isCategoryContextual ? '#10B981' :
+                    colors.textSecondary
+                  }
                   style={styles.typeIcon}
                 />
                 <Text style={[
                   styles.confidenceText,
                   isFullSentence && styles.fullSentenceConfidence,
-                  isTenseVariation && styles.tenseVariationConfidence
+                  isTenseVariation && styles.tenseVariationConfidence,
+                  isCategoryContextual && styles.categoryContextualConfidence
                 ]}>
                   {Math.round(suggestion.confidence * 100)}%
                 </Text>
@@ -115,7 +125,8 @@ export default function AdvancedSuggestionsRow({
                 style={[
                   styles.suggestionText,
                   isFullSentence && styles.fullSentenceText,
-                  isTenseVariation && styles.tenseVariationText
+                  isTenseVariation && styles.tenseVariationText,
+                  isCategoryContextual && styles.categoryContextualText
                 ]} 
                 numberOfLines={2}
               >
@@ -129,6 +140,11 @@ export default function AdvancedSuggestionsRow({
               {isTenseVariation && suggestion.context && (
                 <View style={styles.labelBadge}>
                   <Text style={styles.tenseLabel}>{suggestion.context}</Text>
+                </View>
+              )}
+              {isCategoryContextual && suggestion.context && (
+                <View style={styles.labelBadge}>
+                  <Text style={styles.categoryLabel}>{suggestion.context}</Text>
                 </View>
               )}
             </TouchableOpacity>
@@ -186,6 +202,11 @@ const styles = StyleSheet.create({
     borderLeftColor: colors.warning,
     borderLeftWidth: 3,
   },
+  categoryContextualSuggestion: {
+    backgroundColor: '#ECFDF5',
+    borderLeftColor: '#10B981',
+    borderLeftWidth: 3,
+  },
   suggestionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -206,6 +227,9 @@ const styles = StyleSheet.create({
   tenseVariationConfidence: {
     color: colors.warning,
   },
+  categoryContextualConfidence: {
+    color: '#10B981',
+  },
   suggestionText: {
     fontSize: 12,
     fontFamily: 'Montserrat_600SemiBold',
@@ -220,6 +244,10 @@ const styles = StyleSheet.create({
   tenseVariationText: {
     fontSize: 12,
     color: colors.warning,
+  },
+  categoryContextualText: {
+    fontSize: 12,
+    color: '#10B981',
   },
   labelBadge: {
     marginTop: 4,
@@ -236,6 +264,13 @@ const styles = StyleSheet.create({
     fontSize: 8,
     fontFamily: 'Montserrat_600SemiBold',
     color: colors.warning,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  categoryLabel: {
+    fontSize: 8,
+    fontFamily: 'Montserrat_600SemiBold',
+    color: '#10B981',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
