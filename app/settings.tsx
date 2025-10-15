@@ -38,6 +38,10 @@ export default function SettingsScreen() {
   const [editingTile, setEditingTile] = useState<Tile | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   
+  // Text input states for preferences
+  const [foodInput, setFoodInput] = useState('');
+  const [animalInput, setAnimalInput] = useState('');
+  
   const { settings: emotionSettings, updateEmotion } = useEmotionSettings();
   const { settings: ttsSettings, availableVoices, updateSettings: updateTTSSettings, speak } = useTTSSettings();
   const { 
@@ -61,6 +65,12 @@ export default function SettingsScreen() {
     
     // Load front page image
     loadFrontPageImage();
+    
+    // Load text preferences
+    const savedFood = getPreference('favourite_food');
+    const savedAnimal = getPreference('favourite_animal');
+    if (savedFood) setFoodInput(savedFood);
+    if (savedAnimal) setAnimalInput(savedAnimal);
     
     console.log('Settings screen mounted successfully');
   }, []);
@@ -139,6 +149,13 @@ export default function SettingsScreen() {
     console.log('Preference save result:', success);
   };
 
+  const handleTextPreferenceSave = async (category: string, key: string, value: string) => {
+    if (value.trim()) {
+      console.log('Saving text preference:', { category, key, value });
+      await savePreference(category, key, value.trim());
+    }
+  };
+
   const handleEditTile = (tile: Tile) => {
     console.log('Editing tile:', tile);
     setEditingTile(tile);
@@ -178,7 +195,7 @@ export default function SettingsScreen() {
 
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Choose Your Emotion</Text>
-              <Text style={styles.helperText}>Tap an emotion to select it.</Text>
+              <Text style={styles.helperText}>Tap an emotion to select it. These are your custom emotion designs.</Text>
               <View style={styles.emotionGrid}>
                 {emotionOptions.map((emotion) => (
                   <TouchableOpacity
@@ -212,7 +229,7 @@ export default function SettingsScreen() {
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Front Page / Logo Image</Text>
               <Text style={styles.helperText}>
-                Upload a PNG or image file to use as your app logo on the main menu screen.
+                Upload a PNG or image file to use as your app logo on the main menu screen. This image is static and cannot be changed by users.
               </Text>
               
               {frontPageImage ? (
@@ -283,6 +300,9 @@ export default function SettingsScreen() {
           <View style={styles.tabContentWrapper}>
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Text-to-Speech Voice</Text>
+              <Text style={styles.helperText}>
+                Choose from three clear voice options: Male, Female, or Neutral. These voices are optimized for clarity and accessibility.
+              </Text>
               <View style={styles.currentVoiceContainer}>
                 <View style={styles.voiceInfoContainer}>
                   <Text style={styles.currentVoiceText}>Current Voice</Text>
@@ -300,7 +320,7 @@ export default function SettingsScreen() {
               </View>
               
               <View style={styles.voicesContainer}>
-                <Text style={styles.voicesTitle}>Available Clear Voices</Text>
+                <Text style={styles.voicesTitle}>Available Voices</Text>
                 <View style={styles.voicesList}>
                   {availableVoices.map((voice) => (
                     <TouchableOpacity
@@ -383,11 +403,42 @@ export default function SettingsScreen() {
                 {category.preferences.map((pref) => {
                   const currentValue = getPreference(pref.key);
                   console.log('Rendering preference:', pref.key, 'current value:', currentValue);
+                  
+                  // Text input for food and animal
+                  if (pref.type === 'text') {
+                    const isFood = pref.key === 'favourite_food';
+                    const isAnimal = pref.key === 'favourite_animal';
+                    const inputValue = isFood ? foodInput : isAnimal ? animalInput : '';
+                    const setInputValue = isFood ? setFoodInput : isAnimal ? setAnimalInput : () => {};
+                    
+                    return (
+                      <View key={pref.key} style={styles.preferenceContainer}>
+                        <Text style={styles.preferenceQuestion}>{pref.question}</Text>
+                        <TextInput
+                          style={styles.textInput}
+                          placeholder={pref.placeholder || 'Type here...'}
+                          placeholderTextColor="#9CA3AF"
+                          value={inputValue}
+                          onChangeText={setInputValue}
+                          onBlur={() => handleTextPreferenceSave(categoryKey, pref.key, inputValue)}
+                          onSubmitEditing={() => handleTextPreferenceSave(categoryKey, pref.key, inputValue)}
+                        />
+                        {currentValue && (
+                          <View style={styles.savedIndicator}>
+                            <Icon name="checkmark-circle" size={16} color={colors.success} />
+                            <Text style={styles.savedText}>Saved: {currentValue}</Text>
+                          </View>
+                        )}
+                      </View>
+                    );
+                  }
+                  
+                  // Button selection for other preferences
                   return (
                     <View key={pref.key} style={styles.preferenceContainer}>
                       <Text style={styles.preferenceQuestion}>{pref.question}</Text>
                       <View style={styles.optionsGrid}>
-                        {pref.options.map((option) => {
+                        {pref.options?.map((option) => {
                           const isSelected = currentValue === option.value;
                           return (
                             <TouchableOpacity
@@ -432,7 +483,7 @@ export default function SettingsScreen() {
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Edit Default Tiles</Text>
               <Text style={styles.helperText}>
-                Tap any tile to customize its image using a pictogram or custom URL. You can directly edit the image URL in the editor.
+                Tap any tile to customize its image using Baby ARASAAC pictograms or custom URL. All pictograms use the Baby ARASAAC style for visual consistency.
               </Text>
 
               {/* Category Filter */}
@@ -891,6 +942,29 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat_600SemiBold',
     color: colors.text,
     marginBottom: 16,
+  },
+  textInput: {
+    backgroundColor: colors.background,
+    borderColor: '#E5E7EB',
+    borderWidth: 2,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    color: colors.text,
+    fontSize: 16,
+    fontFamily: 'Montserrat_400Regular',
+    marginBottom: 8,
+  },
+  savedIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6 as any,
+    marginTop: 8,
+  },
+  savedText: {
+    fontSize: 13,
+    fontFamily: 'Montserrat_600SemiBold',
+    color: colors.success,
   },
   optionsGrid: {
     flexDirection: 'row',

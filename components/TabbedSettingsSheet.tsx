@@ -57,6 +57,10 @@ export default function TabbedSettingsSheet({
   const [imageUrl, setImageUrl] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>(defaultCategoryId);
   
+  // Text input states for preferences
+  const [foodInput, setFoodInput] = useState('');
+  const [animalInput, setAnimalInput] = useState('');
+  
   // Pictogram selector state
   const [showPictogramSelector, setShowPictogramSelector] = useState(false);
   
@@ -75,7 +79,15 @@ export default function TabbedSettingsSheet({
     } else if (open && mode === 'settings') {
       setActiveTab('emotions');
     }
-  }, [open, mode, defaultCategoryId]);
+    
+    // Load text preferences
+    if (open) {
+      const savedFood = getPreference('favourite_food');
+      const savedAnimal = getPreference('favourite_animal');
+      if (savedFood) setFoodInput(savedFood);
+      if (savedAnimal) setAnimalInput(savedAnimal);
+    }
+  }, [open, mode, defaultCategoryId, getPreference]);
 
   // Control opening/closing
   useEffect(() => {
@@ -168,6 +180,13 @@ export default function TabbedSettingsSheet({
     console.log('Preference select clicked:', { category, key, value });
     const success = await savePreference(category, key, value);
     console.log('Preference save result:', success);
+  };
+
+  const handleTextPreferenceSave = async (category: string, key: string, value: string) => {
+    if (value.trim()) {
+      console.log('Saving text preference:', { category, key, value });
+      await savePreference(category, key, value.trim());
+    }
   };
 
   const renderTabContent = () => {
@@ -311,11 +330,42 @@ export default function TabbedSettingsSheet({
                 {category.preferences.map((pref) => {
                   const currentValue = getPreference(pref.key);
                   console.log('Rendering preference:', pref.key, 'current value:', currentValue);
+                  
+                  // Text input for food and animal
+                  if (pref.type === 'text') {
+                    const isFood = pref.key === 'favourite_food';
+                    const isAnimal = pref.key === 'favourite_animal';
+                    const inputValue = isFood ? foodInput : isAnimal ? animalInput : '';
+                    const setInputValue = isFood ? setFoodInput : isAnimal ? setAnimalInput : () => {};
+                    
+                    return (
+                      <View key={pref.key} style={styles.preferenceContainer}>
+                        <Text style={styles.preferenceQuestion}>{pref.question}</Text>
+                        <TextInput
+                          style={styles.input}
+                          placeholder={pref.placeholder || 'Type here...'}
+                          placeholderTextColor="#9CA3AF"
+                          value={inputValue}
+                          onChangeText={setInputValue}
+                          onBlur={() => handleTextPreferenceSave(categoryKey, pref.key, inputValue)}
+                          onSubmitEditing={() => handleTextPreferenceSave(categoryKey, pref.key, inputValue)}
+                        />
+                        {currentValue && (
+                          <View style={styles.savedIndicator}>
+                            <Icon name="checkmark-circle" size={16} color={colors.success} />
+                            <Text style={styles.savedText}>Saved: {currentValue}</Text>
+                          </View>
+                        )}
+                      </View>
+                    );
+                  }
+                  
+                  // Button selection for other preferences
                   return (
                     <View key={pref.key} style={styles.preferenceContainer}>
                       <Text style={styles.preferenceQuestion}>{pref.question}</Text>
                       <View style={styles.optionsGrid}>
-                        {pref.options.map((option) => {
+                        {pref.options?.map((option) => {
                           const isSelected = currentValue === option.value;
                           return (
                             <TouchableOpacity
@@ -980,5 +1030,16 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontFamily: 'Montserrat_600SemiBold',
     fontSize: 14,
+  },
+  savedIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6 as any,
+    marginTop: 8,
+  },
+  savedText: {
+    fontSize: 13,
+    fontFamily: 'Montserrat_600SemiBold',
+    color: colors.success,
   },
 });

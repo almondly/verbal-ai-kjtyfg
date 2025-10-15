@@ -41,29 +41,18 @@ export function useAIPreferences() {
             { value: 'red', label: 'Red', colour: '#FF6B6B' },
             { value: 'blue', label: 'Blue', colour: '#4ECDC4' },
             { value: 'green', label: 'Green', colour: '#45B7D1' },
-            { value: 'yellow', label: 'Yellow', colour: '#FFA07A' },
+            { value: 'yellow', label: 'Yellow', colour: '#F7DC6F' },
             { value: 'purple', label: 'Purple', colour: '#98D8C8' },
-            { value: 'orange', label: 'Orange', colour: '#F7DC6F' },
+            { value: 'orange', label: 'Orange', colour: '#FFA07A' },
             { value: 'pink', label: 'Pink', colour: '#BB8FCE' },
             { value: 'black', label: 'Black', colour: '#2C3E50' },
           ]
         },
         {
           key: 'favourite_food',
-          type: 'choice',
+          type: 'text',
           question: "What's your favourite food?",
-          options: [
-            { value: 'pizza', label: 'Pizza' },
-            { value: 'pasta', label: 'Pasta' },
-            { value: 'burgers', label: 'Burgers' },
-            { value: 'fish and chips', label: 'Fish and Chips' },
-            { value: 'meat pies', label: 'Meat Pies' },
-            { value: 'lamingtons', label: 'Lamingtons' },
-            { value: 'pavlova', label: 'Pavlova' },
-            { value: 'vegemite toast', label: 'Vegemite Toast' },
-            { value: 'cake', label: 'Cake' },
-            { value: 'ice cream', label: 'Ice Cream' },
-          ]
+          placeholder: 'Type your favourite food...',
         },
         {
           key: 'favourite_activity',
@@ -82,18 +71,9 @@ export function useAIPreferences() {
         },
         {
           key: 'favourite_animal',
-          type: 'choice',
+          type: 'text',
           question: "What's your favourite animal?",
-          options: [
-            { value: 'dog', label: 'Dog' },
-            { value: 'cat', label: 'Cat' },
-            { value: 'kangaroo', label: 'Kangaroo' },
-            { value: 'koala', label: 'Koala' },
-            { value: 'dolphin', label: 'Dolphin' },
-            { value: 'elephant', label: 'Elephant' },
-            { value: 'lion', label: 'Lion' },
-            { value: 'penguin', label: 'Penguin' },
-          ]
+          placeholder: 'Type your favourite animal...',
         }
       ]
     },

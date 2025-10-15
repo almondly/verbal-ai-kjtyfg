@@ -21,7 +21,7 @@ export interface TTSSettings {
 
 const DEFAULT_TTS_SETTINGS: TTSSettings = {
   voiceIdentifier: 'default',
-  voiceName: 'Default Voice',
+  voiceName: 'Neutral Voice',
   language: 'en-US',
   pitch: 1.0,
   rate: 1.0,
@@ -29,19 +29,16 @@ const DEFAULT_TTS_SETTINGS: TTSSettings = {
 
 const TTS_STORAGE_KEY = 'tts_settings';
 
-// Only include the clearest, most understandable voices
-const CLEAR_VOICES: TTSVoice[] = [
-  { identifier: 'default', name: 'Default Voice', language: 'en-US' },
-  { identifier: 'com.apple.ttsbundle.Samantha-compact', name: 'Samantha (Clear)', language: 'en-US' },
-  { identifier: 'com.apple.ttsbundle.Alex-compact', name: 'Alex (Clear)', language: 'en-US' },
-  { identifier: 'com.apple.ttsbundle.Victoria-compact', name: 'Victoria (Clear)', language: 'en-US' },
-  { identifier: 'com.apple.ttsbundle.Daniel-compact', name: 'Daniel (British)', language: 'en-GB' },
-  { identifier: 'com.apple.ttsbundle.Karen-compact', name: 'Karen (Australian)', language: 'en-AU' },
+// Only three voice options: Male, Female, and Neutral
+const SIMPLIFIED_VOICES: TTSVoice[] = [
+  { identifier: 'default', name: 'Neutral Voice', language: 'en-US' },
+  { identifier: 'com.apple.ttsbundle.Samantha-compact', name: 'Female Voice', language: 'en-US' },
+  { identifier: 'com.apple.ttsbundle.Alex-compact', name: 'Male Voice', language: 'en-US' },
 ];
 
 export function useTTSSettings() {
   const [settings, setSettings] = useState<TTSSettings>(DEFAULT_TTS_SETTINGS);
-  const [availableVoices, setAvailableVoices] = useState<TTSVoice[]>(CLEAR_VOICES);
+  const [availableVoices, setAvailableVoices] = useState<TTSVoice[]>(SIMPLIFIED_VOICES);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -57,51 +54,15 @@ export function useTTSSettings() {
 
   const loadAvailableVoices = async () => {
     try {
-      console.log('Loading available TTS voices...');
-      const voices = await Speech.getAvailableVoicesAsync();
-      console.log('Raw TTS voices from Speech API:', voices);
+      console.log('Loading simplified TTS voices (Male, Female, Neutral)...');
       
-      // Start with our curated clear voices
-      const formattedVoices: TTSVoice[] = [...CLEAR_VOICES];
-
-      // Add system voices if available, but filter for clarity
-      if (voices && voices.length > 0) {
-        const clearSystemVoices = voices.filter(voice => {
-          const name = voice.name.toLowerCase();
-          // Only include voices known to be clear and easy to understand
-          return (
-            name.includes('samantha') ||
-            name.includes('alex') ||
-            name.includes('victoria') ||
-            name.includes('daniel') ||
-            name.includes('karen') ||
-            name.includes('susan') ||
-            name.includes('allison') ||
-            name.includes('tom') ||
-            name.includes('enhanced') ||
-            (voice.quality === 'enhanced' || voice.quality === 'premium')
-          );
-        });
-
-        clearSystemVoices.forEach(voice => {
-          // Avoid duplicates
-          if (!formattedVoices.find(v => v.identifier === voice.identifier)) {
-            formattedVoices.push({
-              identifier: voice.identifier,
-              name: `${voice.name} (System)`,
-              language: voice.language,
-              quality: voice.quality,
-            });
-          }
-        });
-      }
-      
-      console.log('Filtered clear TTS voices:', formattedVoices);
-      setAvailableVoices(formattedVoices);
+      // Always use our simplified three-voice system
+      setAvailableVoices(SIMPLIFIED_VOICES);
+      console.log('Simplified TTS voices loaded:', SIMPLIFIED_VOICES);
     } catch (err) {
       console.log('Error loading available voices:', err);
-      // Fallback to our curated list
-      setAvailableVoices(CLEAR_VOICES);
+      // Fallback to our simplified list
+      setAvailableVoices(SIMPLIFIED_VOICES);
     }
   };
 

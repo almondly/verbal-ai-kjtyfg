@@ -45,7 +45,7 @@ export default function PictogramSelector({ word, onSelect, onClose }: Props) {
       }
 
       const data = await response.json();
-      console.log('ARASAAC search results:', data.length, 'pictograms found for', query);
+      console.log('ARASAAC Baby pictograms search results:', data.length, 'pictograms found for', query);
       setPictograms(data.slice(0, 20)); // Limit to 20 results
     } catch (err) {
       console.error('Error fetching pictograms:', err);
@@ -61,8 +61,9 @@ export default function PictogramSelector({ word, onSelect, onClose }: Props) {
   };
 
   const handleSelectPictogram = (pictogramId: number) => {
-    const pictogramUrl = `https://static.arasaac.org/pictograms/${pictogramId}/${pictogramId}_300.png`;
-    console.log('Selected pictogram:', pictogramUrl);
+    // Use Baby ARASAAC pictograms by default (skin color variant)
+    const pictogramUrl = `https://static.arasaac.org/pictograms/${pictogramId}/${pictogramId}_2500_n.png`;
+    console.log('Selected Baby ARASAAC pictogram:', pictogramUrl);
     onSelect(pictogramUrl);
   };
 
@@ -96,7 +97,7 @@ export default function PictogramSelector({ word, onSelect, onClose }: Props) {
       </View>
 
       <Text style={styles.helperText}>
-        Tap a pictogram to select it for this word. These are ARASAAC-style pictograms.
+        Tap a pictogram to select it. Using Baby ARASAAC pictograms for visual consistency.
       </Text>
 
       {loading && (
@@ -136,7 +137,8 @@ export default function PictogramSelector({ word, onSelect, onClose }: Props) {
         >
           <View style={styles.pictogramGrid}>
             {pictograms.map((pictogram) => {
-              const pictogramUrl = `https://static.arasaac.org/pictograms/${pictogram._id}/${pictogram._id}_300.png`;
+              // Use Baby ARASAAC pictograms (skin color variant)
+              const pictogramUrl = `https://static.arasaac.org/pictograms/${pictogram._id}/${pictogram._id}_2500_n.png`;
               const keywords = pictogram.keywords.map(k => k.keyword).join(', ');
               
               return (
