@@ -71,9 +71,10 @@ export default function AdvancedSuggestionsRow({
       )}
       
       <ScrollView
+        horizontal
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={true}
+        showsHorizontalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
         {suggestions.slice(0, 10).map((suggestion, index) => {
@@ -96,7 +97,7 @@ export default function AdvancedSuggestionsRow({
               <View style={styles.suggestionHeader}>
                 <Icon
                   name={getTypeIcon(suggestion.type)}
-                  size={14}
+                  size={16}
                   color={isFullSentence ? colors.primary : isTenseVariation ? colors.warning : colors.textSecondary}
                   style={styles.typeIcon}
                 />
@@ -114,15 +115,19 @@ export default function AdvancedSuggestionsRow({
                   isFullSentence && styles.fullSentenceText,
                   isTenseVariation && styles.tenseVariationText
                 ]} 
-                numberOfLines={isFullSentence ? 3 : 2}
+                numberOfLines={2}
               >
                 {suggestion.text}
               </Text>
               {isFullSentence && (
-                <Text style={styles.fullSentenceLabel}>Full Sentence</Text>
+                <View style={styles.labelBadge}>
+                  <Text style={styles.fullSentenceLabel}>Full Sentence</Text>
+                </View>
               )}
               {isTenseVariation && suggestion.context && (
-                <Text style={styles.tenseLabel}>{suggestion.context}</Text>
+                <View style={styles.labelBadge}>
+                  <Text style={styles.tenseLabel}>{suggestion.context}</Text>
+                </View>
               )}
             </TouchableOpacity>
           );
@@ -142,7 +147,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.surface,
-    borderRadius: 8,
+    borderRadius: 10,
     paddingVertical: 8,
     paddingHorizontal: 8,
   },
@@ -153,40 +158,43 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    gap: 8 as any,
+    gap: 10 as any,
     paddingHorizontal: 4,
     paddingVertical: 4,
   },
   suggestion: {
     backgroundColor: colors.background,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderLeftWidth: 3,
-    boxShadow: '0px 2px 4px rgba(0,0,0,0.08)',
-    marginBottom: 4,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderLeftWidth: 4,
+    boxShadow: '0px 2px 6px rgba(0,0,0,0.1)',
+    minWidth: 140,
+    maxWidth: 200,
   },
   fullSentenceSuggestion: {
     backgroundColor: '#EEF2FF',
     borderLeftColor: colors.primary,
-    borderLeftWidth: 4,
+    borderLeftWidth: 5,
+    minWidth: 200,
+    maxWidth: 280,
   },
   tenseVariationSuggestion: {
     backgroundColor: '#FFF7ED',
     borderLeftColor: colors.warning,
-    borderLeftWidth: 3,
+    borderLeftWidth: 4,
   },
   suggestionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 4,
+    marginBottom: 6,
   },
   typeIcon: {
     marginRight: 4,
   },
   confidenceText: {
-    fontSize: 10,
+    fontSize: 11,
     color: colors.textSecondary,
     fontFamily: 'Montserrat_600SemiBold',
   },
@@ -197,32 +205,37 @@ const styles = StyleSheet.create({
     color: colors.warning,
   },
   suggestionText: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: 'Montserrat_600SemiBold',
     color: colors.text,
-    lineHeight: 16,
+    lineHeight: 18,
   },
   fullSentenceText: {
-    fontSize: 12,
-    lineHeight: 15,
+    fontSize: 13,
+    lineHeight: 17,
     color: colors.primary,
   },
   tenseVariationText: {
-    fontSize: 13,
+    fontSize: 14,
     color: colors.warning,
+  },
+  labelBadge: {
+    marginTop: 6,
+    alignSelf: 'flex-start',
   },
   fullSentenceLabel: {
     fontSize: 9,
-    fontFamily: 'Montserrat_500Medium',
+    fontFamily: 'Montserrat_600SemiBold',
     color: colors.primary,
-    marginTop: 4,
     textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   tenseLabel: {
     fontSize: 9,
-    fontFamily: 'Montserrat_500Medium',
+    fontFamily: 'Montserrat_600SemiBold',
     color: colors.warning,
-    marginTop: 4,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   hintText: {
     fontSize: 11,

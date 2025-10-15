@@ -38,33 +38,34 @@ export default function CategoryBar({ categories, selectedId, onSelect, style }:
               key={cat.id}
               style={{
                 transform: [{ scale: active ? scaleAnim : 1 }],
-                marginRight: index < categories.length - 1 ? 10 : 0,
+                marginRight: index < categories.length - 1 ? 12 : 0,
               }}
             >
               <TouchableOpacity
                 style={[
                   styles.chip,
                   {
-                    backgroundColor: active ? cat.color : colors.backgroundAlt,
-                    borderColor: active ? colors.border : colors.borderLight,
+                    backgroundColor: cat.color,
+                    borderColor: active ? colors.borderDark : colors.border,
                     borderWidth: active ? 3 : 2,
+                    opacity: active ? 1 : 0.85,
                   },
                 ]}
                 onPress={() => {
                   onSelect(cat.id);
                   animatePop();
                 }}
-                activeOpacity={0.85}
+                activeOpacity={0.9}
               >
                 <Icon 
                   name={cat.icon as any} 
-                  size={26} 
-                  color={colors.text} 
+                  size={28} 
+                  color={colors.textLight} 
                 />
                 <Text style={[
                   styles.chipText, 
                   { 
-                    color: colors.text,
+                    color: colors.textLight,
                     fontFamily: active ? 'Montserrat_700Bold' : 'Montserrat_600SemiBold'
                   }
                 ]}>
@@ -83,12 +84,12 @@ const styles = StyleSheet.create({
   wrapper: {
     width: '100%',
     paddingHorizontal: 8,
-    paddingVertical: 12,
+    paddingVertical: 10,
     backgroundColor: colors.backgroundAlt,
-    borderRadius: 10,
+    borderRadius: 12,
     borderWidth: 2,
     borderColor: colors.borderLight,
-    boxShadow: '0px 2px 4px rgba(0,0,0,0.15)',
+    boxShadow: '0px 2px 6px rgba(0,0,0,0.12)',
   },
   row: {
     alignItems: 'center',
@@ -96,12 +97,12 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   chip: {
-    width: 76,
-    height: 76,
-    borderRadius: 10,
+    width: 80,
+    height: 80,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    boxShadow: '0px 2px 4px rgba(0,0,0,0.1)',
+    boxShadow: '0px 3px 6px rgba(0,0,0,0.15)',
   },
   chipText: {
     fontSize: 11,

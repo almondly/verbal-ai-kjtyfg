@@ -134,7 +134,7 @@ export default function CommunicationScreen() {
   return (
     <LandscapeGuard>
       <View style={[commonStyles.container, styles.container]}>
-        {/* Top Bar */}
+        {/* Top Bar with Back, Emotion, and Settings */}
         <View style={styles.topBar}>
           <TouchableOpacity 
             style={styles.backButton} 
@@ -158,69 +158,73 @@ export default function CommunicationScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Main Content */}
-        <View style={styles.mainContent}>
-          {/* Left Side - Tiles */}
-          <View style={styles.leftPanel}>
-            <CategoryBar
-              categories={categories}
-              selectedId={selectedCategory}
-              onSelect={setSelectedCategory}
-            />
-            <CommunicationGrid
-              tiles={filteredTiles}
-              onTilePress={handleTilePress}
-              onTileLongPress={handleTileLongPress}
-              onTileEdit={handleTileEdit}
-              onAddTile={() => setSettingsOpen(true)}
-              selectedCategory={selectedCategory}
-            />
-          </View>
+        {/* Phrase Bar */}
+        <View style={styles.phraseBarContainer}>
+          <PhraseBar
+            sentence={sentence}
+            onRemove={handleRemoveFromSentence}
+            onClear={handleClearSentence}
+            onSpeak={handleSpeak}
+          />
+        </View>
 
-          {/* Right Side - Phrase Bar & Suggestions */}
-          <View style={styles.rightPanel}>
-            <PhraseBar
-              sentence={sentence}
-              onRemove={handleRemoveFromSentence}
-              onClear={handleClearSentence}
-              onSpeak={handleSpeak}
-            />
-            
-            <View style={styles.suggestionsContainer}>
-              <Text style={styles.suggestionsTitle}>AI Recommendations</Text>
-              {advancedSuggestions.length > 0 ? (
-                <AdvancedSuggestionsRow
-                  suggestions={advancedSuggestions}
-                  onPressSuggestion={(text) => {
-                    const tile: Tile = {
-                      id: `suggestion-${Date.now()}`,
-                      text,
-                      color: colors.primary,
-                    };
-                    handleTilePress(tile);
-                  }}
-                  onRemoveWord={(word) => {
-                    // Remove the word from the sentence when tense is changed
-                    setSentence(prev => {
-                      const index = prev.findIndex(t => t.text.toLowerCase() === word.toLowerCase());
-                      if (index !== -1) {
-                        return prev.filter((_, i) => i !== index);
-                      }
-                      return prev;
-                    });
-                  }}
-                  style={styles.suggestions}
-                />
-              ) : (
-                <View style={styles.emptyAIContainer}>
-                  <Icon name="bulb-outline" size={32} color={colors.textSecondary} />
-                  <Text style={styles.emptyAIText}>
-                    Start building a sentence to see AI suggestions
-                  </Text>
-                </View>
-              )}
-            </View>
+        {/* AI Sentence Predictor / Recommendations */}
+        <View style={styles.predictorContainer}>
+          <View style={styles.predictorHeader}>
+            <Icon name="bulb-outline" size={20} color={colors.primary} />
+            <Text style={styles.predictorTitle}>Sentence Predictor</Text>
           </View>
+          {advancedSuggestions.length > 0 ? (
+            <AdvancedSuggestionsRow
+              suggestions={advancedSuggestions}
+              onPressSuggestion={(text) => {
+                const tile: Tile = {
+                  id: `suggestion-${Date.now()}`,
+                  text,
+                  color: colors.primary,
+                };
+                handleTilePress(tile);
+              }}
+              onRemoveWord={(word) => {
+                // Remove the word from the sentence when tense is changed
+                setSentence(prev => {
+                  const index = prev.findIndex(t => t.text.toLowerCase() === word.toLowerCase());
+                  if (index !== -1) {
+                    return prev.filter((_, i) => i !== index);
+                  }
+                  return prev;
+                });
+              }}
+              style={styles.suggestions}
+            />
+          ) : (
+            <View style={styles.emptyPredictorContainer}>
+              <Text style={styles.emptyPredictorText}>
+                Start building a sentence to see AI predictions
+              </Text>
+            </View>
+          )}
+        </View>
+
+        {/* Category Bar */}
+        <View style={styles.categoryBarContainer}>
+          <CategoryBar
+            categories={categories}
+            selectedId={selectedCategory}
+            onSelect={setSelectedCategory}
+          />
+        </View>
+
+        {/* Tiles Grid */}
+        <View style={styles.gridContainer}>
+          <CommunicationGrid
+            tiles={filteredTiles}
+            onTilePress={handleTilePress}
+            onTileLongPress={handleTileLongPress}
+            onTileEdit={handleTileEdit}
+            onAddTile={() => setSettingsOpen(true)}
+            selectedCategory={selectedCategory}
+          />
         </View>
 
         {/* Settings Sheet - Only for adding tiles */}
@@ -258,25 +262,25 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
     backgroundColor: colors.backgroundAlt,
-    borderBottomWidth: 1,
+    borderBottomWidth: 2,
     borderBottomColor: colors.borderLight,
   },
   backButton: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8 as any,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
     backgroundColor: colors.background,
-    borderRadius: 12,
-    borderWidth: 1,
+    borderRadius: 10,
+    borderWidth: 2,
     borderColor: colors.borderLight,
   },
   backButtonText: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: 'Montserrat_600SemiBold',
     color: colors.text,
   },
@@ -286,57 +290,60 @@ const styles = StyleSheet.create({
     transform: [{ translateX: -25 }],
   },
   settingsButton: {
-    padding: 10,
+    padding: 8,
     backgroundColor: colors.background,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.borderLight,
-  },
-  mainContent: {
-    flex: 1,
-    flexDirection: 'row',
-    gap: 16 as any,
-    padding: 16,
-  },
-  leftPanel: {
-    flex: 2,
-    gap: 12 as any,
-  },
-  rightPanel: {
-    flex: 1,
-    gap: 12 as any,
-  },
-  suggestionsContainer: {
-    flex: 1,
-    backgroundColor: colors.backgroundAlt,
-    borderRadius: 12,
-    padding: 12,
+    borderRadius: 10,
     borderWidth: 2,
     borderColor: colors.borderLight,
-    boxShadow: '0px 2px 6px rgba(0,0,0,0.1)',
   },
-  suggestionsTitle: {
-    fontSize: 14,
+  phraseBarContainer: {
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 8,
+  },
+  predictorContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: colors.backgroundAlt,
+    borderTopWidth: 2,
+    borderBottomWidth: 2,
+    borderColor: colors.borderLight,
+    minHeight: 120,
+    maxHeight: 140,
+  },
+  predictorHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8 as any,
+    marginBottom: 8,
+  },
+  predictorTitle: {
+    fontSize: 15,
     fontFamily: 'Montserrat_700Bold',
     color: colors.text,
-    marginBottom: 8,
-    textAlign: 'center',
   },
   suggestions: {
     flex: 1,
   },
-  emptyAIContainer: {
+  emptyPredictorContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 12 as any,
     paddingVertical: 20,
   },
-  emptyAIText: {
-    fontSize: 12,
+  emptyPredictorText: {
+    fontSize: 13,
     fontFamily: 'Montserrat_500Medium',
     color: colors.textSecondary,
     textAlign: 'center',
-    paddingHorizontal: 20,
+  },
+  categoryBarContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  gridContainer: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: 8,
   },
 });
