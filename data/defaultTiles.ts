@@ -23,15 +23,6 @@ const categoryColor: Record<string, string> = {
   toys: '#F8B4D9',
 };
 
-// 🧩 Add an `image` field to Tile definition (make sure ../types.ts has this)
-export interface Tile {
-  id: string;
-  text: string;
-  category: string;
-  color: string;
-  image?: string;
-}
-
 // ========================================================================
 // 🖼️ PICTOGRAM IMAGE URLs - EDIT THESE TO CHANGE TILE IMAGES
 // ========================================================================

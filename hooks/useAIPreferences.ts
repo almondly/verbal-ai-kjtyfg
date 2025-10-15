@@ -1,5 +1,5 @@
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
 import { supabase } from '../app/integrations/supabase/client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -28,7 +28,7 @@ export function useAIPreferences() {
   const [error, setError] = useState<string | null>(null);
 
   // Predefined preference categories with Australian English
-  const preferenceCategories = {
+  const preferenceCategories = useMemo(() => ({
     personal: {
       title: 'Personal Preferences',
       icon: 'person-outline',
@@ -183,7 +183,7 @@ export function useAIPreferences() {
         }
       ]
     }
-  };
+  }), []);
 
   // Load preferences from local storage
   const loadPreferences = useCallback(async () => {

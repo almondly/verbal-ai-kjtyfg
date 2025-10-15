@@ -15,24 +15,24 @@ export default function EmotionFace({ emotion, size = 100 }: Props) {
   const [customImage, setCustomImage] = useState<string | null>(null);
 
   useEffect(() => {
+    const loadCustomEmotion = async () => {
+      try {
+        const stored = await AsyncStorage.getItem(CUSTOM_EMOTIONS_KEY);
+        if (stored) {
+          const customEmotions = JSON.parse(stored);
+          if (customEmotions[emotion]) {
+            setCustomImage(customEmotions[emotion]);
+          } else {
+            setCustomImage(null);
+          }
+        }
+      } catch (error) {
+        console.log('Error loading custom emotion:', error);
+      }
+    };
+    
     loadCustomEmotion();
   }, [emotion]);
-
-  const loadCustomEmotion = async () => {
-    try {
-      const stored = await AsyncStorage.getItem(CUSTOM_EMOTIONS_KEY);
-      if (stored) {
-        const customEmotions = JSON.parse(stored);
-        if (customEmotions[emotion]) {
-          setCustomImage(customEmotions[emotion]);
-        } else {
-          setCustomImage(null);
-        }
-      }
-    } catch (error) {
-      console.log('Error loading custom emotion:', error);
-    }
-  };
 
   // If there's a custom image, display it
   if (customImage) {

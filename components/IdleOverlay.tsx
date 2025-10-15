@@ -44,7 +44,7 @@ export default function IdleOverlay({ visible, emotion, onDismiss }: Props) {
         }),
       ]).start();
     }
-  }, [visible, emotion]);
+  }, [visible, emotion, fadeAnim, scaleAnim]);
 
   if (!visible) return null;
 

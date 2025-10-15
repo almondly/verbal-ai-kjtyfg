@@ -7,6 +7,7 @@
  * - Grammatical rules
  * - Context awareness
  * - Pronoun variations (I, you, he, she, we, they)
+ * - Category-based contextual recommendations
  */
 
 import { detectTenseContext, getVerbFormForContext, getBaseForm } from './wordVariations';
@@ -253,7 +254,7 @@ export function generateCompleteSentences(
   const currentText = currentWords.join(' ').toLowerCase();
   
   // Find user phrases that start with current text
-  const matchingPhrases: Array<{ phrase: string; frequency: number }> = [];
+  const matchingPhrases: { phrase: string; frequency: number }[] = [];
   
   userPhrases.forEach((frequency, phrase) => {
     if (phrase.startsWith(currentText) && phrase !== currentText) {
@@ -291,8 +292,8 @@ export function predictNextWords(
   currentWords: string[],
   transitions: Map<string, Map<string, number>>,
   maxPredictions: number = 5
-): Array<{ word: string; confidence: number }> {
-  const predictions: Array<{ word: string; confidence: number }> = [];
+): { word: string; confidence: number }[] {
+  const predictions: { word: string; confidence: number }[] = [];
   
   if (currentWords.length === 0) return predictions;
   
@@ -374,10 +375,10 @@ export function analyzeSentenceStructure(words: string[]): {
  * Score and rank sentence suggestions
  */
 export function scoreSuggestions(
-  suggestions: Array<{ text: string; type: string; confidence: number }>,
+  suggestions: { text: string; type: string; confidence: number }[],
   currentWords: string[],
   userFrequency: Map<string, number>
-): Array<{ text: string; type: string; confidence: number; score: number }> {
+): { text: string; type: string; confidence: number; score: number }[] {
   return suggestions.map(suggestion => {
     let score = suggestion.confidence;
     

@@ -1,5 +1,5 @@
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 
 interface UseIdleDetectionProps {
   timeout?: number; // milliseconds
@@ -16,7 +16,7 @@ export function useIdleDetection({
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastActivityRef = useRef(Date.now());
 
-  const resetTimer = () => {
+  const resetTimer = useCallback(() => {
     console.log('Activity detected, resetting idle timer');
     lastActivityRef.current = Date.now();
     
@@ -34,11 +34,11 @@ export function useIdleDetection({
       setIsIdle(true);
       onIdle?.();
     }, timeout);
-  };
+  }, [isIdle, onActive, onIdle, timeout]);
 
-  const handleActivity = () => {
+  const handleActivity = useCallback(() => {
     resetTimer();
-  };
+  }, [resetTimer]);
 
   useEffect(() => {
     // Start the timer
@@ -49,7 +49,7 @@ export function useIdleDetection({
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [timeout]);
+  }, [resetTimer]);
 
   return {
     isIdle,
