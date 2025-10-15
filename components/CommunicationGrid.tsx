@@ -1,58 +1,111 @@
 
-import { View, StyleSheet, useWindowDimensions } from 'react-native';
-import TileItem from './TileItem';
+import { memo, useCallback } from 'react';
+import { View, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { Tile } from '../types';
-import { colors } from '../styles/commonStyles';
+import TileItem from './TileItem';
 
 interface Props {
   tiles: Tile[];
-  onPressTile: (tile: Tile) => void;
-  onPressAdd: () => void;
-  onRemoveTile: (id: string) => void;
+  onTilePress: (tile: Tile) => void;
+  onTileLongPress?: (tile: Tile) => void;
+  onTileEdit?: (tile: Tile) => void;
+  onAddTile?: () => void;
+  selectedCategory?: string;
 }
 
-function getColumns(width: number): number {
-  if (width >= 1400) return 8;
-  if (width >= 1200) return 7;
-  if (width >= 1000) return 6;
-  if (width >= 820) return 5;
-  if (width >= 680) return 4;
-  return 3;
-}
-
-export default function CommunicationGrid({ tiles, onPressTile, onPressAdd, onRemoveTile }: Props) {
-  const { width } = useWindowDimensions();
-  const columns = getColumns(width);
-  const itemPercent = 100 / columns;
-
-  const addTile: Tile = { id: '__add__', text: 'Add Tile', color: colors.borderLight };
-  const items = [addTile, ...tiles];
+const CommunicationGrid = memo(function CommunicationGrid({
+  tiles,
+  onTilePress,
+  onTileLongPress,
+  onTileEdit,
+  onAddTile,
+  selectedCategory,
+}: Props) {
+  const handleTileLongPress = useCallback((tile: Tile) => {
+    if (tile.id.startsWith('custom-')) {
+      Alert.alert(
+        'Tile Options',
+        'What would you like to do with this tile?',
+        [
+          {
+            text: 'Edit',
+            onPress: () => onTileEdit?.(tile),
+          },
+          {
+            text: 'Delete',
+            onPress: () => onTileLongPress?.(tile),
+            style: 'destructive',
+          },
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+        ]
+      );
+    } else {
+      // For default tiles, allow editing to add pictograms
+      Alert.alert(
+        'Edit Tile',
+        'Would you like to customize this tile?',
+        [
+          {
+            text: 'Edit',
+            onPress: () => onTileEdit?.(tile),
+          },
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+        ]
+      );
+    }
+  }, [onTileLongPress, onTileEdit]);
 
   return (
-    <View style={styles.grid}>
-      {items.map((tile) =>
-        tile.id === '__add__' ? (
-          <TileItem key={tile.id} tile={tile} onPress={onPressAdd} isAdd itemPercent={itemPercent} />
-        ) : (
+    <ScrollView 
+      style={styles.container}
+      contentContainerStyle={styles.content}
+      showsVerticalScrollIndicator={false}
+    >
+      <View style={styles.grid}>
+        {tiles.map((tile) => (
           <TileItem
             key={tile.id}
             tile={tile}
-            onPress={() => onPressTile(tile)}
-            onLongPress={() => onRemoveTile(tile.id)}
-            itemPercent={itemPercent}
+            onPress={() => onTilePress(tile)}
+            onLongPress={() => handleTileLongPress(tile)}
+            itemPercent={33.33}
           />
-        )
-      )}
-    </View>
+        ))}
+        {selectedCategory && selectedCategory !== 'all' && onAddTile && (
+          <TileItem
+            tile={{
+              id: 'add-tile',
+              text: 'Add Tile',
+              color: '#E5E7EB',
+            }}
+            onPress={onAddTile}
+            isAdd
+            itemPercent={33.33}
+          />
+        )}
+      </View>
+    </ScrollView>
   );
-}
+});
+
+export default CommunicationGrid;
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  content: {
+    paddingBottom: 20,
+  },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    paddingHorizontal: 4,
-    paddingTop: 4,
-    backgroundColor: colors.background,
+    alignItems: 'flex-start',
   },
 });

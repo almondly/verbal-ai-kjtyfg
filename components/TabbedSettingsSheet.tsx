@@ -1,10 +1,11 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, ScrollView, Alert, Modal } from 'react-native';
 import { colors } from '../styles/commonStyles';
 import Icon from './Icon';
 import EmotionFace from './EmotionFace';
+import PictogramSelector from './PictogramSelector';
 import * as ImagePicker from 'expo-image-picker';
 import { Tile } from '../types';
 import { categories } from '../data/categories';
@@ -56,8 +57,11 @@ export default function TabbedSettingsSheet({
   const [phrase, setPhrase] = useState('');
   const [color, setColor] = useState('#FFFFFF');
   const [imageUri, setImageUri] = useState<string | undefined>(undefined);
-  const [imageUrl, setImageUrl] = useState<string>(''); // NEW: Custom image URL
+  const [imageUrl, setImageUrl] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>(defaultCategoryId);
+  
+  // Pictogram selector state
+  const [showPictogramSelector, setShowPictogramSelector] = useState(false);
   
   // Custom emotions state
   const [customEmotions, setCustomEmotions] = useState<Record<string, string>>({});
@@ -173,11 +177,19 @@ export default function TabbedSettingsSheet({
     }
   };
 
+  const handleSelectPictogram = (pictogramUrl: string) => {
+    console.log('Pictogram selected:', pictogramUrl);
+    setImageUrl(pictogramUrl);
+    setImageUri(undefined); // Clear gallery image
+    setShowPictogramSelector(false);
+  };
+
   const closeAndReset = () => {
     setPhrase('');
     setColor('#FFFFFF');
     setImageUri(undefined);
     setImageUrl('');
+    setShowPictogramSelector(false);
     onClose();
   };
 
@@ -485,39 +497,48 @@ export default function TabbedSettingsSheet({
                 ))}
               </View>
 
-              <Text style={styles.sectionTitle}>Image</Text>
-              <Text style={styles.helperText}>Add a custom image URL or pick from your gallery</Text>
+              <Text style={styles.sectionTitle}>Pictogram</Text>
+              <Text style={styles.helperText}>Browse ARASAAC pictograms or add a custom image</Text>
               
-              <TextInput
-                placeholder="https://example.com/image.png"
-                placeholderTextColor="#9CA3AF"
-                style={styles.input}
-                value={imageUrl}
-                onChangeText={(text) => {
-                  setImageUrl(text);
-                  if (text.trim()) {
-                    setImageUri(undefined); // Clear gallery image if URL is entered
-                  }
-                }}
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
-
-              <View style={styles.row}>
+              <View style={styles.imageOptionsRow}>
                 <TouchableOpacity 
-                  style={[styles.action, { backgroundColor: '#EEF2FF' }]} 
+                  style={[styles.imageOptionBtn, { flex: 1 }]} 
+                  onPress={() => setShowPictogramSelector(true)} 
+                  activeOpacity={0.9}
+                >
+                  <Icon name="images-outline" size={20} color={colors.primary} />
+                  <Text style={styles.imageOptionText}>Browse Pictograms</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity 
+                  style={[styles.imageOptionBtn, { flex: 1 }]} 
                   onPress={pickImage} 
                   activeOpacity={0.9}
                 >
-                  <Text style={styles.actionText}>Pick from Gallery</Text>
+                  <Icon name="image-outline" size={20} color={colors.primary} />
+                  <Text style={styles.imageOptionText}>Pick from Gallery</Text>
                 </TouchableOpacity>
-                {(imageUri || imageUrl) ? (
+              </View>
+
+              {(imageUri || imageUrl) && (
+                <View style={styles.imagePreviewContainer}>
                   <Image 
                     source={{ uri: imageUri || imageUrl }} 
-                    style={{ width: 56, height: 56, borderRadius: 12 }} 
+                    style={styles.imagePreview} 
+                    resizeMode="contain"
                   />
-                ) : null}
-              </View>
+                  <TouchableOpacity 
+                    style={styles.removeImageButton}
+                    onPress={() => {
+                      setImageUri(undefined);
+                      setImageUrl('');
+                    }}
+                    activeOpacity={0.8}
+                  >
+                    <Icon name="close-circle" size={24} color={colors.danger} />
+                  </TouchableOpacity>
+                </View>
+              )}
 
               <TouchableOpacity style={styles.addBtn} onPress={handleAddTile} activeOpacity={0.9}>
                 <Text style={styles.addBtnText}>Add Tile</Text>
@@ -532,65 +553,81 @@ export default function TabbedSettingsSheet({
   };
 
   return (
-    <BottomSheet
-      ref={sheetRef}
-      snapPoints={snapPoints}
-      index={open ? 0 : -1}
-      enablePanDownToClose
-      onClose={closeAndReset}
-      backgroundStyle={{ backgroundColor: colors.backgroundAlt, borderRadius: 0 }}
-      handleIndicatorStyle={{ backgroundColor: '#CBD5E1' }}
-      keyboardBehavior="interactive"
-      keyboardBlurBehavior="restore"
-      style={{ zIndex: 9999 }}
-    >
-      <BottomSheetView style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.title}>{title || (mode === 'add' ? 'Add Tile' : 'Settings')}</Text>
-          <TouchableOpacity onPress={closeAndReset} style={styles.closeBtn} activeOpacity={0.8}>
-            <Icon name="close-outline" size={28} color={colors.text} />
-          </TouchableOpacity>
-        </View>
+    <>
+      <BottomSheet
+        ref={sheetRef}
+        snapPoints={snapPoints}
+        index={open ? 0 : -1}
+        enablePanDownToClose
+        onClose={closeAndReset}
+        backgroundStyle={{ backgroundColor: colors.backgroundAlt, borderRadius: 0 }}
+        handleIndicatorStyle={{ backgroundColor: '#CBD5E1' }}
+        keyboardBehavior="interactive"
+        keyboardBlurBehavior="restore"
+        style={{ zIndex: 9999 }}
+      >
+        <BottomSheetView style={styles.container}>
+          <View style={styles.header}>
+            <Text style={styles.title}>{title || (mode === 'add' ? 'Add Tile' : 'Settings')}</Text>
+            <TouchableOpacity onPress={closeAndReset} style={styles.closeBtn} activeOpacity={0.8}>
+              <Icon name="close-outline" size={28} color={colors.text} />
+            </TouchableOpacity>
+          </View>
 
-        {/* Tab Navigation */}
-        <View style={styles.tabBar}>
-          <ScrollView 
-            horizontal 
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.tabBarContent}
-          >
-            {tabs.map((tab) => (
-              <TouchableOpacity
-                key={tab.id}
-                style={[
-                  styles.tab,
-                  activeTab === tab.id && styles.tabActive
-                ]}
-                onPress={() => setActiveTab(tab.id)}
-                activeOpacity={0.8}
-              >
-                <Icon 
-                  name={tab.icon as any} 
-                  size={20} 
-                  color={activeTab === tab.id ? colors.primary : colors.textSecondary} 
-                />
-                <Text style={[
-                  styles.tabText,
-                  activeTab === tab.id && styles.tabTextActive
-                ]}>
-                  {tab.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
+          {/* Tab Navigation */}
+          <View style={styles.tabBar}>
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.tabBarContent}
+            >
+              {tabs.map((tab) => (
+                <TouchableOpacity
+                  key={tab.id}
+                  style={[
+                    styles.tab,
+                    activeTab === tab.id && styles.tabActive
+                  ]}
+                  onPress={() => setActiveTab(tab.id)}
+                  activeOpacity={0.8}
+                >
+                  <Icon 
+                    name={tab.icon as any} 
+                    size={20} 
+                    color={activeTab === tab.id ? colors.primary : colors.textSecondary} 
+                  />
+                  <Text style={[
+                    styles.tabText,
+                    activeTab === tab.id && styles.tabTextActive
+                  ]}>
+                    {tab.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
 
-        {/* Tab Content */}
-        <View style={styles.contentContainer}>
-          {renderTabContent()}
-        </View>
-      </BottomSheetView>
-    </BottomSheet>
+          {/* Tab Content */}
+          <View style={styles.contentContainer}>
+            {renderTabContent()}
+          </View>
+        </BottomSheetView>
+      </BottomSheet>
+
+      {/* Pictogram Selector Modal */}
+      <Modal
+        visible={showPictogramSelector}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowPictogramSelector(false)}
+      >
+        <PictogramSelector
+          word={phrase || 'communication'}
+          onSelect={handleSelectPictogram}
+          onClose={() => setShowPictogramSelector(false)}
+        />
+      </Modal>
+    </>
   );
 }
 
@@ -946,6 +983,50 @@ const styles = StyleSheet.create({
     height: 16,
     borderRadius: 8,
     backgroundColor: '#111827',
+  },
+  imageOptionsRow: {
+    flexDirection: 'row',
+    gap: 12 as any,
+    marginBottom: 16,
+  },
+  imageOptionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8 as any,
+    backgroundColor: '#EEF2FF',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 14,
+    borderWidth: 2,
+    borderColor: colors.primary,
+  },
+  imageOptionText: {
+    fontSize: 14,
+    fontFamily: 'Montserrat_600SemiBold',
+    color: colors.primary,
+  },
+  imagePreviewContainer: {
+    position: 'relative',
+    alignSelf: 'center',
+    marginBottom: 16,
+  },
+  imagePreview: {
+    width: 120,
+    height: 120,
+    borderRadius: 16,
+    backgroundColor: '#F9FAFB',
+    borderWidth: 2,
+    borderColor: '#E5E7EB',
+  },
+  removeImageButton: {
+    position: 'absolute',
+    top: -8,
+    right: -8,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 4,
+    boxShadow: '0px 2px 8px rgba(0,0,0,0.15)',
   },
   addBtn: {
     backgroundColor: colors.primary,

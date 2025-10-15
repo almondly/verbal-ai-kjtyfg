@@ -88,6 +88,10 @@ export function useLibrary() {
     setTiles(prev => [tile, ...prev]);
   };
 
+  const updateTile = (updatedTile: Tile) => {
+    setTiles(prev => prev.map(t => t.id === updatedTile.id ? updatedTile : t));
+  };
+
   const removeTile = (id: string) => {
     setTiles(prev => prev.filter(t => t.id !== id));
   };
@@ -103,5 +107,5 @@ export function useLibrary() {
     }
   };
 
-  return { tiles, addTile, removeTile, resetTiles };
+  return { tiles, addTile, updateTile, removeTile, resetTiles };
 }
