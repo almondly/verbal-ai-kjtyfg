@@ -1135,7 +1135,6 @@ export function useAdvancedAI() {
     userPatterns
   };
 }
-</write file>
 
 Now let me update the sentenceCompletion utility to add the category-based recommendation function:
 
