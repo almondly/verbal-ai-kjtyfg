@@ -20,7 +20,7 @@ const TileItem = memo(function TileItem({
   onPress,
   onLongPress,
   isAdd,
-  itemPercent = 33.33,
+  itemPercent = 20,
 }: Props) {
   const scale = useRef(new Animated.Value(1)).current;
   const { width } = useWindowDimensions();
@@ -279,24 +279,24 @@ const TileItem = memo(function TileItem({
     return 'chatbubble-ellipses';
   };
 
-  // Responsive font size - larger and bolder
+  // Responsive font size - adjusted for smaller tiles
   const getResponsiveFontSize = () => {
-    if (width >= 1400) return 20;
-    if (width >= 1200) return 19;
-    if (width >= 1000) return 18;
-    if (width >= 820) return 17;
-    if (width >= 680) return 16;
-    return 15;
+    if (width >= 1400) return 16;
+    if (width >= 1200) return 15;
+    if (width >= 1000) return 14;
+    if (width >= 820) return 13;
+    if (width >= 680) return 12;
+    return 11;
   };
 
-  // Responsive icon size - larger for better visibility
+  // Responsive icon size - adjusted for smaller tiles
   const getResponsiveIconSize = () => {
-    if (width >= 1400) return 70;
-    if (width >= 1200) return 65;
-    if (width >= 1000) return 60;
-    if (width >= 820) return 55;
-    if (width >= 680) return 50;
-    return 45;
+    if (width >= 1400) return 55;
+    if (width >= 1200) return 50;
+    if (width >= 1000) return 45;
+    if (width >= 820) return 42;
+    if (width >= 680) return 38;
+    return 35;
   };
 
   const tileColor = getCategoryColor();
@@ -324,8 +324,9 @@ const TileItem = memo(function TileItem({
         style={[
           styles.tile, 
           { 
-            backgroundColor: tileColor,
-            boxShadow: `0px 0px 20px ${tileColor}40, 0px 4px 12px rgba(0,0,0,0.15)`,
+            backgroundColor: '#FFFFFF',
+            borderColor: tileColor,
+            borderWidth: 4,
           }
         ]}
       >
@@ -351,12 +352,12 @@ const TileItem = memo(function TileItem({
               }}
             />
           ) : (
-            <Icon name={iconName} size={iconSize} color={colors.textLight} />
+            <Icon name={iconName} size={iconSize} color={tileColor} />
           )}
         </View>
         <View style={styles.textContainer}>
           <Text 
-            style={[styles.text, { fontSize, color: colors.textLight }]} 
+            style={[styles.text, { fontSize, color: colors.text }]} 
             numberOfLines={2} 
             ellipsizeMode="tail"
           >
@@ -372,39 +373,40 @@ export default TileItem;
 
 const styles = StyleSheet.create({
   tileWrap: {
-    padding: 6,
+    padding: 4,
   },
   tile: {
     aspectRatio: 1,
-    borderRadius: 16,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 12,
+    padding: 8,
+    boxShadow: '0px 2px 8px rgba(0,0,0,0.1)',
   },
   iconWrap: {
     flex: 1,
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   customImage: {
     width: '100%',
     height: '100%',
-    maxWidth: 80,
-    maxHeight: 80,
-    borderRadius: 8,
+    maxWidth: 60,
+    maxHeight: 60,
+    borderRadius: 6,
   },
   textContainer: {
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 40,
+    minHeight: 32,
   },
   text: {
     fontFamily: 'Montserrat_700Bold',
     textAlign: 'center',
-    lineHeight: 20,
-    paddingHorizontal: 4,
+    lineHeight: 16,
+    paddingHorizontal: 2,
   },
 });

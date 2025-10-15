@@ -33,7 +33,7 @@ const categoryColor: Record<string, string> = {
 
 const pictograms: Record<string, string> = {
   // Core vocabulary
-  i: 'https://static.arasaac.org/pictograms/3913/I.png',
+  i: '',
   you: 'https://static.arasaac.org/pictograms/1262/you.png',
   he: 'https://static.arasaac.org/pictograms/1885/he.png',
   she: 'https://static.arasaac.org/pictograms/5097/she.png',

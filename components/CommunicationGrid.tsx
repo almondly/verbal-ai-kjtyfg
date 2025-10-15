@@ -74,7 +74,7 @@ const CommunicationGrid = memo(function CommunicationGrid({
             tile={tile}
             onPress={() => onTilePress(tile)}
             onLongPress={() => handleTileLongPress(tile)}
-            itemPercent={33.33}
+            itemPercent={20}
           />
         ))}
         {selectedCategory && selectedCategory !== 'all' && onAddTile && (
@@ -86,7 +86,7 @@ const CommunicationGrid = memo(function CommunicationGrid({
             }}
             onPress={onAddTile}
             isAdd
-            itemPercent={33.33}
+            itemPercent={20}
           />
         )}
       </View>
