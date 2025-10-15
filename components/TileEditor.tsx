@@ -147,8 +147,8 @@ export default function TileEditor({ visible, tile, onSave, onClose }: Props) {
             </View>
 
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Pictogram</Text>
-              <Text style={styles.helperText}>Browse ARASAAC pictograms or add a custom image</Text>
+              <Text style={styles.sectionTitle}>Image</Text>
+              <Text style={styles.helperText}>Choose a pictogram, add a custom URL, or pick from gallery</Text>
               
               <View style={styles.imageOptionsRow}>
                 <TouchableOpacity 
@@ -168,6 +168,24 @@ export default function TileEditor({ visible, tile, onSave, onClose }: Props) {
                   <Icon name="image-outline" size={20} color={colors.primary} />
                   <Text style={styles.imageOptionText}>Pick from Gallery</Text>
                 </TouchableOpacity>
+              </View>
+
+              <View style={styles.urlInputContainer}>
+                <Text style={styles.urlInputLabel}>Or enter custom image URL:</Text>
+                <TextInput
+                  placeholder="https://example.com/image.png"
+                  placeholderTextColor="#9CA3AF"
+                  style={styles.urlInput}
+                  value={imageUrl}
+                  onChangeText={(text) => {
+                    setImageUrl(text);
+                    if (text.trim()) {
+                      setImageUri(undefined);
+                    }
+                  }}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
               </View>
 
               {(imageUri || imageUrl) && (
@@ -341,6 +359,26 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Montserrat_600SemiBold',
     color: colors.primary,
+  },
+  urlInputContainer: {
+    marginBottom: 16,
+  },
+  urlInputLabel: {
+    fontSize: 14,
+    fontFamily: 'Montserrat_600SemiBold',
+    color: colors.text,
+    marginBottom: 8,
+  },
+  urlInput: {
+    backgroundColor: '#F9FAFB',
+    borderColor: '#E5E7EB',
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    color: colors.text,
+    fontSize: 14,
+    fontFamily: 'Montserrat_400Regular',
   },
   imagePreviewContainer: {
     position: 'relative',

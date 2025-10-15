@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform, TextInput, Image, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform, TextInput, Image, Alert, Modal } from 'react-native';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import Icon from '../components/Icon';
 import { commonStyles, colors } from '../styles/commonStyles';
@@ -15,8 +15,11 @@ import { useLibrary } from '../hooks/useLibrary';
 import { useAI } from '../hooks/useAI';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import TileEditor from '../components/TileEditor';
+import { Tile } from '../types';
+import { categories } from '../data/categories';
 
-type TabType = 'emotions' | 'voice' | 'ai' | 'manage';
+type TabType = 'emotions' | 'voice' | 'ai' | 'manage' | 'defaultTiles';
 
 const CUSTOM_EMOTIONS_KEY = 'custom_emotions';
 
@@ -32,6 +35,8 @@ export default function SettingsScreen() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabType>('emotions');
   const [customEmotions, setCustomEmotions] = useState<Record<string, string>>({});
+  const [editingTile, setEditingTile] = useState<Tile | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   
   const { settings: emotionSettings, updateEmotion } = useEmotionSettings();
   const { settings: ttsSettings, availableVoices, updateSettings: updateTTSSettings, speak } = useTTSSettings();
@@ -40,7 +45,7 @@ export default function SettingsScreen() {
     savePreference, 
     getPreference, 
   } = useAIPreferences();
-  const { resetTiles } = useLibrary();
+  const { tiles, updateTile, resetTiles } = useLibrary();
   const { resetLearning } = useAI();
 
   useEffect(() => {
@@ -139,12 +144,28 @@ export default function SettingsScreen() {
     console.log('Preference save result:', success);
   };
 
+  const handleEditTile = (tile: Tile) => {
+    console.log('Editing tile:', tile);
+    setEditingTile(tile);
+  };
+
+  const handleSaveTile = (updatedTile: Tile) => {
+    console.log('Saving tile:', updatedTile);
+    updateTile(updatedTile);
+    setEditingTile(null);
+  };
+
   const tabs: { id: TabType; label: string; icon: string }[] = [
     { id: 'emotions', label: 'Emotions', icon: 'happy-outline' },
     { id: 'voice', label: 'Voice', icon: 'volume-high-outline' },
     { id: 'ai', label: 'AI Preferences', icon: 'brain-outline' },
+    { id: 'defaultTiles', label: 'Default Tiles', icon: 'grid-outline' },
     { id: 'manage', label: 'Manage', icon: 'settings-outline' },
   ];
+
+  const filteredTiles = selectedCategory === 'all' 
+    ? tiles 
+    : tiles.filter(tile => tile.category === selectedCategory);
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -340,6 +361,96 @@ export default function SettingsScreen() {
           </ScrollView>
         );
 
+      case 'defaultTiles':
+        return (
+          <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false}>
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Edit Default Tiles</Text>
+              <Text style={styles.helperText}>
+                Tap any tile to customize its image using a pictogram or custom URL
+              </Text>
+
+              {/* Category Filter */}
+              <ScrollView 
+                horizontal 
+                showsHorizontalScrollIndicator={false} 
+                contentContainerStyle={styles.categoryFilterRow}
+              >
+                <TouchableOpacity
+                  style={[
+                    styles.categoryFilterChip,
+                    selectedCategory === 'all' && styles.categoryFilterChipActive
+                  ]}
+                  onPress={() => setSelectedCategory('all')}
+                  activeOpacity={0.8}
+                >
+                  <Icon name="apps-outline" size={18} color={selectedCategory === 'all' ? colors.primary : colors.textSecondary} />
+                  <Text style={[
+                    styles.categoryFilterText,
+                    selectedCategory === 'all' && styles.categoryFilterTextActive
+                  ]}>
+                    All
+                  </Text>
+                </TouchableOpacity>
+                {categories.filter(c => c.id !== 'all').map((cat) => (
+                  <TouchableOpacity
+                    key={cat.id}
+                    style={[
+                      styles.categoryFilterChip,
+                      selectedCategory === cat.id && styles.categoryFilterChipActive,
+                      selectedCategory === cat.id && { borderColor: cat.color }
+                    ]}
+                    onPress={() => setSelectedCategory(cat.id)}
+                    activeOpacity={0.8}
+                  >
+                    <Icon 
+                      name={cat.icon as any} 
+                      size={18} 
+                      color={selectedCategory === cat.id ? cat.color : colors.textSecondary} 
+                    />
+                    <Text style={[
+                      styles.categoryFilterText,
+                      selectedCategory === cat.id && { color: cat.color }
+                    ]}>
+                      {cat.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+
+              {/* Tiles Grid */}
+              <View style={styles.tilesGrid}>
+                {filteredTiles.map((tile) => (
+                  <TouchableOpacity
+                    key={tile.id}
+                    style={styles.tileCard}
+                    onPress={() => handleEditTile(tile)}
+                    activeOpacity={0.8}
+                  >
+                    <View style={[styles.tileCardContent, { backgroundColor: tile.color || '#F3F4F6' }]}>
+                      {(tile.imageUrl || tile.imageUri) ? (
+                        <Image
+                          source={{ uri: tile.imageUrl || tile.imageUri }}
+                          style={styles.tileImage}
+                          resizeMode="contain"
+                        />
+                      ) : (
+                        <Icon name="image-outline" size={32} color={colors.textSecondary} />
+                      )}
+                    </View>
+                    <Text style={styles.tileCardText} numberOfLines={2}>
+                      {tile.text}
+                    </Text>
+                    <View style={styles.editBadge}>
+                      <Icon name="create-outline" size={14} color={colors.primary} />
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          </ScrollView>
+        );
+
       case 'manage':
         return (
           <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false}>
@@ -426,6 +537,16 @@ export default function SettingsScreen() {
         <View style={styles.contentContainer}>
           {renderTabContent()}
         </View>
+
+        {/* Tile Editor Modal */}
+        {editingTile && (
+          <TileEditor
+            visible={!!editingTile}
+            tile={editingTile}
+            onSave={handleSaveTile}
+            onClose={() => setEditingTile(null)}
+          />
+        )}
       </View>
     </LandscapeGuard>
   );
@@ -766,5 +887,73 @@ const styles = StyleSheet.create({
     marginTop: 12,
     color: '#6B7280',
     fontSize: 14,
+  },
+  categoryFilterRow: {
+    gap: 8 as any,
+    paddingVertical: 8,
+    marginBottom: 16,
+  },
+  categoryFilterChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6 as any,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 12,
+    backgroundColor: '#F9FAFB',
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  categoryFilterChipActive: {
+    backgroundColor: '#EEF2FF',
+    borderColor: colors.primary,
+  },
+  categoryFilterText: {
+    fontSize: 13,
+    fontFamily: 'Montserrat_600SemiBold',
+    color: colors.textSecondary,
+  },
+  categoryFilterTextActive: {
+    color: colors.primary,
+  },
+  tilesGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12 as any,
+  },
+  tileCard: {
+    width: '18%',
+    marginBottom: 12,
+    position: 'relative',
+  },
+  tileCardContent: {
+    aspectRatio: 1,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 6,
+    borderWidth: 2,
+    borderColor: '#E5E7EB',
+  },
+  tileImage: {
+    width: '80%',
+    height: '80%',
+  },
+  tileCardText: {
+    fontSize: 12,
+    fontFamily: 'Montserrat_600SemiBold',
+    color: colors.text,
+    textAlign: 'center',
+    paddingHorizontal: 4,
+  },
+  editBadge: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    backgroundColor: '#EEF2FF',
+    borderRadius: 12,
+    padding: 6,
+    borderWidth: 1,
+    borderColor: colors.primary,
   },
 });
