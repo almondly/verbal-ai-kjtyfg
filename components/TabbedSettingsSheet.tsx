@@ -56,6 +56,7 @@ export default function TabbedSettingsSheet({
   const [phrase, setPhrase] = useState('');
   const [color, setColor] = useState('#FFFFFF');
   const [imageUri, setImageUri] = useState<string | undefined>(undefined);
+  const [imageUrl, setImageUrl] = useState<string>(''); // NEW: Custom image URL
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>(defaultCategoryId);
   
   // Custom emotions state
@@ -125,6 +126,7 @@ export default function TabbedSettingsSheet({
       });
       if (!result.canceled) {
         setImageUri(result.assets[0].uri);
+        setImageUrl(''); // Clear URL if picking from gallery
       }
     } catch (e) {
       console.log('pickImage error', e);
@@ -175,6 +177,7 @@ export default function TabbedSettingsSheet({
     setPhrase('');
     setColor('#FFFFFF');
     setImageUri(undefined);
+    setImageUrl('');
     onClose();
   };
 
@@ -185,6 +188,7 @@ export default function TabbedSettingsSheet({
       text: phrase.trim(),
       color,
       imageUri,
+      imageUrl: imageUrl.trim() || undefined,
       category: selectedCategory,
     };
     onAddTile && onAddTile(tile);
@@ -482,6 +486,23 @@ export default function TabbedSettingsSheet({
               </View>
 
               <Text style={styles.sectionTitle}>Image</Text>
+              <Text style={styles.helperText}>Add a custom image URL or pick from your gallery</Text>
+              
+              <TextInput
+                placeholder="https://example.com/image.png"
+                placeholderTextColor="#9CA3AF"
+                style={styles.input}
+                value={imageUrl}
+                onChangeText={(text) => {
+                  setImageUrl(text);
+                  if (text.trim()) {
+                    setImageUri(undefined); // Clear gallery image if URL is entered
+                  }
+                }}
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+
               <View style={styles.row}>
                 <TouchableOpacity 
                   style={[styles.action, { backgroundColor: '#EEF2FF' }]} 
@@ -490,8 +511,11 @@ export default function TabbedSettingsSheet({
                 >
                   <Text style={styles.actionText}>Pick from Gallery</Text>
                 </TouchableOpacity>
-                {imageUri ? (
-                  <Image source={{ uri: imageUri }} style={{ width: 56, height: 56, borderRadius: 12 }} />
+                {(imageUri || imageUrl) ? (
+                  <Image 
+                    source={{ uri: imageUri || imageUrl }} 
+                    style={{ width: 56, height: 56, borderRadius: 12 }} 
+                  />
                 ) : null}
               </View>
 

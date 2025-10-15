@@ -1,6 +1,6 @@
 
 import { memo, useRef, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated, useWindowDimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Animated, useWindowDimensions, Image } from 'react-native';
 import { Tile } from '../types';
 import { colors } from '../styles/commonStyles';
 import { categories } from '../data/categories';
@@ -23,6 +23,7 @@ const TileItem = memo(function TileItem({
 }: Props) {
   const scale = useRef(new Animated.Value(1)).current;
   const { width } = useWindowDimensions();
+  const [imageError, setImageError] = useState(false);
 
   const handlePressIn = () => {
     Animated.spring(scale, { 
@@ -301,6 +302,9 @@ const TileItem = memo(function TileItem({
   const iconSize = getResponsiveIconSize();
   const iconName = isAdd ? 'add-circle' : getIconName();
 
+  // Check if we should display a custom image
+  const hasCustomImage = !isAdd && (tile.imageUrl || tile.imageUri) && !imageError;
+
   return (
     <Animated.View
       style={[
@@ -323,7 +327,19 @@ const TileItem = memo(function TileItem({
         ]}
       >
         <View style={styles.iconWrap}>
-          <Icon name={iconName} size={iconSize} color={colors.textLight} />
+          {hasCustomImage ? (
+            <Image
+              source={{ uri: tile.imageUrl || tile.imageUri }}
+              style={styles.customImage}
+              resizeMode="contain"
+              onError={() => {
+                console.log('Failed to load custom image for tile:', tile.text);
+                setImageError(true);
+              }}
+            />
+          ) : (
+            <Icon name={iconName} size={iconSize} color={colors.textLight} />
+          )}
         </View>
         <View style={styles.textContainer}>
           <Text 
@@ -358,6 +374,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 8,
+  },
+  customImage: {
+    width: '100%',
+    height: '100%',
+    maxWidth: 80,
+    maxHeight: 80,
   },
   textContainer: {
     width: '100%',
