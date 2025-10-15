@@ -2,72 +2,53 @@
 import { useCallback, useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Platform, ScrollView } from 'react-native';
 import * as ScreenOrientation from 'expo-screen-orientation';
-import Icon from '../components/Icon';
 import { commonStyles, colors } from '../styles/commonStyles';
-import { useTTSSettings } from '../hooks/useTTSSettings';
-import { useAdvancedAI } from '../hooks/useAdvancedAI';
-import { useEmotionSettings } from '../hooks/useEmotionSettings';
-import LandscapeGuard from '../components/LandscapeGuard';
-import { useRouter } from 'expo-router';
-import EmotionFace from '../components/EmotionFace';
-import AdvancedSuggestionsRow from '../components/AdvancedSuggestionsRow';
 import CategoryBar from '../components/CategoryBar';
 import { categories } from '../data/categories';
+import EmotionFace from '../components/EmotionFace';
+import { useEmotionSettings } from '../hooks/useEmotionSettings';
+import LandscapeGuard from '../components/LandscapeGuard';
+import AdvancedSuggestionsRow from '../components/AdvancedSuggestionsRow';
+import { useAdvancedAI } from '../hooks/useAdvancedAI';
+import { useTTSSettings } from '../hooks/useTTSSettings';
+import Icon from '../components/Icon';
+import { useRouter } from 'expo-router';
 
 export default function KeyboardScreen() {
-  console.log('KeyboardScreen rendering...');
-  
-  const router = useRouter();
-  const { speak } = useTTSSettings();
-  const {
-    recordUserInput,
-    getAdvancedSuggestions,
-    getTimeBasedSuggestions,
-  } = useAdvancedAI();
-  const { settings } = useEmotionSettings();
-  
-  const [typedText, setTypedText] = useState('');
-  const [suggestions, setSuggestions] = useState<any[]>([]);
-  const [sentenceHistory, setSentenceHistory] = useState<string[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>('keyboard');
-
   useEffect(() => {
-    // Lock orientation on native platforms only
-    if (Platform.OS !== 'web') {
-      try {
-        ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
-        console.log('Keyboard screen orientation locked to landscape');
-      } catch (error) {
-        console.log('Failed to lock screen orientation in keyboard screen:', error);
+    (async () => {
+      if (Platform.OS !== 'web') {
+        await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
       }
-    }
-    
-    console.log('Keyboard screen mounted successfully');
+    })();
   }, []);
 
-  // Update suggestions when text changes
+  const [typedText, setTypedText] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const { getAdvancedSuggestions, getTimeBasedSuggestions, recordUserInput } = useAdvancedAI();
+  const { currentEmotion } = useEmotionSettings();
+  const { speak } = useTTSSettings();
+  const [advancedSuggestions, setAdvancedSuggestions] = useState<any[]>([]);
+
+  const router = useRouter();
+
   useEffect(() => {
-    const updateSuggestions = async () => {
-      if (typedText.trim().length > 0) {
-        const words = typedText.trim().split(/\s+/);
-        const availableWords: string[] = [];
-        const aiSuggestions = await getAdvancedSuggestions(words, availableWords, 10, undefined);
-        setSuggestions(aiSuggestions.slice(0, 10));
-      } else {
-        // Get temporal suggestions when no text is typed
-        const timeBasedSuggestions = await getTimeBasedSuggestions();
-        const temporalSuggestions = timeBasedSuggestions.slice(0, 10).map((phrase, index) => ({
-          text: phrase.split(' ')[0], // Get first word
+    (async () => {
+      if (!typedText.trim()) {
+        // Show initial suggestions when no text is typed
+        const timeBased = await getTimeBasedSuggestions();
+        const initialSuggestions = timeBased.slice(0, 10).map((phrase, index) => ({
+          text: phrase.split(' ')[0], // Get first word of common phrases
           confidence: Math.max(0.6, 0.8 - index * 0.05),
           type: 'temporal' as const,
-          context: 'Common starter'
+          context: 'Common starter word'
         }));
         
-        // Add common starter words
+        // Add some common starter words if we don't have enough
         const commonStarters = ['I', 'you', 'want', 'need', 'can', 'what', 'where', 'help', 'please', 'like'];
         commonStarters.forEach((word, index) => {
-          if (!temporalSuggestions.some(s => s.text.toLowerCase() === word.toLowerCase())) {
-            temporalSuggestions.push({
+          if (!initialSuggestions.some(s => s.text.toLowerCase() === word.toLowerCase())) {
+            initialSuggestions.push({
               text: word,
               confidence: Math.max(0.5, 0.7 - index * 0.05),
               type: 'contextual' as const,
@@ -76,235 +57,161 @@ export default function KeyboardScreen() {
           }
         });
         
-        setSuggestions(temporalSuggestions.slice(0, 10));
+        setAdvancedSuggestions(initialSuggestions.slice(0, 10));
+        return;
       }
-    };
 
-    updateSuggestions();
-  }, [typedText, getAdvancedSuggestions, getTimeBasedSuggestions]);
+      const words = typedText.trim().split(/\s+/);
+      const [advanced, timeBased] = await Promise.all([
+        getAdvancedSuggestions(words, [], 10, selectedCategory !== 'all' ? selectedCategory : undefined),
+        getTimeBasedSuggestions(),
+      ]);
 
-  const normalizeForTTS = (text: string) => {
-    const lowered = text.toLowerCase();
-    const cleaned = lowered.replace(/\s+/g, ' ').trim();
-    return cleaned;
-  };
+      const combined = [...advanced, ...timeBased.slice(0, 3).map((phrase, index) => ({
+        text: phrase,
+        confidence: Math.max(0.5, 0.7 - index * 0.05),
+        type: 'temporal' as const,
+        context: 'Common phrase'
+      }))]
+        .sort((a, b) => b.confidence - a.confidence)
+        .slice(0, 10);
+
+      setAdvancedSuggestions(combined);
+    })();
+  }, [typedText, getAdvancedSuggestions, getTimeBasedSuggestions, selectedCategory]);
 
   const handleSpeak = useCallback(async () => {
-    if (!typedText.trim()) {
-      console.log('No text to speak');
-      return;
-    }
+    if (!typedText.trim()) return;
     
-    const ttsText = normalizeForTTS(typedText);
-    console.log('Speaking typed sentence:', ttsText);
+    const normalized = normalizeForTTS(typedText);
+    await speak(normalized);
     
-    await speak(ttsText);
-    await recordUserInput(typedText, settings.selectedEmotion);
-    
-    // Add to history
-    setSentenceHistory(prev => [typedText, ...prev.slice(0, 9)]);
-    
-    // Clear the text input after speaking
-    setTypedText('');
-  }, [typedText, speak, recordUserInput, settings.selectedEmotion]);
+    // Record the sentence for AI learning
+    await recordUserInput(typedText, selectedCategory !== 'all' ? selectedCategory : undefined);
+  }, [typedText, speak, recordUserInput, selectedCategory]);
 
-  const handleClear = useCallback(() => {
-    console.log('Clearing typed text');
-    setTypedText('');
-  }, []);
+  const normalizeForTTS = (text: string): string => {
+    return text
+      .replace(/\bi\b/gi, 'I')
+      .replace(/\bim\b/gi, "I'm")
+      .replace(/\bive\b/gi, "I've")
+      .replace(/\bill\b/gi, "I'll")
+      .replace(/\bid\b/gi, "I'd")
+      .replace(/\bu\b/gi, 'you')
+      .replace(/\bur\b/gi, 'your')
+      .replace(/\br\b/gi, 'are')
+      .replace(/\bu r\b/gi, 'you are')
+      .trim();
+  };
 
-  const handleBackspace = useCallback(() => {
-    console.log('Backspace pressed');
-    setTypedText(prev => prev.slice(0, -1));
-  }, []);
-
-  const handleSuggestionPress = useCallback((suggestionText: string) => {
-    console.log('Suggestion pressed:', suggestionText);
-    
-    // Check if it's a full sentence suggestion
-    const isFullSentence = suggestionText.split(' ').length > 2;
-    
-    if (isFullSentence) {
-      // For full sentences, check if current text is a prefix
-      const currentTextLower = typedText.trim().toLowerCase();
-      const suggestionLower = suggestionText.toLowerCase();
-      
-      if (suggestionLower.startsWith(currentTextLower) && currentTextLower.length > 0) {
-        // Remove the matching prefix and add the rest
-        const remainingText = suggestionText.substring(currentTextLower.length).trim();
-        setTypedText(prev => {
-          const trimmed = prev.trim();
-          return trimmed ? `${trimmed} ${remainingText}` : remainingText;
-        });
-      } else {
-        // Replace entire text with the suggestion
-        setTypedText(suggestionText);
-      }
-    } else {
-      // For single words, append to current text
-      setTypedText(prev => {
-        const trimmed = prev.trim();
-        return trimmed ? `${trimmed} ${suggestionText}` : suggestionText;
-      });
-    }
-  }, [typedText]);
-
-  const handleHistoryPress = useCallback((sentence: string) => {
-    console.log('History item pressed:', sentence);
-    setTypedText(sentence);
-  }, []);
-
-  const handleBackToMenu = () => {
-    console.log('Going back to main menu');
+  const handleBackToMenu = useCallback(() => {
     router.push('/main-menu');
-  };
+  }, [router]);
 
-  const handleOpenSettings = () => {
-    console.log('Opening settings');
+  const handleOpenSettings = useCallback(() => {
     router.push('/settings');
-  };
-
-  const handleCategorySelect = useCallback((categoryId: string) => {
-    console.log('Category selected:', categoryId);
-    if (categoryId === 'keyboard') {
-      setSelectedCategory('keyboard');
-    } else {
-      console.log('Navigating to communication screen');
-      router.push('/communication');
-    }
   }, [router]);
 
   return (
     <LandscapeGuard>
-      <View style={[commonStyles.container, { paddingHorizontal: 8 }]}>
-        {/* Top Bar - Matching communication screen */}
+      <View style={[commonStyles.container, styles.container]}>
+        {/* Top Bar with Back, Emotion, and Settings */}
         <View style={styles.topBar}>
-          <TouchableOpacity onPress={handleBackToMenu} style={styles.iconBtn} activeOpacity={0.8}>
-            <Icon name="home-outline" size={32} color={colors.text} />
+          <TouchableOpacity 
+            style={styles.backButton} 
+            onPress={handleBackToMenu}
+            activeOpacity={0.8}
+          >
+            <Icon name="arrow-back-outline" size={24} color={colors.text} />
+            <Text style={styles.backButtonText}>Menu</Text>
           </TouchableOpacity>
-          
-          <Text style={styles.appTitle}>COMpanion</Text>
-          
-          <View style={styles.rightSection}>
-            <View style={styles.emotionContainer}>
-              <EmotionFace emotion={settings.selectedEmotion} size={60} />
-            </View>
-            <TouchableOpacity onPress={handleOpenSettings} style={styles.iconBtn} activeOpacity={0.8}>
-              <Icon name="settings-outline" size={32} color={colors.text} />
+
+          <View style={styles.emotionContainer}>
+            <EmotionFace emotion={currentEmotion} size={50} />
+          </View>
+
+          <TouchableOpacity 
+            style={styles.settingsButton} 
+            onPress={handleOpenSettings}
+            activeOpacity={0.8}
+          >
+            <Icon name="settings-outline" size={28} color={colors.text} />
+          </TouchableOpacity>
+        </View>
+
+        {/* Text Input Area */}
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.textInput}
+            value={typedText}
+            onChangeText={setTypedText}
+            placeholder="Type your message here..."
+            placeholderTextColor={colors.textSecondary}
+            multiline
+            autoFocus
+          />
+          <View style={styles.inputActions}>
+            <TouchableOpacity 
+              style={styles.clearButton} 
+              onPress={() => setTypedText('')}
+              activeOpacity={0.8}
+            >
+              <Icon name="close-circle-outline" size={24} color={colors.textSecondary} />
+              <Text style={styles.clearButtonText}>Clear</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.speakButton, !typedText.trim() && styles.speakButtonDisabled]} 
+              onPress={handleSpeak}
+              disabled={!typedText.trim()}
+              activeOpacity={0.8}
+            >
+              <Icon name="volume-high-outline" size={28} color={colors.white} />
+              <Text style={styles.speakButtonText}>Speak</Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Phrase Bar Area - Shows current typed text */}
-        <View style={styles.phraseBarContainer}>
-          <View style={styles.phraseBar}>
-            <ScrollView 
-              horizontal 
-              style={styles.phraseScroll}
-              showsHorizontalScrollIndicator={false}
-            >
-              <Text style={styles.phraseText}>
-                {typedText || 'Type your sentence here...'}
-              </Text>
-            </ScrollView>
-            <View style={styles.phraseActions}>
-              <TouchableOpacity 
-                onPress={handleBackspace} 
-                style={[styles.phraseBtn, styles.backspaceBtn]}
-                activeOpacity={0.8}
-                disabled={!typedText}
-              >
-                <Icon name="backspace-outline" size={24} color={typedText ? colors.text : colors.textSecondary} />
-              </TouchableOpacity>
-              <TouchableOpacity 
-                onPress={handleClear} 
-                style={styles.phraseBtn}
-                activeOpacity={0.8}
-              >
-                <Icon name="close-outline" size={24} color={colors.danger} />
-              </TouchableOpacity>
-              <TouchableOpacity 
-                onPress={handleSpeak} 
-                style={[styles.phraseBtn, styles.speakBtn]}
-                activeOpacity={0.8}
-                disabled={!typedText.trim()}
-              >
-                <Icon name="volume-high-outline" size={28} color="#FFFFFF" />
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-
-        {/* Suggestions Row - Matching communication screen */}
+        {/* AI Suggestions */}
         <View style={styles.suggestionsContainer}>
-          {suggestions.length > 0 && (
+          {advancedSuggestions.length > 0 ? (
             <AdvancedSuggestionsRow
-              suggestions={suggestions}
-              onPressSuggestion={handleSuggestionPress}
-              showDetails={false}
+              suggestions={advancedSuggestions}
+              onPressSuggestion={(text) => {
+                setTypedText(prev => {
+                  const trimmed = prev.trim();
+                  return trimmed ? `${trimmed} ${text}` : text;
+                });
+              }}
+              onRemoveWord={(word) => {
+                // Remove the word from the typed text when tense is changed
+                setTypedText(prev => {
+                  const words = prev.trim().split(/\s+/);
+                  const index = words.findIndex(w => w.toLowerCase() === word.toLowerCase());
+                  if (index !== -1) {
+                    words.splice(index, 1);
+                    return words.join(' ');
+                  }
+                  return prev;
+                });
+              }}
+              style={styles.suggestions}
             />
+          ) : (
+            <View style={styles.emptySuggestionsContainer}>
+              <Text style={styles.emptySuggestionsText}>
+                Start typing to see AI predictions
+              </Text>
+            </View>
           )}
         </View>
 
-        {/* Category Bar - Same as communication screen */}
-        <View style={styles.categoryContainer}>
+        {/* Category Bar */}
+        <View style={styles.categoryBarContainer}>
           <CategoryBar
             categories={categories}
             selectedId={selectedCategory}
-            onSelect={handleCategorySelect}
+            onSelect={setSelectedCategory}
           />
-        </View>
-
-        {/* Main Content Area - Keyboard and History in tile-like format */}
-        <View style={styles.gridContainer}>
-          <ScrollView
-            style={styles.gridScrollView}
-            contentContainerStyle={styles.gridScrollContent}
-            showsVerticalScrollIndicator={true}
-          >
-            {/* Text Input Tile */}
-            <View style={styles.inputTile}>
-              <Text style={styles.inputLabel}>Type Your Message</Text>
-              <TextInput
-                style={styles.textInput}
-                placeholder="Start typing here..."
-                placeholderTextColor={colors.textSecondary}
-                value={typedText}
-                onChangeText={setTypedText}
-                multiline={true}
-                autoFocus={true}
-                autoCorrect={true}
-                autoCapitalize="sentences"
-                editable={true}
-                selectTextOnFocus={false}
-                keyboardType="default"
-                returnKeyType="done"
-                blurOnSubmit={false}
-              />
-            </View>
-
-            {/* History Section - Tile format */}
-            {sentenceHistory.length > 0 && (
-              <View style={styles.historySection}>
-                <Text style={styles.sectionTitle}>Recent Sentences</Text>
-                <View style={styles.historyGrid}>
-                  {sentenceHistory.map((sentence, index) => (
-                    <TouchableOpacity
-                      key={index}
-                      style={styles.historyTile}
-                      onPress={() => handleHistoryPress(sentence)}
-                      activeOpacity={0.8}
-                    >
-                      <Icon name="time-outline" size={24} color={colors.primary} />
-                      <Text style={styles.historyTileText} numberOfLines={3}>
-                        {sentence}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-            )}
-          </ScrollView>
         </View>
       </View>
     </LandscapeGuard>
@@ -312,168 +219,136 @@ export default function KeyboardScreen() {
 }
 
 const styles = StyleSheet.create({
-  appTitle: {
-    fontSize: 22,
-    fontFamily: 'Montserrat_700Bold',
-    color: colors.text,
-    flex: 1,
-    textAlign: 'center',
+  container: {
+    backgroundColor: colors.background,
   },
   topBar: {
-    width: '100%',
-    paddingTop: 1,
-    paddingBottom: 1,
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 2,
-    zIndex: 10,
-  },
-  iconBtn: {
-    backgroundColor: colors.backgroundAlt,
-    padding: 16,
-    borderRadius: 16,
-    boxShadow: '0px 6px 14px rgba(0,0,0,0.08)',
-    minWidth: 64,
     alignItems: 'center',
-    justifyContent: 'center',
-  },
-  rightSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12 as any,
-  },
-  emotionContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  phraseBarContainer: {
-    marginBottom: 2,
-    zIndex: 9,
-  },
-  phraseBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.backgroundAlt,
-    borderRadius: 16,
     paddingHorizontal: 16,
-    paddingVertical: 12,
-    minHeight: 70,
-    boxShadow: '0px 6px 14px rgba(0,0,0,0.08)',
+    paddingVertical: 10,
+    backgroundColor: colors.backgroundAlt,
+    borderBottomWidth: 2,
+    borderBottomColor: colors.borderLight,
   },
-  phraseScroll: {
-    flex: 1,
-    marginRight: 12,
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8 as any,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    backgroundColor: colors.background,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: colors.borderLight,
   },
-  phraseText: {
-    fontSize: 20,
+  backButtonText: {
+    fontSize: 15,
     fontFamily: 'Montserrat_600SemiBold',
     color: colors.text,
-    lineHeight: 28,
   },
-  phraseActions: {
-    flexDirection: 'row',
-    gap: 8 as any,
+  emotionContainer: {
+    position: 'absolute',
+    left: '50%',
+    transform: [{ translateX: -25 }],
   },
-  phraseBtn: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
+  settingsButton: {
+    padding: 8,
     backgroundColor: colors.background,
-    alignItems: 'center',
-    justifyContent: 'center',
-    boxShadow: '0px 4px 10px rgba(0,0,0,0.08)',
-  },
-  backspaceBtn: {
-    backgroundColor: colors.backgroundAlt,
+    borderRadius: 10,
     borderWidth: 2,
-    borderColor: colors.primary + '40',
+    borderColor: colors.borderLight,
   },
-  speakBtn: {
-    backgroundColor: colors.primary,
-  },
-  suggestionsContainer: {
-    marginBottom: 2,
-    minHeight: 40,
-    zIndex: 8,
-  },
-  categoryContainer: {
-    marginBottom: 4,
-    height: 70,
-    zIndex: 5,
-    backgroundColor: colors.background,
-    position: 'relative',
-  },
-  gridContainer: {
-    flex: 1,
-    marginTop: 0,
-    zIndex: 1,
-  },
-  gridScrollView: {
-    flex: 1,
-  },
-  gridScrollContent: {
-    paddingTop: 8,
-    paddingBottom: 16,
-    paddingHorizontal: 8,
-  },
-  inputTile: {
+  inputContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     backgroundColor: colors.backgroundAlt,
-    borderRadius: 20,
-    padding: 24,
-    marginBottom: 16,
-    boxShadow: '0px 6px 20px rgba(0,0,0,0.08)',
+    borderBottomWidth: 2,
+    borderBottomColor: colors.borderLight,
+  },
+  textInput: {
+    backgroundColor: colors.background,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: colors.borderLight,
+    padding: 16,
+    fontSize: 18,
+    fontFamily: 'Montserrat_500Medium',
+    color: colors.text,
+    minHeight: 100,
+    maxHeight: 150,
+    textAlignVertical: 'top',
+  },
+  inputActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 12,
+  },
+  clearButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6 as any,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: colors.background,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: colors.borderLight,
+  },
+  clearButtonText: {
+    fontSize: 15,
+    fontFamily: 'Montserrat_600SemiBold',
+    color: colors.textSecondary,
+  },
+  speakButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8 as any,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    backgroundColor: colors.primary,
+    borderRadius: 12,
     borderWidth: 2,
     borderColor: colors.primary,
   },
-  inputLabel: {
-    fontSize: 18,
-    fontFamily: 'Montserrat_700Bold',
-    color: colors.primary,
-    marginBottom: 12,
+  speakButtonDisabled: {
+    backgroundColor: colors.textSecondary,
+    borderColor: colors.textSecondary,
+    opacity: 0.5,
   },
-  textInput: {
-    fontSize: 20,
-    fontFamily: 'Montserrat_600SemiBold',
-    color: colors.text,
-    minHeight: 120,
-    maxHeight: 200,
-    textAlignVertical: 'top',
-    outlineStyle: 'none',
-  },
-  historySection: {
-    marginTop: 8,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontFamily: 'Montserrat_700Bold',
-    color: colors.text,
-    marginBottom: 12,
-    paddingHorizontal: 4,
-  },
-  historyGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12 as any,
-  },
-  historyTile: {
-    backgroundColor: colors.backgroundAlt,
-    borderRadius: 16,
-    padding: 16,
-    minWidth: 180,
-    maxWidth: 250,
-    minHeight: 120,
-    boxShadow: '0px 6px 14px rgba(0,0,0,0.08)',
-    borderWidth: 2,
-    borderColor: colors.primary + '40',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8 as any,
-  },
-  historyTileText: {
+  speakButtonText: {
     fontSize: 16,
-    fontFamily: 'Montserrat_600SemiBold',
-    color: colors.text,
+    fontFamily: 'Montserrat_700Bold',
+    color: colors.white,
+  },
+  suggestionsContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: colors.backgroundAlt,
+    borderBottomWidth: 2,
+    borderBottomColor: colors.borderLight,
+    minHeight: 100,
+    maxHeight: 120,
+  },
+  suggestions: {
+    flex: 1,
+  },
+  emptySuggestionsContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+  emptySuggestionsText: {
+    fontSize: 13,
+    fontFamily: 'Montserrat_500Medium',
+    color: colors.textSecondary,
     textAlign: 'center',
+  },
+  categoryBarContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
 });
