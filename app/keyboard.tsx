@@ -51,7 +51,7 @@ export default function KeyboardScreen() {
       if (typedText.trim().length > 0) {
         const words = typedText.trim().split(/\s+/);
         const availableWords: string[] = [];
-        const aiSuggestions = await getAdvancedSuggestions(words, availableWords);
+        const aiSuggestions = await getAdvancedSuggestions(words, availableWords, 10, undefined);
         setSuggestions(aiSuggestions.slice(0, 10));
       } else {
         // Get temporal suggestions when no text is typed

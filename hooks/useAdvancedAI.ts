@@ -1136,8 +1136,6 @@ export function useAdvancedAI() {
   };
 }
 
-Now let me update the sentenceCompletion utility to add the category-based recommendation function:
-
 <write file="utils/sentenceCompletion.ts">
 /**
  * Sentence Completion Engine
