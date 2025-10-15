@@ -1,6 +1,7 @@
 
 import { Tile } from '../types';
 
+// 🎨 Category color palette
 const categoryColor: Record<string, string> = {
   core: '#3498DB',
   people: '#9B59B6',
@@ -22,16 +23,83 @@ const categoryColor: Record<string, string> = {
   toys: '#F8B4D9',
 };
 
-// Helper to build tiles quickly - NO IMAGES, just pictogram icons!
+// 🧩 Add an `image` field to Tile definition (make sure ../types.ts has this)
+export interface Tile {
+  id: string;
+  text: string;
+  category: string;
+  color: string;
+  image?: string;
+}
+
+// ========================================================================
+// 🖼️ PICTOGRAM IMAGE URLs - EDIT THESE TO CHANGE TILE IMAGES
+// ========================================================================
+// Simply replace any URL below with your own image link.
+// The word on the left (e.g., 'i', 'you', 'want') matches the tile text.
+// The URL on the right is the image that will be displayed for that tile.
+// ========================================================================
+
+const pictograms: Record<string, string> = {
+  // Core vocabulary
+  i: 'https://static.arasaac.org/pictograms/3913/I.png',
+  you: 'https://static.arasaac.org/pictograms/1262/you.png',
+  he: 'https://static.arasaac.org/pictograms/1885/he.png',
+  she: 'https://static.arasaac.org/pictograms/5097/she.png',
+  we: 'https://static.arasaac.org/pictograms/9097/we.png',
+  they: 'https://static.arasaac.org/pictograms/2544/they.png',
+  it: 'https://static.arasaac.org/pictograms/13054/it.png',
+  me: 'https://static.arasaac.org/pictograms/8224/me.png',
+  my: 'https://static.arasaac.org/pictograms/8231/my.png',
+  mine: 'https://static.arasaac.org/pictograms/4368/mine.png',
+  your: 'https://static.arasaac.org/pictograms/1262/you.png',
+  want: 'https://static.arasaac.org/pictograms/2341/want.png',
+  need: 'https://static.arasaac.org/pictograms/9005/need.png',
+  like: 'https://static.arasaac.org/pictograms/1230/like.png',
+  "don't": 'https://static.arasaac.org/pictograms/4763/dont.png',
+  help: 'https://static.arasaac.org/pictograms/1530/help.png',
+  more: 'https://static.arasaac.org/pictograms/2295/more.png',
+  again: 'https://static.arasaac.org/pictograms/1744/again.png',
+  different: 'https://static.arasaac.org/pictograms/4021/different.png',
+  same: 'https://static.arasaac.org/pictograms/2092/same.png',
+  this: 'https://static.arasaac.org/pictograms/1596/this.png',
+  that: 'https://static.arasaac.org/pictograms/2752/that.png',
+  here: 'https://static.arasaac.org/pictograms/1043/here.png',
+  there: 'https://static.arasaac.org/pictograms/1044/there.png',
+  go: 'https://static.arasaac.org/pictograms/2922/go.png',
+  stop: 'https://static.arasaac.org/pictograms/2707/stop.png',
+  come: 'https://static.arasaac.org/pictograms/2054/come.png',
+  look: 'https://static.arasaac.org/pictograms/2690/look.png',
+  put: 'https://static.arasaac.org/pictograms/2921/put.png',
+  make: 'https://static.arasaac.org/pictograms/1527/make.png',
+  turn: 'https://static.arasaac.org/pictograms/2735/turn.png',
+  open: 'https://static.arasaac.org/pictograms/1977/open.png',
+  close: 'https://static.arasaac.org/pictograms/1976/close.png',
+  'all done': 'https://static.arasaac.org/pictograms/5426/all-done.png',
+  finished: 'https://static.arasaac.org/pictograms/5426/all-done.png',
+  please: 'https://static.arasaac.org/pictograms/1993/please.png',
+  'thank you': 'https://static.arasaac.org/pictograms/1735/thank-you.png',
+  yes: 'https://static.arasaac.org/pictograms/3572/yes.png',
+  no: 'https://static.arasaac.org/pictograms/3573/no.png',
+  because: 'https://static.arasaac.org/pictograms/3254/because.png',
+  and: 'https://static.arasaac.org/pictograms/1267/and.png',
+  or: 'https://static.arasaac.org/pictograms/1302/or.png',
+  with: 'https://static.arasaac.org/pictograms/1729/with.png',
+  without: 'https://static.arasaac.org/pictograms/1730/without.png',
+};
+
+// ⚙️ Helper to build tiles (auto-fills image if available)
 const t = (category: string, text: string): Tile => ({
   id: `${category}-${text.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
   text,
   category,
   color: categoryColor[category] || '#3498DB',
+  image: pictograms[text.toLowerCase()],
 });
 
+// 🧱 Default core vocabulary
 export const defaultTiles: Tile[] = [
-  // Core - Essential communication words
+  // Core
   t('core', 'I'),
   t('core', 'you'),
   t('core', 'he'),
