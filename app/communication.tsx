@@ -164,8 +164,8 @@ export default function CommunicationScreen() {
           <View style={styles.leftPanel}>
             <CategoryBar
               categories={categories}
-              selectedCategory={selectedCategory}
-              onSelectCategory={setSelectedCategory}
+              selectedId={selectedCategory}
+              onSelect={setSelectedCategory}
             />
             <CommunicationGrid
               tiles={filteredTiles}
@@ -186,30 +186,40 @@ export default function CommunicationScreen() {
               onSpeak={handleSpeak}
             />
             
-            {advancedSuggestions.length > 0 && (
-              <AdvancedSuggestionsRow
-                suggestions={advancedSuggestions}
-                onPressSuggestion={(text) => {
-                  const tile: Tile = {
-                    id: `suggestion-${Date.now()}`,
-                    text,
-                    color: colors.primary,
-                  };
-                  handleTilePress(tile);
-                }}
-                onRemoveWord={(word) => {
-                  // Remove the word from the sentence when tense is changed
-                  setSentence(prev => {
-                    const index = prev.findIndex(t => t.text.toLowerCase() === word.toLowerCase());
-                    if (index !== -1) {
-                      return prev.filter((_, i) => i !== index);
-                    }
-                    return prev;
-                  });
-                }}
-                style={styles.suggestions}
-              />
-            )}
+            <View style={styles.suggestionsContainer}>
+              <Text style={styles.suggestionsTitle}>AI Recommendations</Text>
+              {advancedSuggestions.length > 0 ? (
+                <AdvancedSuggestionsRow
+                  suggestions={advancedSuggestions}
+                  onPressSuggestion={(text) => {
+                    const tile: Tile = {
+                      id: `suggestion-${Date.now()}`,
+                      text,
+                      color: colors.primary,
+                    };
+                    handleTilePress(tile);
+                  }}
+                  onRemoveWord={(word) => {
+                    // Remove the word from the sentence when tense is changed
+                    setSentence(prev => {
+                      const index = prev.findIndex(t => t.text.toLowerCase() === word.toLowerCase());
+                      if (index !== -1) {
+                        return prev.filter((_, i) => i !== index);
+                      }
+                      return prev;
+                    });
+                  }}
+                  style={styles.suggestions}
+                />
+              ) : (
+                <View style={styles.emptyAIContainer}>
+                  <Icon name="bulb-outline" size={32} color={colors.textSecondary} />
+                  <Text style={styles.emptyAIText}>
+                    Start building a sentence to see AI suggestions
+                  </Text>
+                </View>
+              )}
+            </View>
           </View>
         </View>
 
@@ -296,7 +306,37 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: 12 as any,
   },
+  suggestionsContainer: {
+    flex: 1,
+    backgroundColor: colors.backgroundAlt,
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 2,
+    borderColor: colors.borderLight,
+    boxShadow: '0px 2px 6px rgba(0,0,0,0.1)',
+  },
+  suggestionsTitle: {
+    fontSize: 14,
+    fontFamily: 'Montserrat_700Bold',
+    color: colors.text,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
   suggestions: {
     flex: 1,
+  },
+  emptyAIContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 12 as any,
+    paddingVertical: 20,
+  },
+  emptyAIText: {
+    fontSize: 12,
+    fontFamily: 'Montserrat_500Medium',
+    color: colors.textSecondary,
+    textAlign: 'center',
+    paddingHorizontal: 20,
   },
 });

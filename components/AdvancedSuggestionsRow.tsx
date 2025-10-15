@@ -49,13 +49,7 @@ export default function AdvancedSuggestionsRow({
   const [selectedWord, setSelectedWord] = useState<string | null>(null);
 
   if (suggestions.length === 0) {
-    return (
-      <View style={[styles.emptyContainer, style]}>
-        <Text style={styles.emptyText}>
-          AI suggestions will appear as you build sentences
-        </Text>
-      </View>
-    );
+    return null;
   }
 
   const handleTenseSelect = (newWord: string, tense: string) => {
@@ -77,9 +71,9 @@ export default function AdvancedSuggestionsRow({
       )}
       
       <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.row}
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={true}
         keyboardShouldPersistTaps="handled"
       >
         {suggestions.slice(0, 10).map((suggestion, index) => {
@@ -146,33 +140,33 @@ export default function AdvancedSuggestionsRow({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.backgroundAlt,
-    borderRadius: 12,
+    flex: 1,
+    backgroundColor: colors.surface,
+    borderRadius: 8,
     paddingVertical: 8,
     paddingHorizontal: 8,
-    boxShadow: '0px 2px 6px rgba(0,0,0,0.06)',
   },
   tenseSwitcher: {
     marginBottom: 8,
   },
-  row: {
-    alignItems: 'center',
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
     gap: 8 as any,
     paddingHorizontal: 4,
+    paddingVertical: 4,
   },
   suggestion: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.background,
     borderRadius: 10,
     paddingHorizontal: 12,
-    paddingVertical: 8,
-    minWidth: 100,
-    maxWidth: 140,
+    paddingVertical: 10,
     borderLeftWidth: 3,
     boxShadow: '0px 2px 4px rgba(0,0,0,0.08)',
+    marginBottom: 4,
   },
   fullSentenceSuggestion: {
-    minWidth: 180,
-    maxWidth: 220,
     backgroundColor: '#EEF2FF',
     borderLeftColor: colors.primary,
     borderLeftWidth: 4,
@@ -237,20 +231,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 8,
     fontStyle: 'italic',
-  },
-  emptyContainer: {
-    backgroundColor: colors.backgroundAlt,
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    boxShadow: '0px 2px 6px rgba(0,0,0,0.06)',
-  },
-  emptyText: {
-    color: colors.textSecondary,
-    fontFamily: 'Montserrat_400Regular',
-    fontSize: 12,
-    textAlign: 'center',
   },
 });

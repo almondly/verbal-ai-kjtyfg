@@ -1,5 +1,5 @@
 
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Tile } from '../types';
 import { colors } from '../styles/commonStyles';
 import Icon from './Icon';
@@ -9,50 +9,61 @@ interface Props {
   onSpeak: () => void;
   onClear: () => void;
   onBackspace?: () => void;
+  onRemove?: (index: number) => void;
 }
 
-export default function PhraseBar({ sentence, onSpeak, onClear, onBackspace }: Props) {
+export default function PhraseBar({ sentence, onSpeak, onClear, onBackspace, onRemove }: Props) {
   const text = sentence.map(s => s.text).join(' ');
+  
   return (
-    <View style={styles.bar}>
-      <View style={styles.textContainer}>
-        <Text style={styles.text}>{text || 'Tap tiles to build a sentence'}</Text>
-      </View>
-      <View style={styles.actions}>
-        {onBackspace && (
+    <View style={styles.container}>
+      <View style={styles.bar}>
+        <ScrollView 
+          style={styles.textScrollContainer}
+          contentContainerStyle={styles.textContainer}
+          showsVerticalScrollIndicator={false}
+        >
+          <Text style={styles.text}>{text || 'Tap tiles to build a sentence'}</Text>
+        </ScrollView>
+        <View style={styles.actions}>
+          {onBackspace && (
+            <TouchableOpacity 
+              style={[styles.actionBtn, styles.backspaceBtn, { opacity: sentence.length > 0 ? 1 : 0.4 }]} 
+              onPress={onBackspace} 
+              activeOpacity={0.85}
+              disabled={sentence.length === 0}
+            >
+              <Icon name="backspace-outline" size={26} color={colors.text} />
+            </TouchableOpacity>
+          )}
           <TouchableOpacity 
-            style={[styles.actionBtn, styles.backspaceBtn, { opacity: sentence.length > 0 ? 1 : 0.4 }]} 
-            onPress={onBackspace} 
+            style={[styles.actionBtn, styles.speakBtn]} 
+            onPress={onSpeak} 
             activeOpacity={0.85}
-            disabled={sentence.length === 0}
           >
-            <Icon name="backspace-outline" size={26} color={colors.text} />
+            <Icon name="volume-high-outline" size={30} color="#FFFFFF" />
           </TouchableOpacity>
-        )}
-        <TouchableOpacity 
-          style={[styles.actionBtn, styles.speakBtn]} 
-          onPress={onSpeak} 
-          activeOpacity={0.85}
-        >
-          <Icon name="volume-high-outline" size={30} color="#FFFFFF" />
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.actionBtn, styles.clearBtn]} 
-          onPress={onClear} 
-          activeOpacity={0.85}
-        >
-          <Icon name="close-outline" size={30} color="#FFFFFF" />
-        </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.actionBtn, styles.clearBtn]} 
+            onPress={onClear} 
+            activeOpacity={0.85}
+          >
+            <Icon name="close-outline" size={30} color="#FFFFFF" />
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    width: '100%',
+  },
   bar: {
     width: '100%',
     backgroundColor: colors.backgroundAlt,
-    borderRadius: 10,
+    borderRadius: 12,
     paddingVertical: 14,
     paddingHorizontal: 16,
     boxShadow: '0px 2px 6px rgba(0,0,0,0.15)',
@@ -60,12 +71,14 @@ const styles = StyleSheet.create({
     borderColor: colors.borderLight,
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
-    minHeight: 64,
+    minHeight: 80,
+    maxHeight: 120,
   },
-  textContainer: {
+  textScrollContainer: {
     flex: 1,
     paddingRight: 12,
+  },
+  textContainer: {
     justifyContent: 'center',
     minHeight: 48,
   },
