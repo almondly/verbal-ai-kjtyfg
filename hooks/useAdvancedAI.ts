@@ -1135,8 +1135,6 @@ export function useAdvancedAI() {
     userPatterns
   };
 }
-
-<write file="utils/sentenceCompletion.ts">
 /**
  * Sentence Completion Engine
  * Provides intelligent sentence completion based on:
