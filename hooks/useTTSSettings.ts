@@ -173,16 +173,18 @@ export function useTTSSettings() {
     
     console.log('Finding best voice for type:', voiceType);
     
-    // Platform-specific voice selection
+    // Platform-specific voice selection with improved male and neutral voices
     if (Platform.OS === 'ios') {
       // iOS voice identifiers
       if (voiceType === 'male') {
-        // Look for male voices like Alex, Daniel, etc.
+        // Look for deeper male voices like Alex, Daniel, Fred
         const maleVoice = systemVoices.find(v => 
           v.identifier.includes('Alex') || 
           v.identifier.includes('Daniel') ||
+          v.identifier.includes('Fred') ||
           v.name.toLowerCase().includes('alex') ||
-          v.name.toLowerCase().includes('daniel')
+          v.name.toLowerCase().includes('daniel') ||
+          v.name.toLowerCase().includes('fred')
         );
         if (maleVoice) {
           console.log('Found male voice:', maleVoice.identifier);
@@ -202,13 +204,27 @@ export function useTTSSettings() {
           console.log('Found female voice:', femaleVoice.identifier);
           return femaleVoice.identifier;
         }
+      } else if (voiceType === 'neutral') {
+        // Look for neutral voices - prefer Siri or default system voice
+        const neutralVoice = systemVoices.find(v => 
+          v.identifier.includes('Siri') ||
+          v.name.toLowerCase().includes('siri') ||
+          v.identifier.includes('Default')
+        );
+        if (neutralVoice) {
+          console.log('Found neutral voice:', neutralVoice.identifier);
+          return neutralVoice.identifier;
+        }
       }
     } else if (Platform.OS === 'android') {
       // Android voice identifiers
       if (voiceType === 'male') {
+        // Look for male voices with lower pitch
         const maleVoice = systemVoices.find(v => 
           v.language === 'en-US' && 
-          (v.name.toLowerCase().includes('male') || v.quality === Speech.VoiceQuality.Enhanced)
+          (v.name.toLowerCase().includes('male') || 
+           v.name.toLowerCase().includes('man') ||
+           v.quality === Speech.VoiceQuality.Enhanced)
         );
         if (maleVoice) {
           console.log('Found male voice:', maleVoice.identifier);
@@ -222,6 +238,17 @@ export function useTTSSettings() {
         if (femaleVoice) {
           console.log('Found female voice:', femaleVoice.identifier);
           return femaleVoice.identifier;
+        }
+      } else if (voiceType === 'neutral') {
+        // Look for default or standard voice
+        const neutralVoice = systemVoices.find(v => 
+          v.language === 'en-US' && 
+          (v.name.toLowerCase().includes('default') || 
+           v.name.toLowerCase().includes('standard'))
+        );
+        if (neutralVoice) {
+          console.log('Found neutral voice:', neutralVoice.identifier);
+          return neutralVoice.identifier;
         }
       }
     }
@@ -247,10 +274,16 @@ export function useTTSSettings() {
       
       if (settings.voiceIdentifier === 'male') {
         voiceIdentifier = findBestVoice('male');
+        // Adjust pitch for more masculine sound
+        options.pitch = Math.max(0.7, settings.pitch - 0.2);
       } else if (settings.voiceIdentifier === 'female') {
         voiceIdentifier = findBestVoice('female');
+        // Keep pitch slightly higher for feminine sound
+        options.pitch = Math.min(1.3, settings.pitch + 0.1);
       } else if (settings.voiceIdentifier === 'neutral') {
         voiceIdentifier = findBestVoice('neutral');
+        // Neutral pitch - slightly lower than default but not as low as male
+        options.pitch = Math.max(0.85, settings.pitch - 0.1);
       }
 
       // Only set voice if we found a matching one
@@ -291,10 +324,16 @@ export function useTTSSettings() {
       
       if (voiceIdentifier === 'male') {
         actualVoiceId = findBestVoice('male');
+        // Adjust pitch for more masculine sound
+        options.pitch = Math.max(0.7, settings.pitch - 0.2);
       } else if (voiceIdentifier === 'female') {
         actualVoiceId = findBestVoice('female');
+        // Keep pitch slightly higher for feminine sound
+        options.pitch = Math.min(1.3, settings.pitch + 0.1);
       } else if (voiceIdentifier === 'neutral') {
         actualVoiceId = findBestVoice('neutral');
+        // Neutral pitch - slightly lower than default but not as low as male
+        options.pitch = Math.max(0.85, settings.pitch - 0.1);
       }
 
       if (actualVoiceId) {

@@ -22,7 +22,7 @@ import { getContextualAACSentences, aacSentences } from '../utils/aacSentences';
 export interface AdvancedSuggestion {
   text: string;
   confidence: number;
-  type: 'completion' | 'next_word' | 'common_phrase' | 'contextual' | 'temporal' | 'synonym' | 'preference' | 'full_sentence' | 'tense_variation' | 'category_contextual';
+  type: 'completion' | 'next_word' | 'common_phrase' | 'contextual' | 'temporal' | 'synonym' | 'preference' | 'full_sentence' | 'tense_variation' | 'category_contextual' | 'polite_ending';
   context?: string;
 }
 
@@ -447,6 +447,29 @@ export function useAdvancedAI() {
     return topics;
   };
 
+  // Helper function to detect if sentence needs polite ending
+  const needsPoliteEnding = (words: string[]): boolean => {
+    const sentenceText = words.join(' ').toLowerCase();
+    
+    // Check if sentence is a request
+    const isRequest = sentenceText.includes('can i') || 
+                     sentenceText.includes('could i') || 
+                     sentenceText.includes('may i') ||
+                     sentenceText.includes('i want') ||
+                     sentenceText.includes('i need') ||
+                     sentenceText.includes('can you') ||
+                     sentenceText.includes('could you') ||
+                     sentenceText.includes('would you');
+    
+    // Check if sentence already has polite words
+    const hasPoliteWords = sentenceText.includes('please') || 
+                          sentenceText.includes('thank you') ||
+                          sentenceText.includes('thanks');
+    
+    // Suggest polite ending if it's a request without polite words
+    return isRequest && !hasPoliteWords && words.length >= 2;
+  };
+
   // Ultra-enhanced duplicate detection with advanced fuzzy matching
   const removeDuplicateWords = (words: string[], currentSentence: string[] = []): string[] => {
     const seen = new Set<string>();
@@ -695,7 +718,22 @@ export function useAdvancedAI() {
         currentCategory 
       });
 
-      // 0. AAC Official Sentences (HIGHEST PRIORITY - from official AAC resources)
+      // 0. Check if sentence needs polite ending
+      if (needsPoliteEnding(currentWords)) {
+        const politeEndings = ['please', 'thank you', 'thanks'];
+        politeEndings.forEach((ending, index) => {
+          if (!currentWords.some(w => w.toLowerCase() === ending.toLowerCase())) {
+            suggestions.push({
+              text: ending,
+              confidence: Math.max(0.88, 0.95 - index * 0.03),
+              type: 'polite_ending',
+              context: 'Polite sentence ending'
+            });
+          }
+        });
+      }
+
+      // 1. AAC Official Sentences (HIGHEST PRIORITY - from official AAC resources)
       const aacSuggestions = getContextualAACSentences(currentWords, 3);
       aacSuggestions.forEach((sentence, index) => {
         // Extract next word or suggest full sentence
@@ -726,7 +764,7 @@ export function useAdvancedAI() {
         }
       });
 
-      // 1. CATEGORY-BASED CONTEXTUAL SUGGESTIONS (HIGH PRIORITY - NEW ENHANCED FEATURE)
+      // 2. CATEGORY-BASED CONTEXTUAL SUGGESTIONS (HIGH PRIORITY - NEW ENHANCED FEATURE)
       if (currentCategory && currentCategory !== 'all' && currentCategory !== 'keyboard') {
         console.log('Getting category-relevant words for category:', currentCategory);
         const categoryWords = getCategoryRelevantWords(currentWords, currentCategory, availableWords);
@@ -745,7 +783,7 @@ export function useAdvancedAI() {
         });
       }
 
-      // 2. ChatGPT-style common phrase completions (HIGH PRIORITY)
+      // 3. ChatGPT-style common phrase completions (HIGH PRIORITY)
       if (lastWord && commonPhrases[lastWord]) {
         const phraseCompletions = commonPhrases[lastWord];
         phraseCompletions.forEach((completion, index) => {
@@ -762,7 +800,7 @@ export function useAdvancedAI() {
         });
       }
 
-      // 3. Multi-word phrase matching for better context
+      // 4. Multi-word phrase matching for better context
       if (currentWords.length >= 2) {
         const lastTwoWords = currentWords.slice(-2).join(' ').toLowerCase();
         Object.entries(commonPhrases).forEach(([key, completions]) => {
@@ -783,7 +821,7 @@ export function useAdvancedAI() {
         });
       }
 
-      // 4. AI Preference-based suggestions (ENHANCED)
+      // 5. AI Preference-based suggestions (ENHANCED)
       const contextualPreferenceSuggestions = getContextualSuggestions(currentText, currentHour);
       console.log('Contextual preference suggestions:', contextualPreferenceSuggestions);
       contextualPreferenceSuggestions.forEach((suggestion, index) => {
@@ -797,7 +835,7 @@ export function useAdvancedAI() {
         }
       });
       
-      // 5. Topic-based context learning suggestions
+      // 6. Topic-based context learning suggestions
       const currentTopics = detectSentenceTopics(currentWords);
       if (currentTopics.length > 0) {
         // Fetch phrases related to current topics
@@ -825,7 +863,7 @@ export function useAdvancedAI() {
         });
       }
 
-      // 6. Enhanced phrase completions from user patterns
+      // 7. Enhanced phrase completions from user patterns
       if (currentText) {
         userPatterns.phrases.forEach((frequency, phrase) => {
           if (phrase.startsWith(currentText) && phrase !== currentText) {
@@ -848,7 +886,7 @@ export function useAdvancedAI() {
         });
       }
 
-      // 7. Enhanced word transitions with context scoring
+      // 8. Enhanced word transitions with context scoring
       if (lastWord && userPatterns.transitions.has(lastWord)) {
         const nextWords = userPatterns.transitions.get(lastWord)!;
         nextWords.forEach((frequency, nextWord) => {
@@ -872,7 +910,7 @@ export function useAdvancedAI() {
         });
       }
 
-      // 8. Enhanced temporal suggestions with day/time awareness
+      // 9. Enhanced temporal suggestions with day/time awareness
       userPatterns.temporalPatterns.forEach((timeData, phrase) => {
         const relevantTimes = timeData.filter(t => Math.abs(t.hour - currentHour) <= 1);
         if (relevantTimes.length > 0) {
@@ -893,7 +931,7 @@ export function useAdvancedAI() {
         }
       });
 
-      // 9. Enhanced synonym suggestions with multiple alternatives
+      // 10. Enhanced synonym suggestions with multiple alternatives
       if (lastWord && availableWords.length > 0) {
         const synonyms = findAlternativeWords(lastWord, availableWords, currentWords);
         synonyms.forEach((synonym, index) => {
@@ -909,7 +947,7 @@ export function useAdvancedAI() {
         });
       }
       
-      // 10. Enhanced tense variation suggestions with all tenses
+      // 11. Enhanced tense variation suggestions with all tenses
       if (lastWord && isLikelyVerb(lastWord)) {
         const baseForm = getBaseForm(lastWord);
         
@@ -935,7 +973,7 @@ export function useAdvancedAI() {
         });
       }
       
-      // 11. Word variation suggestions (plurals, etc.)
+      // 12. Word variation suggestions (plurals, etc.)
       if (lastWord) {
         const variations = generateWordVariations(lastWord);
         
@@ -954,7 +992,7 @@ export function useAdvancedAI() {
         });
       }
       
-      // 12. Complete sentence suggestions from partial input
+      // 13. Complete sentence suggestions from partial input
       if (currentWords.length >= 1 && currentWords.length <= 3) {
         const completeSentences = generateCompleteSentences(currentWords, userPatterns.phrases, 2);
         
@@ -975,7 +1013,7 @@ export function useAdvancedAI() {
         });
       }
       
-      // 13. N-gram based predictions
+      // 14. N-gram based predictions
       if (currentWords.length > 0) {
         const ngramPredictions = predictNextWords(currentWords, userPatterns.transitions, 3);
         
@@ -993,7 +1031,7 @@ export function useAdvancedAI() {
         });
       }
 
-      // 14. Enhanced contextual suggestions with smart filtering
+      // 15. Enhanced contextual suggestions with smart filtering
       if (availableWords.length > 0) {
         const filteredAvailableWords = removeDuplicateWords(availableWords, currentWords);
         const contextualWords = filteredAvailableWords
@@ -1022,7 +1060,7 @@ export function useAdvancedAI() {
         });
       }
 
-      // 15. Add high-frequency words as fallback
+      // 16. Add high-frequency words as fallback
       if (suggestions.length < maxSuggestions - 3 && availableWords.length > 0) {
         const filteredAvailableWords = removeDuplicateWords(availableWords, currentWords);
         const fallbackWords = filteredAvailableWords
@@ -1039,7 +1077,7 @@ export function useAdvancedAI() {
         });
       }
 
-      // 16. Add full sentence suggestions as last options (ENHANCED WITH AAC)
+      // 17. Add full sentence suggestions as last options (ENHANCED WITH AAC)
       if (currentWords.length >= 1 && currentWords.length <= 4) {
         // Prioritize AAC sentences
         const aacFullSentences = aacSentences
@@ -1105,6 +1143,7 @@ export function useAdvancedAI() {
           }
           // Secondary sort by type priority
           const typePriority = {
+            'polite_ending': 11,
             'category_contextual': 10,
             'preference': 9,
             'common_phrase': 8,

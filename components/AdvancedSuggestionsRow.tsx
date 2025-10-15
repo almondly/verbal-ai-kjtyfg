@@ -8,7 +8,7 @@ import TenseSwitcher from './TenseSwitcher';
 
 interface Props {
   suggestions: AdvancedSuggestion[];
-  onPressSuggestion: (text: string) => void;
+  onPressSuggestion: (text: string, isFullSentence: boolean) => void;
   onRemoveWord?: (word: string) => void;
   style?: any;
   showDetails?: boolean;
@@ -32,6 +32,8 @@ const getTypeIcon = (type: string) => {
       return 'star-outline';
     case 'category_contextual':
       return 'folder-outline';
+    case 'polite_ending':
+      return 'happy-outline';
     default:
       return 'bulb-outline';
   }
@@ -60,7 +62,7 @@ export default function AdvancedSuggestionsRow({
     if (onRemoveWord && selectedWord) {
       onRemoveWord(selectedWord);
     }
-    onPressSuggestion(newWord);
+    onPressSuggestion(newWord, false);
     setSelectedWord(null);
   };
 
@@ -85,6 +87,7 @@ export default function AdvancedSuggestionsRow({
           const isFullSentence = suggestion.type === 'full_sentence';
           const isTenseVariation = suggestion.type === 'tense_variation';
           const isCategoryContextual = suggestion.type === 'category_contextual';
+          const isPoliteEnding = suggestion.type === 'polite_ending';
           
           return (
             <TouchableOpacity
@@ -94,10 +97,11 @@ export default function AdvancedSuggestionsRow({
                 isFullSentence && styles.fullSentenceSuggestion,
                 isTenseVariation && styles.tenseVariationSuggestion,
                 isCategoryContextual && styles.categoryContextualSuggestion,
+                isPoliteEnding && styles.politeEndingSuggestion,
                 { borderLeftColor: getConfidenceColor(suggestion.confidence) }
               ]}
-              onPress={() => onPressSuggestion(suggestion.text)}
-              onLongPress={() => setSelectedWord(suggestion.text)}
+              onPress={() => onPressSuggestion(suggestion.text, isFullSentence)}
+              onLongPress={() => !isFullSentence && setSelectedWord(suggestion.text)}
               activeOpacity={0.8}
             >
               <View style={styles.suggestionHeader}>
@@ -108,6 +112,7 @@ export default function AdvancedSuggestionsRow({
                     isFullSentence ? colors.primary : 
                     isTenseVariation ? colors.warning : 
                     isCategoryContextual ? '#10B981' :
+                    isPoliteEnding ? '#F59E0B' :
                     colors.textSecondary
                   }
                   style={styles.typeIcon}
@@ -116,7 +121,8 @@ export default function AdvancedSuggestionsRow({
                   styles.confidenceText,
                   isFullSentence && styles.fullSentenceConfidence,
                   isTenseVariation && styles.tenseVariationConfidence,
-                  isCategoryContextual && styles.categoryContextualConfidence
+                  isCategoryContextual && styles.categoryContextualConfidence,
+                  isPoliteEnding && styles.politeEndingConfidence
                 ]}>
                   {Math.round(suggestion.confidence * 100)}%
                 </Text>
@@ -126,7 +132,8 @@ export default function AdvancedSuggestionsRow({
                   styles.suggestionText,
                   isFullSentence && styles.fullSentenceText,
                   isTenseVariation && styles.tenseVariationText,
-                  isCategoryContextual && styles.categoryContextualText
+                  isCategoryContextual && styles.categoryContextualText,
+                  isPoliteEnding && styles.politeEndingText
                 ]} 
                 numberOfLines={2}
               >
@@ -145,6 +152,11 @@ export default function AdvancedSuggestionsRow({
               {isCategoryContextual && suggestion.context && (
                 <View style={styles.labelBadge}>
                   <Text style={styles.categoryLabel}>{suggestion.context}</Text>
+                </View>
+              )}
+              {isPoliteEnding && (
+                <View style={styles.labelBadge}>
+                  <Text style={styles.politeLabel}>Polite</Text>
                 </View>
               )}
             </TouchableOpacity>
@@ -207,6 +219,11 @@ const styles = StyleSheet.create({
     borderLeftColor: '#10B981',
     borderLeftWidth: 3,
   },
+  politeEndingSuggestion: {
+    backgroundColor: '#FEF3C7',
+    borderLeftColor: '#F59E0B',
+    borderLeftWidth: 3,
+  },
   suggestionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -230,6 +247,9 @@ const styles = StyleSheet.create({
   categoryContextualConfidence: {
     color: '#10B981',
   },
+  politeEndingConfidence: {
+    color: '#F59E0B',
+  },
   suggestionText: {
     fontSize: 12,
     fontFamily: 'Montserrat_600SemiBold',
@@ -248,6 +268,10 @@ const styles = StyleSheet.create({
   categoryContextualText: {
     fontSize: 12,
     color: '#10B981',
+  },
+  politeEndingText: {
+    fontSize: 12,
+    color: '#F59E0B',
   },
   labelBadge: {
     marginTop: 4,
@@ -271,6 +295,13 @@ const styles = StyleSheet.create({
     fontSize: 8,
     fontFamily: 'Montserrat_600SemiBold',
     color: '#10B981',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  politeLabel: {
+    fontSize: 8,
+    fontFamily: 'Montserrat_600SemiBold',
+    color: '#F59E0B',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },

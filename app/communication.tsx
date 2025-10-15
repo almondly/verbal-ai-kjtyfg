@@ -164,6 +164,30 @@ export default function CommunicationScreen() {
     router.push('/settings');
   }, [router]);
 
+  // Handle suggestion press with full sentence replacement logic
+  const handleSuggestionPress = useCallback((text: string, isFullSentence: boolean) => {
+    if (isFullSentence) {
+      // Clear existing sentence and replace with the full sentence
+      const words = text.split(' ');
+      const newSentence = words.map((word, index) => ({
+        id: `suggestion-${Date.now()}-${index}`,
+        text: word,
+        color: colors.primary,
+        category: 'suggestion',
+      }));
+      setSentence(newSentence);
+    } else {
+      // Add word to existing sentence
+      const tile: Tile = {
+        id: `suggestion-${Date.now()}`,
+        text,
+        color: colors.primary,
+        category: 'suggestion',
+      };
+      handleTilePress(tile);
+    }
+  }, [handleTilePress]);
+
   return (
     <LandscapeGuard>
       <View style={[commonStyles.container, styles.container]}>
@@ -206,15 +230,7 @@ export default function CommunicationScreen() {
           {advancedSuggestions.length > 0 ? (
             <AdvancedSuggestionsRow
               suggestions={advancedSuggestions}
-              onPressSuggestion={(text) => {
-                const tile: Tile = {
-                  id: `suggestion-${Date.now()}`,
-                  text,
-                  color: colors.primary,
-                  category: 'suggestion',
-                };
-                handleTilePress(tile);
-              }}
+              onPressSuggestion={handleSuggestionPress}
               onRemoveWord={(word) => {
                 // Remove the word from the sentence when tense is changed
                 setSentence(prev => {

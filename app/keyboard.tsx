@@ -112,6 +112,20 @@ export default function KeyboardScreen() {
     router.push('/settings');
   }, [router]);
 
+  // Handle suggestion press with full sentence replacement logic
+  const handleSuggestionPress = useCallback((text: string, isFullSentence: boolean) => {
+    if (isFullSentence) {
+      // Replace entire text with the full sentence
+      setTypedText(text);
+    } else {
+      // Add word to existing text
+      setTypedText(prev => {
+        const trimmed = prev.trim();
+        return trimmed ? `${trimmed} ${text}` : text;
+      });
+    }
+  }, []);
+
   return (
     <LandscapeGuard>
       <View style={[commonStyles.container, styles.container]}>
@@ -176,12 +190,7 @@ export default function KeyboardScreen() {
           {advancedSuggestions.length > 0 ? (
             <AdvancedSuggestionsRow
               suggestions={advancedSuggestions}
-              onPressSuggestion={(text) => {
-                setTypedText(prev => {
-                  const trimmed = prev.trim();
-                  return trimmed ? `${trimmed} ${text}` : text;
-                });
-              }}
+              onPressSuggestion={handleSuggestionPress}
               onRemoveWord={(word) => {
                 // Remove the word from the typed text when tense is changed
                 setTypedText(prev => {
