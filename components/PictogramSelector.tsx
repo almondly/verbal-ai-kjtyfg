@@ -96,7 +96,7 @@ export default function PictogramSelector({ word, onSelect, onClose }: Props) {
       </View>
 
       <Text style={styles.helperText}>
-        Tap a pictogram to select it for this word
+        Tap a pictogram to select it for this word. These are ARASAAC-style pictograms.
       </Text>
 
       {loading && (
@@ -289,19 +289,19 @@ const styles = StyleSheet.create({
     width: '48%',
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
-    padding: 10,
+    padding: 12,
     alignItems: 'center',
-    borderWidth: 3,
+    borderWidth: 5,
     borderColor: colors.primary,
-    boxShadow: '0px 2px 6px rgba(0,0,0,0.1)',
+    boxShadow: '0px 3px 8px rgba(0,0,0,0.12)',
   },
   pictogramImageContainer: {
     width: '100%',
     aspectRatio: 1,
     backgroundColor: '#FFFFFF',
     borderRadius: 8,
-    padding: 8,
-    marginBottom: 8,
+    padding: 10,
+    marginBottom: 10,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -310,7 +310,7 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   pictogramKeywords: {
-    fontSize: 11,
+    fontSize: 12,
     fontFamily: 'Montserrat_600SemiBold',
     color: colors.text,
     textAlign: 'center',
