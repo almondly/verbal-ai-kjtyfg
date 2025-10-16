@@ -22,7 +22,7 @@ export default function PictogramSelector({ word, onSelect, onClose }: Props) {
   const [pictograms, setPictograms] = useState<Pictogram[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedVariant, setSelectedVariant] = useState<PictogramVariant>('500');
+  const [selectedVariant, setSelectedVariant] = useState<PictogramVariant>('2500');
 
   useEffect(() => {
     searchPictograms(word);
@@ -72,25 +72,25 @@ export default function PictogramSelector({ word, onSelect, onClose }: Props) {
 
   const getVariantLabel = (variant: PictogramVariant): string => {
     switch (variant) {
-      case '500':
-        return 'Advanced (Color)';
       case '2500':
         return 'Detailed (Color)';
       case '2500_n':
         return 'Detailed (Skin)';
+      case '500':
+        return 'Standard (Color)';
       default:
-        return 'Advanced';
+        return 'Detailed';
     }
   };
 
   const getVariantDescription = (variant: PictogramVariant): string => {
     switch (variant) {
-      case '500':
-        return 'High-quality colored pictograms with detail';
       case '2500':
-        return 'Very detailed colored pictograms';
+        return 'Very detailed colored pictograms (recommended)';
       case '2500_n':
         return 'Very detailed with skin tones (for people)';
+      case '500':
+        return 'Standard colored pictograms';
       default:
         return '';
     }
@@ -132,7 +132,7 @@ export default function PictogramSelector({ word, onSelect, onClose }: Props) {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.variantButtons}
         >
-          {(['500', '2500', '2500_n'] as PictogramVariant[]).map((variant) => (
+          {(['2500', '2500_n', '500'] as PictogramVariant[]).map((variant) => (
             <TouchableOpacity
               key={variant}
               style={[

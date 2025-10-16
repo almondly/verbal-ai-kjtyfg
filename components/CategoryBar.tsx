@@ -46,9 +46,10 @@ export default function CategoryBar({ categories, selectedId, onSelect, style }:
                   styles.chip,
                   {
                     backgroundColor: cat.color,
-                    borderColor: active ? colors.borderDark : colors.border,
-                    borderWidth: active ? 3 : 2,
+                    borderColor: active ? cat.color : colors.border,
+                    borderWidth: active ? 4 : 2,
                     opacity: active ? 1 : 0.85,
+                    boxShadow: active ? `0px 0px 12px ${cat.color}` : '0px 3px 6px rgba(0,0,0,0.15)',
                   },
                 ]}
                 onPress={() => {
@@ -102,7 +103,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    boxShadow: '0px 3px 6px rgba(0,0,0,0.15)',
   },
   chipText: {
     fontSize: 11,
