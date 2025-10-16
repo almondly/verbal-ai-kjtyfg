@@ -44,6 +44,7 @@ const pictograms: Record<string, string> = {
   my: 'https://static.arasaac.org/pictograms/8231/8231_2500.png',
   mine: 'https://static.arasaac.org/pictograms/4368/4368_2500.png',
   your: 'https://static.arasaac.org/pictograms/1262/1262_2500.png',
+  all: 'https://static.arasaac.org/pictograms/2544/2544_2500.png',
 
   want: 'https://static.arasaac.org/pictograms/2341/2341_2500.png',
   need: 'https://static.arasaac.org/pictograms/9005/9005_2500.png',
@@ -340,6 +341,7 @@ export const defaultTiles: Tile[] = [
   t('core', 'my'),
   t('core', 'mine'),
   t('core', 'your'),
+  t('core', 'all'),
   t('core', 'want'),
   t('core', 'need'),
   t('core', 'like'),

@@ -6,7 +6,7 @@ import { defaultTiles } from '../data/defaultTiles';
 
 const LIBRARY_KEY = 'aac_tiles_v1';
 const SEED_VERSION_KEY = 'aac_tiles_seed_version';
-const CURRENT_SEED_VERSION = 5; // Incremented to force update with colorful ARASAAC pictograms
+const CURRENT_SEED_VERSION = 6; // Incremented to force update with fixed pictograms for I, you, he, all
 
 function mergeMissingDefaults(stored: Tile[], defaults: Tile[]): Tile[] {
   // Create a map of default tiles by ID for quick lookup
@@ -82,7 +82,7 @@ export function useLibrary() {
         if (seedVersion < CURRENT_SEED_VERSION) {
           // Migrate: merge in any missing defaults AND update existing tiles with new images
           console.log(
-            `🔄 Migrating tiles: seedVersion ${seedVersion} -> ${CURRENT_SEED_VERSION} - Updating with colorful ARASAAC pictograms`
+            `🔄 Migrating tiles: seedVersion ${seedVersion} -> ${CURRENT_SEED_VERSION} - Fixing I, you, he, all pictograms`
           );
           const merged = mergeMissingDefaults(loadedTiles, defaultTiles);
           setTiles(merged);
