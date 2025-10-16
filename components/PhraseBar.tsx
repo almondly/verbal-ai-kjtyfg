@@ -8,11 +8,21 @@ interface Props {
   sentence: Tile[];
   onSpeak: () => void;
   onClear: () => void;
-  onBackspace?: () => void;
+  onDeleteWord?: () => void;
+  onReplay?: () => void;
+  hasLastSpoken?: boolean;
   onRemove?: (index: number) => void;
 }
 
-export default function PhraseBar({ sentence, onSpeak, onClear, onBackspace, onRemove }: Props) {
+export default function PhraseBar({ 
+  sentence, 
+  onSpeak, 
+  onClear, 
+  onDeleteWord, 
+  onReplay, 
+  hasLastSpoken = false,
+  onRemove 
+}: Props) {
   const text = sentence.map(s => s.text).join(' ');
   
   return (
@@ -26,14 +36,24 @@ export default function PhraseBar({ sentence, onSpeak, onClear, onBackspace, onR
           <Text style={styles.text}>{text || 'Tap tiles to build a sentence'}</Text>
         </ScrollView>
         <View style={styles.actions}>
-          {onBackspace && (
+          {onDeleteWord && (
             <TouchableOpacity 
-              style={[styles.actionBtn, styles.backspaceBtn, { opacity: sentence.length > 0 ? 1 : 0.4 }]} 
-              onPress={onBackspace} 
+              style={[styles.actionBtn, styles.deleteWordBtn, { opacity: sentence.length > 0 ? 1 : 0.4 }]} 
+              onPress={onDeleteWord} 
               activeOpacity={0.85}
               disabled={sentence.length === 0}
             >
-              <Icon name="backspace-outline" size={26} color={colors.text} />
+              <Icon name="backspace-outline" size={24} color={colors.text} />
+            </TouchableOpacity>
+          )}
+          {onReplay && (
+            <TouchableOpacity 
+              style={[styles.actionBtn, styles.replayBtn, { opacity: hasLastSpoken ? 1 : 0.4 }]} 
+              onPress={onReplay} 
+              activeOpacity={0.85}
+              disabled={!hasLastSpoken}
+            >
+              <Icon name="play-outline" size={24} color={colors.text} />
             </TouchableOpacity>
           )}
           <TouchableOpacity 
@@ -103,7 +123,11 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     boxShadow: '0px 2px 4px rgba(0,0,0,0.15)',
   },
-  backspaceBtn: {
+  deleteWordBtn: {
+    backgroundColor: colors.backgroundAlt,
+    borderColor: colors.border,
+  },
+  replayBtn: {
     backgroundColor: colors.backgroundAlt,
     borderColor: colors.border,
   },

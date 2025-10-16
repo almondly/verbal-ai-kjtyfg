@@ -40,6 +40,7 @@ export default function CommunicationScreen() {
   const [advancedSuggestions, setAdvancedSuggestions] = useState<any[]>([]);
   const { speak } = useTTSSettings();
   const [editingTile, setEditingTile] = useState<Tile | null>(null);
+  const [lastSpokenText, setLastSpokenText] = useState<string>('');
 
   const filteredTiles = useMemo(() => {
     if (selectedCategory === 'all') return tiles;
@@ -128,12 +129,29 @@ export default function CommunicationScreen() {
     setSentence([]);
   }, []);
 
+  const handleDeleteLastWord = useCallback(() => {
+    setSentence(prev => {
+      if (prev.length === 0) return prev;
+      return prev.slice(0, -1);
+    });
+  }, []);
+
+  const handleReplayLastSentence = useCallback(async () => {
+    if (!lastSpokenText.trim()) return;
+    
+    const normalized = normalizeForTTS(lastSpokenText);
+    await speak(normalized);
+  }, [lastSpokenText, speak]);
+
   const handleSpeak = useCallback(async () => {
     const text = sentence.map(t => t.text).join(' ');
     if (!text.trim()) return;
     
     const normalized = normalizeForTTS(text);
     await speak(normalized);
+    
+    // Store the last spoken text for replay
+    setLastSpokenText(text);
     
     // Record the sentence for AI learning with category context
     await recordUserInput(text, selectedCategory !== 'all' ? selectedCategory : undefined);
@@ -222,6 +240,9 @@ export default function CommunicationScreen() {
             onRemove={handleRemoveFromSentence}
             onClear={handleClearSentence}
             onSpeak={handleSpeak}
+            onDeleteWord={handleDeleteLastWord}
+            onReplay={handleReplayLastSentence}
+            hasLastSpoken={!!lastSpokenText}
           />
         </View>
 

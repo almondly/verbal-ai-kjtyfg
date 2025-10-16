@@ -29,6 +29,7 @@ export default function KeyboardScreen() {
   const { currentEmotion } = useEmotionSettings();
   const { speak } = useTTSSettings();
   const [advancedSuggestions, setAdvancedSuggestions] = useState<any[]>([]);
+  const [lastSpokenText, setLastSpokenText] = useState<string>('');
 
   const router = useRouter();
 
@@ -80,11 +81,30 @@ export default function KeyboardScreen() {
     })();
   }, [typedText, getAdvancedSuggestions, getTimeBasedSuggestions, selectedCategory]);
 
+  const handleDeleteLastWord = useCallback(() => {
+    setTypedText(prev => {
+      const words = prev.trim().split(/\s+/);
+      if (words.length === 0 || (words.length === 1 && !words[0])) return '';
+      words.pop();
+      return words.join(' ');
+    });
+  }, []);
+
+  const handleReplayLastSentence = useCallback(async () => {
+    if (!lastSpokenText.trim()) return;
+    
+    const normalized = normalizeForTTS(lastSpokenText);
+    await speak(normalized);
+  }, [lastSpokenText, speak]);
+
   const handleSpeak = useCallback(async () => {
     if (!typedText.trim()) return;
     
     const normalized = normalizeForTTS(typedText);
     await speak(normalized);
+    
+    // Store the last spoken text for replay
+    setLastSpokenText(typedText);
     
     // Record the sentence for AI learning
     await recordUserInput(typedText, selectedCategory !== 'all' ? selectedCategory : undefined);
@@ -165,23 +185,45 @@ export default function KeyboardScreen() {
             autoFocus
           />
           <View style={styles.inputActions}>
-            <TouchableOpacity 
-              style={styles.clearButton} 
-              onPress={() => setTypedText('')}
-              activeOpacity={0.8}
-            >
-              <Icon name="close-circle-outline" size={24} color={colors.textSecondary} />
-              <Text style={styles.clearButtonText}>Clear</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={[styles.speakButton, !typedText.trim() && styles.speakButtonDisabled]} 
-              onPress={handleSpeak}
-              disabled={!typedText.trim()}
-              activeOpacity={0.8}
-            >
-              <Icon name="volume-high-outline" size={28} color={colors.white} />
-              <Text style={styles.speakButtonText}>Speak</Text>
-            </TouchableOpacity>
+            <View style={styles.leftActions}>
+              <TouchableOpacity 
+                style={[styles.deleteWordButton, !typedText.trim() && styles.buttonDisabled]} 
+                onPress={handleDeleteLastWord}
+                disabled={!typedText.trim()}
+                activeOpacity={0.8}
+              >
+                <Icon name="backspace-outline" size={22} color={colors.text} />
+                <Text style={styles.deleteWordButtonText}>Delete Word</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.replayButton, !lastSpokenText && styles.buttonDisabled]} 
+                onPress={handleReplayLastSentence}
+                disabled={!lastSpokenText}
+                activeOpacity={0.8}
+              >
+                <Icon name="play-outline" size={22} color={colors.text} />
+                <Text style={styles.replayButtonText}>Replay</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.rightActions}>
+              <TouchableOpacity 
+                style={styles.clearButton} 
+                onPress={() => setTypedText('')}
+                activeOpacity={0.8}
+              >
+                <Icon name="close-circle-outline" size={24} color={colors.textSecondary} />
+                <Text style={styles.clearButtonText}>Clear</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.speakButton, !typedText.trim() && styles.speakButtonDisabled]} 
+                onPress={handleSpeak}
+                disabled={!typedText.trim()}
+                activeOpacity={0.8}
+              >
+                <Icon name="volume-high-outline" size={28} color={colors.white} />
+                <Text style={styles.speakButtonText}>Speak</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
 
@@ -294,6 +336,49 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: 12,
+  },
+  leftActions: {
+    flexDirection: 'row',
+    gap: 8 as any,
+  },
+  rightActions: {
+    flexDirection: 'row',
+    gap: 8 as any,
+  },
+  deleteWordButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6 as any,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: colors.background,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: colors.borderLight,
+  },
+  deleteWordButtonText: {
+    fontSize: 13,
+    fontFamily: 'Montserrat_600SemiBold',
+    color: colors.text,
+  },
+  replayButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6 as any,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: colors.background,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: colors.borderLight,
+  },
+  replayButtonText: {
+    fontSize: 13,
+    fontFamily: 'Montserrat_600SemiBold',
+    color: colors.text,
+  },
+  buttonDisabled: {
+    opacity: 0.4,
   },
   clearButton: {
     flexDirection: 'row',
