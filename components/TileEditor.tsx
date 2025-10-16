@@ -19,7 +19,7 @@ export default function TileEditor({ visible, tile, onSave, onClose }: Props) {
   const [text, setText] = useState(tile.text);
   const [color, setColor] = useState(tile.color || '#FFFFFF');
   const [imageUri, setImageUri] = useState(tile.imageUri);
-  const [imageUrl, setImageUrl] = useState(tile.imageUrl || '');
+  const [imageUrl, setImageUrl] = useState(tile.imageUrl || tile.image || '');
   const [selectedCategory, setSelectedCategory] = useState(tile.category);
   const [showPictogramSelector, setShowPictogramSelector] = useState(false);
 
@@ -28,7 +28,7 @@ export default function TileEditor({ visible, tile, onSave, onClose }: Props) {
       setText(tile.text);
       setColor(tile.color || '#FFFFFF');
       setImageUri(tile.imageUri);
-      setImageUrl(tile.imageUrl || '');
+      setImageUrl(tile.imageUrl || tile.image || '');
       setSelectedCategory(tile.category);
     }
   }, [visible, tile]);
@@ -72,11 +72,13 @@ export default function TileEditor({ visible, tile, onSave, onClose }: Props) {
       text: text.trim(),
       color,
       imageUri,
+      // Preserve the image property for default tiles, or use imageUrl for custom tiles
+      image: imageUrl.trim() || tile.image,
       imageUrl: imageUrl.trim() || undefined,
       category: selectedCategory,
     };
 
-    console.log('Saving tile with imageUrl:', updatedTile.imageUrl);
+    console.log('Saving tile with image:', updatedTile.image, 'imageUrl:', updatedTile.imageUrl);
     onSave(updatedTile);
     onClose();
   };

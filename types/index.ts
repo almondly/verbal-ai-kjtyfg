@@ -3,8 +3,9 @@ export type Tile = {
   id: string;
   text: string;
   color?: string;
-  imageUri?: string;
-  imageUrl?: string; // NEW: Custom image URL for tiles
+  image?: string; // ARASAAC pictogram URL
+  imageUri?: string; // Local image URI (from image picker)
+  imageUrl?: string; // Custom image URL for tiles
   category?: string; // folder/category id
 };
 

@@ -6,18 +6,43 @@ import { defaultTiles } from '../data/defaultTiles';
 
 const LIBRARY_KEY = 'aac_tiles_v1';
 const SEED_VERSION_KEY = 'aac_tiles_seed_version';
-const CURRENT_SEED_VERSION = 3; // Incremented to trigger migration with new expanded vocabulary
+const CURRENT_SEED_VERSION = 5; // Incremented to force update with colorful ARASAAC pictograms
 
 function mergeMissingDefaults(stored: Tile[], defaults: Tile[]): Tile[] {
-  // Keep user tiles intact; add any missing defaults by id
-  const map = new Map<string, Tile>();
-  for (const t of stored) map.set(t.id, t);
+  // Create a map of default tiles by ID for quick lookup
+  const defaultsMap = new Map<string, Tile>();
   for (const d of defaults) {
-    if (!map.has(d.id)) {
-      map.set(d.id, d);
+    defaultsMap.set(d.id, d);
+  }
+
+  // Update stored tiles with new default properties (especially images)
+  const updatedTiles = stored.map(storedTile => {
+    const defaultTile = defaultsMap.get(storedTile.id);
+    if (defaultTile) {
+      // If this is a default tile, update it with the latest default properties
+      // but preserve any custom user modifications (imageUri, imageUrl)
+      return {
+        ...defaultTile,
+        // Preserve custom user images if they exist
+        imageUri: storedTile.imageUri,
+        imageUrl: storedTile.imageUrl || defaultTile.imageUrl,
+        // Use the new default image if no custom image exists
+        image: storedTile.imageUri || storedTile.imageUrl ? storedTile.image : defaultTile.image,
+      };
+    }
+    // Keep custom tiles as-is
+    return storedTile;
+  });
+
+  // Add any new default tiles that don't exist in stored tiles
+  const storedIds = new Set(stored.map(t => t.id));
+  for (const defaultTile of defaults) {
+    if (!storedIds.has(defaultTile.id)) {
+      updatedTiles.push(defaultTile);
     }
   }
-  return Array.from(map.values());
+
+  return updatedTiles;
 }
 
 export function useLibrary() {
@@ -47,7 +72,7 @@ export function useLibrary() {
 
         if (!loadedTiles) {
           // No saved tiles: seed with defaults and mark version
-          console.log('Seeding tiles for the first time with expanded vocabulary and images');
+          console.log('🎨 Seeding tiles for the first time with colorful ARASAAC pictograms');
           setTiles(defaultTiles);
           await AsyncStorage.setItem(LIBRARY_KEY, JSON.stringify(defaultTiles));
           await AsyncStorage.setItem(SEED_VERSION_KEY, String(CURRENT_SEED_VERSION));
@@ -55,9 +80,9 @@ export function useLibrary() {
         }
 
         if (seedVersion < CURRENT_SEED_VERSION) {
-          // Migrate: merge in any missing defaults
+          // Migrate: merge in any missing defaults AND update existing tiles with new images
           console.log(
-            `Migrating tiles: seedVersion ${seedVersion} -> ${CURRENT_SEED_VERSION} - Adding expanded vocabulary with AAC images`
+            `🔄 Migrating tiles: seedVersion ${seedVersion} -> ${CURRENT_SEED_VERSION} - Updating with colorful ARASAAC pictograms`
           );
           const merged = mergeMissingDefaults(loadedTiles, defaultTiles);
           setTiles(merged);
@@ -98,7 +123,7 @@ export function useLibrary() {
 
   const resetTiles = async () => {
     try {
-      console.log('Resetting tiles to expanded vocabulary with AAC images');
+      console.log('🔄 Resetting tiles to colorful ARASAAC pictograms');
       setTiles(defaultTiles);
       await AsyncStorage.setItem(LIBRARY_KEY, JSON.stringify(defaultTiles));
       await AsyncStorage.setItem(SEED_VERSION_KEY, String(CURRENT_SEED_VERSION));
