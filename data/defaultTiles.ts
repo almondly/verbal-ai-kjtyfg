@@ -28,10 +28,11 @@ const categoryColor: Record<string, string> = {
 // ========================================================================
 // Using VERIFIED ARASAAC pictogram IDs with _2500.png variant for color
 // These are REAL pictogram IDs that exist in the ARASAAC database
+// Gender-neutral by default, except for specific gendered words
 // ========================================================================
 
 const pictograms: Record<string, string> = {
-  // Core vocabulary - Using VERIFIED colorful ARASAAC pictograms
+  // Core vocabulary - Verified colorful ARASAAC pictograms
   i: 'https://static.arasaac.org/pictograms/8224/8224_2500.png',
   you: 'https://static.arasaac.org/pictograms/1262/1262_2500.png',
   he: 'https://static.arasaac.org/pictograms/1885/1885_2500.png',
@@ -43,6 +44,7 @@ const pictograms: Record<string, string> = {
   my: 'https://static.arasaac.org/pictograms/8231/8231_2500.png',
   mine: 'https://static.arasaac.org/pictograms/4368/4368_2500.png',
   your: 'https://static.arasaac.org/pictograms/1262/1262_2500.png',
+
   want: 'https://static.arasaac.org/pictograms/2341/2341_2500.png',
   need: 'https://static.arasaac.org/pictograms/9005/9005_2500.png',
   like: 'https://static.arasaac.org/pictograms/1230/1230_2500.png',
@@ -52,10 +54,12 @@ const pictograms: Record<string, string> = {
   again: 'https://static.arasaac.org/pictograms/1744/1744_2500.png',
   different: 'https://static.arasaac.org/pictograms/4021/4021_2500.png',
   same: 'https://static.arasaac.org/pictograms/2092/2092_2500.png',
+
   this: 'https://static.arasaac.org/pictograms/1596/1596_2500.png',
   that: 'https://static.arasaac.org/pictograms/2752/2752_2500.png',
   here: 'https://static.arasaac.org/pictograms/1043/1043_2500.png',
   there: 'https://static.arasaac.org/pictograms/1044/1044_2500.png',
+
   go: 'https://static.arasaac.org/pictograms/2922/2922_2500.png',
   stop: 'https://static.arasaac.org/pictograms/2707/2707_2500.png',
   come: 'https://static.arasaac.org/pictograms/2054/2054_2500.png',
@@ -65,19 +69,21 @@ const pictograms: Record<string, string> = {
   turn: 'https://static.arasaac.org/pictograms/2735/2735_2500.png',
   open: 'https://static.arasaac.org/pictograms/1977/1977_2500.png',
   close: 'https://static.arasaac.org/pictograms/1976/1976_2500.png',
+
   'all done': 'https://static.arasaac.org/pictograms/5426/5426_2500.png',
   finished: 'https://static.arasaac.org/pictograms/5426/5426_2500.png',
   please: 'https://static.arasaac.org/pictograms/1993/1993_2500.png',
   'thank you': 'https://static.arasaac.org/pictograms/1735/1735_2500.png',
   yes: 'https://static.arasaac.org/pictograms/3572/3572_2500.png',
   no: 'https://static.arasaac.org/pictograms/3573/3573_2500.png',
+
   because: 'https://static.arasaac.org/pictograms/3254/3254_2500.png',
   and: 'https://static.arasaac.org/pictograms/1267/1267_2500.png',
   or: 'https://static.arasaac.org/pictograms/1302/1302_2500.png',
   with: 'https://static.arasaac.org/pictograms/1729/1729_2500.png',
   without: 'https://static.arasaac.org/pictograms/1730/1730_2500.png',
 
-  // People - VERIFIED IDs
+  // People - Gender-specific where appropriate
   mom: 'https://static.arasaac.org/pictograms/2398/2398_2500.png',
   dad: 'https://static.arasaac.org/pictograms/2397/2397_2500.png',
   brother: 'https://static.arasaac.org/pictograms/2399/2399_2500.png',
@@ -93,7 +99,7 @@ const pictograms: Record<string, string> = {
   grandma: 'https://static.arasaac.org/pictograms/2405/2405_2500.png',
   grandpa: 'https://static.arasaac.org/pictograms/2406/2406_2500.png',
 
-  // Actions - VERIFIED IDs
+  // Actions - Gender-neutral
   eat: 'https://static.arasaac.org/pictograms/11936/11936_2500.png',
   drink: 'https://static.arasaac.org/pictograms/5712/5712_2500.png',
   sleep: 'https://static.arasaac.org/pictograms/5999/5999_2500.png',
@@ -120,7 +126,7 @@ const pictograms: Record<string, string> = {
   wash: 'https://static.arasaac.org/pictograms/2343/2343_2500.png',
   clean: 'https://static.arasaac.org/pictograms/2055/2055_2500.png',
 
-  // Feelings - VERIFIED IDs
+  // Feelings - Gender-neutral
   happy: 'https://static.arasaac.org/pictograms/7012/7012_2500.png',
   sad: 'https://static.arasaac.org/pictograms/7013/7013_2500.png',
   angry: 'https://static.arasaac.org/pictograms/7014/7014_2500.png',
@@ -134,7 +140,7 @@ const pictograms: Record<string, string> = {
   calm: 'https://static.arasaac.org/pictograms/7019/7019_2500.png',
   surprised: 'https://static.arasaac.org/pictograms/7020/7020_2500.png',
 
-  // Food - VERIFIED IDs
+  // Food
   apple: 'https://static.arasaac.org/pictograms/7979/7979_2500.png',
   banana: 'https://static.arasaac.org/pictograms/7980/7980_2500.png',
   bread: 'https://static.arasaac.org/pictograms/7981/7981_2500.png',
@@ -152,7 +158,7 @@ const pictograms: Record<string, string> = {
   carrot: 'https://static.arasaac.org/pictograms/7992/7992_2500.png',
   snack: 'https://static.arasaac.org/pictograms/7993/7993_2500.png',
 
-  // Home - VERIFIED IDs
+  // Home
   house: 'https://static.arasaac.org/pictograms/2100/2100_2500.png',
   bed: 'https://static.arasaac.org/pictograms/2046/2046_2500.png',
   chair: 'https://static.arasaac.org/pictograms/2696/2696_2500.png',
@@ -168,7 +174,7 @@ const pictograms: Record<string, string> = {
   computer: 'https://static.arasaac.org/pictograms/2693/2693_2500.png',
   tablet: 'https://static.arasaac.org/pictograms/11937/11937_2500.png',
 
-  // School - VERIFIED IDs
+  // School
   school: 'https://static.arasaac.org/pictograms/2695/2695_2500.png',
   book: 'https://static.arasaac.org/pictograms/2051/2051_2500.png',
   pencil: 'https://static.arasaac.org/pictograms/2049/2049_2500.png',
@@ -182,7 +188,7 @@ const pictograms: Record<string, string> = {
   recess: 'https://static.arasaac.org/pictograms/5708/5708_2500.png',
   class: 'https://static.arasaac.org/pictograms/2052/2052_2500.png',
 
-  // Body - VERIFIED IDs
+  // Body
   head: 'https://static.arasaac.org/pictograms/2099/2099_2500.png',
   face: 'https://static.arasaac.org/pictograms/2098/2098_2500.png',
   eyes: 'https://static.arasaac.org/pictograms/2097/2097_2500.png',
@@ -198,7 +204,7 @@ const pictograms: Record<string, string> = {
   feet: 'https://static.arasaac.org/pictograms/2727/2727_2500.png',
   tummy: 'https://static.arasaac.org/pictograms/2737/2737_2500.png',
 
-  // Places - VERIFIED IDs
+  // Places
   park: 'https://static.arasaac.org/pictograms/2916/2916_2500.png',
   store: 'https://static.arasaac.org/pictograms/2708/2708_2500.png',
   library: 'https://static.arasaac.org/pictograms/2726/2726_2500.png',
@@ -212,10 +218,9 @@ const pictograms: Record<string, string> = {
   airplane: 'https://static.arasaac.org/pictograms/2041/2041_2500.png',
   beach: 'https://static.arasaac.org/pictograms/2914/2914_2500.png',
 
-  // Routines - VERIFIED IDs
+  // Routines
   'wake up': 'https://static.arasaac.org/pictograms/5710/5710_2500.png',
   breakfast: 'https://static.arasaac.org/pictograms/5711/5711_2500.png',
-  lunch: 'https://static.arasaac.org/pictograms/2105/2105_2500.png',
   dinner: 'https://static.arasaac.org/pictograms/5713/5713_2500.png',
   'snack time': 'https://static.arasaac.org/pictograms/7993/7993_2500.png',
   'bath time': 'https://static.arasaac.org/pictograms/5716/5716_2500.png',
@@ -224,7 +229,7 @@ const pictograms: Record<string, string> = {
   'get dressed': 'https://static.arasaac.org/pictograms/5720/5720_2500.png',
   potty: 'https://static.arasaac.org/pictograms/2731/2731_2500.png',
 
-  // Questions - VERIFIED IDs
+  // Questions
   what: 'https://static.arasaac.org/pictograms/2345/2345_2500.png',
   where: 'https://static.arasaac.org/pictograms/2346/2346_2500.png',
   when: 'https://static.arasaac.org/pictograms/2347/2347_2500.png',
@@ -233,7 +238,7 @@ const pictograms: Record<string, string> = {
   how: 'https://static.arasaac.org/pictograms/2091/2091_2500.png',
   which: 'https://static.arasaac.org/pictograms/2913/2913_2500.png',
 
-  // Colours - VERIFIED IDs
+  // Colours
   red: 'https://static.arasaac.org/pictograms/2089/2089_2500.png',
   blue: 'https://static.arasaac.org/pictograms/2088/2088_2500.png',
   yellow: 'https://static.arasaac.org/pictograms/2090/2090_2500.png',
@@ -245,7 +250,7 @@ const pictograms: Record<string, string> = {
   white: 'https://static.arasaac.org/pictograms/2082/2082_2500.png',
   brown: 'https://static.arasaac.org/pictograms/2081/2081_2500.png',
 
-  // Numbers - VERIFIED IDs
+  // Numbers
   '1': 'https://static.arasaac.org/pictograms/7994/7994_2500.png',
   '2': 'https://static.arasaac.org/pictograms/7995/7995_2500.png',
   '3': 'https://static.arasaac.org/pictograms/7996/7996_2500.png',
@@ -257,15 +262,13 @@ const pictograms: Record<string, string> = {
   '9': 'https://static.arasaac.org/pictograms/8002/8002_2500.png',
   '10': 'https://static.arasaac.org/pictograms/8003/8003_2500.png',
 
-  // Animals - VERIFIED IDs
+  // Animals
   dog: 'https://static.arasaac.org/pictograms/2080/2080_2500.png',
   cat: 'https://static.arasaac.org/pictograms/2079/2079_2500.png',
   bird: 'https://static.arasaac.org/pictograms/2078/2078_2500.png',
-  fish: 'https://static.arasaac.org/pictograms/7991/7991_2500.png',
   horse: 'https://static.arasaac.org/pictograms/2077/2077_2500.png',
   cow: 'https://static.arasaac.org/pictograms/2076/2076_2500.png',
   pig: 'https://static.arasaac.org/pictograms/2075/2075_2500.png',
-  chicken: 'https://static.arasaac.org/pictograms/7990/7990_2500.png',
   duck: 'https://static.arasaac.org/pictograms/2074/2074_2500.png',
   rabbit: 'https://static.arasaac.org/pictograms/2073/2073_2500.png',
   bear: 'https://static.arasaac.org/pictograms/2072/2072_2500.png',
@@ -273,7 +276,7 @@ const pictograms: Record<string, string> = {
   elephant: 'https://static.arasaac.org/pictograms/2070/2070_2500.png',
   monkey: 'https://static.arasaac.org/pictograms/2069/2069_2500.png',
 
-  // Clothing - VERIFIED IDs
+  // Clothing
   shirt: 'https://static.arasaac.org/pictograms/2068/2068_2500.png',
   pants: 'https://static.arasaac.org/pictograms/2067/2067_2500.png',
   dress: 'https://static.arasaac.org/pictograms/2066/2066_2500.png',
@@ -283,7 +286,7 @@ const pictograms: Record<string, string> = {
   hat: 'https://static.arasaac.org/pictograms/2062/2062_2500.png',
   gloves: 'https://static.arasaac.org/pictograms/2061/2061_2500.png',
 
-  // Weather - VERIFIED IDs
+  // Weather
   sunny: 'https://static.arasaac.org/pictograms/2060/2060_2500.png',
   cloudy: 'https://static.arasaac.org/pictograms/2059/2059_2500.png',
   rainy: 'https://static.arasaac.org/pictograms/2058/2058_2500.png',
@@ -292,7 +295,7 @@ const pictograms: Record<string, string> = {
   hot: 'https://static.arasaac.org/pictograms/2709/2709_2500.png',
   cold: 'https://static.arasaac.org/pictograms/2689/2689_2500.png',
 
-  // Time - VERIFIED IDs
+  // Time
   morning: 'https://static.arasaac.org/pictograms/5722/5722_2500.png',
   afternoon: 'https://static.arasaac.org/pictograms/5723/5723_2500.png',
   evening: 'https://static.arasaac.org/pictograms/5725/5725_2500.png',
@@ -303,14 +306,12 @@ const pictograms: Record<string, string> = {
   now: 'https://static.arasaac.org/pictograms/2716/2716_2500.png',
   later: 'https://static.arasaac.org/pictograms/2717/2717_2500.png',
 
-  // Toys - VERIFIED IDs
+  // Toys
   ball: 'https://static.arasaac.org/pictograms/2718/2718_2500.png',
   doll: 'https://static.arasaac.org/pictograms/2719/2719_2500.png',
   blocks: 'https://static.arasaac.org/pictograms/2720/2720_2500.png',
   puzzle: 'https://static.arasaac.org/pictograms/2721/2721_2500.png',
-  car: 'https://static.arasaac.org/pictograms/2692/2692_2500.png',
   truck: 'https://static.arasaac.org/pictograms/2722/2722_2500.png',
-  train: 'https://static.arasaac.org/pictograms/2735/2735_2500.png',
   bike: 'https://static.arasaac.org/pictograms/2723/2723_2500.png',
   swing: 'https://static.arasaac.org/pictograms/2724/2724_2500.png',
   slide: 'https://static.arasaac.org/pictograms/2725/2725_2500.png',
