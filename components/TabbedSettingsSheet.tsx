@@ -6,7 +6,6 @@ import { colors } from '../styles/commonStyles';
 import Icon from './Icon';
 import EmotionFace from './EmotionFace';
 import PictogramSelector from './PictogramSelector';
-import * as ImagePicker from 'expo-image-picker';
 import { Tile } from '../types';
 import { categories } from '../data/categories';
 import { defaultTiles } from '../data/defaultTiles';
@@ -53,7 +52,6 @@ export default function TabbedSettingsSheet({
   // Add tile states
   const [phrase, setPhrase] = useState('');
   const [color, setColor] = useState('#FFFFFF');
-  const [imageUri, setImageUri] = useState<string | undefined>(undefined);
   const [imageUrl, setImageUrl] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>(defaultCategoryId);
   
@@ -107,39 +105,15 @@ export default function TabbedSettingsSheet({
         { id: 'manage', label: 'Manage', icon: 'settings-outline' },
       ];
 
-  const pickImage = async () => {
-    try {
-      const res = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (res.status !== 'granted') {
-        console.log('Permission not granted');
-        Alert.alert('Permission Required', 'Please grant permission to access your photo library.');
-        return;
-      }
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        quality: 0.7,
-      });
-      if (!result.canceled) {
-        setImageUri(result.assets[0].uri);
-        setImageUrl(''); // Clear URL if picking from gallery
-      }
-    } catch (e) {
-      console.log('pickImage error', e);
-    }
-  };
-
   const handleSelectPictogram = (pictogramUrl: string) => {
     console.log('Pictogram selected:', pictogramUrl);
     setImageUrl(pictogramUrl);
-    setImageUri(undefined); // Clear gallery image
     setShowPictogramSelector(false);
   };
 
   const closeAndReset = () => {
     setPhrase('');
     setColor('#FFFFFF');
-    setImageUri(undefined);
     setImageUrl('');
     setShowPictogramSelector(false);
     onClose();
@@ -151,7 +125,6 @@ export default function TabbedSettingsSheet({
       id: `custom-${Date.now()}`,
       text: phrase.trim(),
       color,
-      imageUri,
       imageUrl: imageUrl.trim() || undefined,
       category: selectedCategory,
     };
@@ -478,7 +451,7 @@ export default function TabbedSettingsSheet({
               </View>
 
               <Text style={styles.sectionTitle}>Pictogram</Text>
-              <Text style={styles.helperText}>Browse ARASAAC pictograms or add a custom image</Text>
+              <Text style={styles.helperText}>Browse ARASAAC pictograms for this tile</Text>
               
               <View style={styles.imageOptionsRow}>
                 <TouchableOpacity 
@@ -489,30 +462,18 @@ export default function TabbedSettingsSheet({
                   <Icon name="images-outline" size={20} color={colors.primary} />
                   <Text style={styles.imageOptionText}>Browse Pictograms</Text>
                 </TouchableOpacity>
-                
-                <TouchableOpacity 
-                  style={[styles.imageOptionBtn, { flex: 1 }]} 
-                  onPress={pickImage} 
-                  activeOpacity={0.9}
-                >
-                  <Icon name="image-outline" size={20} color={colors.primary} />
-                  <Text style={styles.imageOptionText}>Pick from Gallery</Text>
-                </TouchableOpacity>
               </View>
 
-              {(imageUri || imageUrl) && (
+              {imageUrl && (
                 <View style={styles.imagePreviewContainer}>
                   <Image 
-                    source={{ uri: imageUri || imageUrl }} 
+                    source={{ uri: imageUrl }} 
                     style={styles.imagePreview} 
                     resizeMode="contain"
                   />
                   <TouchableOpacity 
                     style={styles.removeImageButton}
-                    onPress={() => {
-                      setImageUri(undefined);
-                      setImageUrl('');
-                    }}
+                    onPress={() => setImageUrl('')}
                     activeOpacity={0.8}
                   >
                     <Icon name="close-circle" size={24} color={colors.danger} />
