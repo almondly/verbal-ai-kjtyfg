@@ -15,11 +15,14 @@ interface Pictogram {
   keywords: { keyword: string }[];
 }
 
+type PictogramVariant = '500' | '2500' | '2500_n';
+
 export default function PictogramSelector({ word, onSelect, onClose }: Props) {
   const [searchQuery, setSearchQuery] = useState(word);
   const [pictograms, setPictograms] = useState<Pictogram[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedVariant, setSelectedVariant] = useState<PictogramVariant>('500');
 
   useEffect(() => {
     searchPictograms(word);
@@ -45,8 +48,8 @@ export default function PictogramSelector({ word, onSelect, onClose }: Props) {
       }
 
       const data = await response.json();
-      console.log('ARASAAC Baby pictograms search results:', data.length, 'pictograms found for', query);
-      setPictograms(data.slice(0, 20)); // Limit to 20 results
+      console.log('ARASAAC pictograms search results:', data.length, 'pictograms found for', query);
+      setPictograms(data.slice(0, 30)); // Increased to 30 results for better selection
     } catch (err) {
       console.error('Error fetching pictograms:', err);
       setError('Failed to load pictograms. Please try again.');
@@ -61,10 +64,36 @@ export default function PictogramSelector({ word, onSelect, onClose }: Props) {
   };
 
   const handleSelectPictogram = (pictogramId: number) => {
-    // Use Baby ARASAAC pictograms by default (skin color variant)
-    const pictogramUrl = `https://static.arasaac.org/pictograms/${pictogramId}/${pictogramId}_2500_n.png`;
-    console.log('Selected Baby ARASAAC pictogram:', pictogramUrl);
+    // Use the selected variant for the pictogram
+    const pictogramUrl = `https://static.arasaac.org/pictograms/${pictogramId}/${pictogramId}_${selectedVariant}.png`;
+    console.log('Selected ARASAAC pictogram:', pictogramUrl, 'variant:', selectedVariant);
     onSelect(pictogramUrl);
+  };
+
+  const getVariantLabel = (variant: PictogramVariant): string => {
+    switch (variant) {
+      case '500':
+        return 'Advanced (Color)';
+      case '2500':
+        return 'Detailed (Color)';
+      case '2500_n':
+        return 'Detailed (Skin)';
+      default:
+        return 'Advanced';
+    }
+  };
+
+  const getVariantDescription = (variant: PictogramVariant): string => {
+    switch (variant) {
+      case '500':
+        return 'High-quality colored pictograms with detail';
+      case '2500':
+        return 'Very detailed colored pictograms';
+      case '2500_n':
+        return 'Very detailed with skin tones (for people)';
+      default:
+        return '';
+    }
   };
 
   return (
@@ -96,8 +125,36 @@ export default function PictogramSelector({ word, onSelect, onClose }: Props) {
         </TouchableOpacity>
       </View>
 
+      <View style={styles.variantSelector}>
+        <Text style={styles.variantLabel}>Pictogram Style:</Text>
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.variantButtons}
+        >
+          {(['500', '2500', '2500_n'] as PictogramVariant[]).map((variant) => (
+            <TouchableOpacity
+              key={variant}
+              style={[
+                styles.variantBtn,
+                selectedVariant === variant && styles.variantBtnActive
+              ]}
+              onPress={() => setSelectedVariant(variant)}
+              activeOpacity={0.7}
+            >
+              <Text style={[
+                styles.variantBtnText,
+                selectedVariant === variant && styles.variantBtnTextActive
+              ]}>
+                {getVariantLabel(variant)}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+
       <Text style={styles.helperText}>
-        Tap a pictogram to select it. Using Baby ARASAAC pictograms for visual consistency.
+        {getVariantDescription(selectedVariant)}
       </Text>
 
       {loading && (
@@ -137,8 +194,8 @@ export default function PictogramSelector({ word, onSelect, onClose }: Props) {
         >
           <View style={styles.pictogramGrid}>
             {pictograms.map((pictogram) => {
-              // Use Baby ARASAAC pictograms (skin color variant)
-              const pictogramUrl = `https://static.arasaac.org/pictograms/${pictogram._id}/${pictogram._id}_2500_n.png`;
+              // Use the selected variant
+              const pictogramUrl = `https://static.arasaac.org/pictograms/${pictogram._id}/${pictogram._id}_${selectedVariant}.png`;
               const keywords = pictogram.keywords.map(k => k.keyword).join(', ');
               
               return (
@@ -194,7 +251,7 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     gap: 12,
-    marginBottom: 12,
+    marginBottom: 16,
   },
   searchInput: {
     flex: 1,
@@ -216,8 +273,41 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  helperText: {
+  variantSelector: {
+    marginBottom: 12,
+  },
+  variantLabel: {
+    fontSize: 14,
+    fontFamily: 'Montserrat_600SemiBold',
+    color: colors.text,
+    marginBottom: 8,
+  },
+  variantButtons: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  variantBtn: {
+    backgroundColor: '#F3F4F6',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  variantBtnActive: {
+    backgroundColor: colors.primary + '20',
+    borderColor: colors.primary,
+  },
+  variantBtnText: {
     fontSize: 13,
+    fontFamily: 'Montserrat_600SemiBold',
+    color: colors.textSecondary,
+  },
+  variantBtnTextActive: {
+    color: colors.primary,
+  },
+  helperText: {
+    fontSize: 12,
     fontFamily: 'Montserrat_400Regular',
     color: colors.textSecondary,
     marginBottom: 16,
@@ -293,7 +383,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 12,
     alignItems: 'center',
-    borderWidth: 5,
+    borderWidth: 3,
     borderColor: colors.primary,
     boxShadow: '0px 3px 8px rgba(0,0,0,0.12)',
   },
