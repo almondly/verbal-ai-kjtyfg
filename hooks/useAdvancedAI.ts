@@ -766,6 +766,54 @@ export function useAdvancedAI() {
         }
       });
 
+      // 1.5. PRONOUN TO POSSESSIVE SUGGESTIONS (ULTRA-HIGH PRIORITY!)
+      // When user types a pronoun, suggest the possessive form
+      const pronounToPossessive: { [key: string]: string } = {
+        'he': 'his',
+        'she': 'her',
+        'i': 'my',
+        'you': 'your',
+        'we': 'our',
+        'they': 'their'
+      };
+      
+      if (lastWord && pronounToPossessive[lastWord]) {
+        const possessive = pronounToPossessive[lastWord];
+        if (!suggestions.some(s => areSimilarWords(s.text.toLowerCase(), possessive.toLowerCase())) &&
+            !currentWords.some(w => areSimilarWords(w.toLowerCase(), possessive.toLowerCase()))) {
+          suggestions.push({
+            text: possessive,
+            confidence: 0.96,
+            type: 'common_phrase',
+            context: `Possessive form of "${lastWord}"`
+          });
+        }
+      }
+      
+      // Also suggest possessive after pronoun + verb patterns like "he needs", "she wants", "I need"
+      if (currentWords.length >= 2) {
+        const lastTwoWords = [currentWords[currentWords.length - 2]?.toLowerCase(), lastWord];
+        const pronoun = lastTwoWords[0];
+        const verb = lastTwoWords[1];
+        
+        // Common verbs that often precede possessive pronouns
+        const possessiveVerbs = ['needs', 'need', 'wants', 'want', 'likes', 'like', 'has', 'have', 
+                                 'lost', 'found', 'brought', 'forgot', 'loves', 'love'];
+        
+        if (pronoun && pronounToPossessive[pronoun] && possessiveVerbs.includes(verb)) {
+          const possessive = pronounToPossessive[pronoun];
+          if (!suggestions.some(s => areSimilarWords(s.text.toLowerCase(), possessive.toLowerCase())) &&
+              !currentWords.some(w => areSimilarWords(w.toLowerCase(), possessive.toLowerCase()))) {
+            suggestions.push({
+              text: possessive,
+              confidence: 0.94,
+              type: 'common_phrase',
+              context: `"${pronoun} ${verb}" often followed by "${possessive}"`
+            });
+          }
+        }
+      }
+
       // 2. CATEGORY-BASED CONTEXTUAL SUGGESTIONS (ULTRA-HIGH PRIORITY - FIXED!)
       if (currentCategory && currentCategory !== 'all' && currentCategory !== 'keyboard') {
         console.log('🎯 Getting FIXED category-relevant words for category:', currentCategory);

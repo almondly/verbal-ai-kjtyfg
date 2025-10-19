@@ -18,6 +18,15 @@ import { getContextualAACSentences, aacSentences } from './aacSentences';
 
 // Enhanced sentence templates with pronoun variations and connecting words (Australian English)
 export const sentenceTemplates = [
+  // PRONOUN TO POSSESSIVE MAPPINGS (NEW FEATURE!)
+  // When user types a pronoun, suggest the possessive form
+  { pattern: ['he'], completions: ['wants', 'needs', 'likes', 'has', 'is', 'can', 'his'] },
+  { pattern: ['she'], completions: ['wants', 'needs', 'likes', 'has', 'is', 'can', 'her'] },
+  { pattern: ['I'], completions: ['want', 'need', 'like', 'have', 'am', 'can', 'my'] },
+  { pattern: ['you'], completions: ['want', 'need', 'like', 'have', 'are', 'can', 'your'] },
+  { pattern: ['we'], completions: ['want', 'need', 'like', 'have', 'are', 'can', 'our'] },
+  { pattern: ['they'], completions: ['want', 'need', 'like', 'have', 'are', 'can', 'their'] },
+  
   // Connecting words - THE
   { pattern: ['the'], completions: ['cat', 'dog', 'ball', 'book', 'toy', 'park', 'shop', 'toilet', 'car', 'bus'] },
   { pattern: ['the', 'cat'], completions: ['is', 'was', 'can', 'wants', 'needs'] },
@@ -37,32 +46,26 @@ export const sentenceTemplates = [
   { pattern: ['this'], completions: ['is', 'was', 'can', 'looks', 'sounds'] },
   { pattern: ['this', 'is'], completions: ['good', 'bad', 'nice', 'mine', 'yours', 'my'] },
   
-  // I want variations
-  { pattern: ['I', 'want'], completions: ['to go', 'to play', 'to eat', 'to drink', 'some water', 'some food', 'that', 'more', 'to go outside', 'to watch telly', 'help', 'the', 'a'] },
+  // I want variations (with possessive)
   { pattern: ['I', 'want', 'to'], completions: ['go', 'play', 'eat', 'drink', 'sleep', 'read', 'draw', 'watch', 'go outside', 'go home'] },
   { pattern: ['I', 'want', 'the'], completions: ['ball', 'book', 'toy', 'red one', 'blue one'] },
   { pattern: ['I', 'want', 'a'], completions: ['toy', 'book', 'snack', 'drink'] },
   
-  // You want variations
-  { pattern: ['you', 'want'], completions: ['to go', 'to play', 'to eat', 'to drink', 'some water', 'some food', 'that', 'more', 'to help me', 'to come', 'the', 'a'] },
+  // You want variations (with possessive)
   { pattern: ['you', 'want', 'to'], completions: ['go', 'play', 'eat', 'drink', 'help me', 'come', 'see', 'know'] },
   { pattern: ['you', 'want', 'the'], completions: ['ball', 'book', 'toy', 'red one', 'blue one'] },
   
-  // He/She wants variations
-  { pattern: ['he', 'wants'], completions: ['to go', 'to play', 'to eat', 'to drink', 'some water', 'some food', 'that', 'more', 'help', 'the', 'a'] },
-  { pattern: ['she', 'wants'], completions: ['to go', 'to play', 'to eat', 'to drink', 'some water', 'some food', 'that', 'more', 'help', 'the', 'a'] },
+  // He/She wants variations (with possessive)
   { pattern: ['he', 'wants', 'to'], completions: ['go', 'play', 'eat', 'drink', 'help', 'come', 'see'] },
   { pattern: ['she', 'wants', 'to'], completions: ['go', 'play', 'eat', 'drink', 'help', 'come', 'see'] },
   { pattern: ['he', 'wants', 'the'], completions: ['ball', 'book', 'toy', 'red one', 'blue one'] },
   { pattern: ['she', 'wants', 'the'], completions: ['ball', 'book', 'toy', 'red one', 'blue one'] },
   
-  // We want variations
-  { pattern: ['we', 'want'], completions: ['to go', 'to play', 'to eat', 'to drink', 'some water', 'some food', 'that', 'more', 'to go outside', 'to play together', 'the', 'a'] },
+  // We want variations (with possessive)
   { pattern: ['we', 'want', 'to'], completions: ['go', 'play', 'eat', 'drink', 'go outside', 'play together', 'have fun'] },
   { pattern: ['we', 'want', 'the'], completions: ['ball', 'book', 'toy', 'red one', 'blue one'] },
   
-  // They want variations
-  { pattern: ['they', 'want'], completions: ['to go', 'to play', 'to eat', 'to drink', 'some water', 'some food', 'that', 'more', 'help', 'the', 'a'] },
+  // They want variations (with possessive)
   { pattern: ['they', 'want', 'to'], completions: ['go', 'play', 'eat', 'drink', 'help', 'come', 'see'] },
   { pattern: ['they', 'want', 'the'], completions: ['ball', 'book', 'toy', 'red one', 'blue one'] },
   
@@ -91,13 +94,21 @@ export const sentenceTemplates = [
   { pattern: ['you', 'need', 'to'], completions: ['help me', 'come', 'see', 'know', 'listen'] },
   { pattern: ['you', 'need', 'the'], completions: ['book', 'pencil', 'paper'] },
   
-  // He/She needs variations
-  { pattern: ['he', 'needs'], completions: ['help', 'water', 'food', 'to go', 'to rest', 'that', 'this', 'the', 'a'] },
-  { pattern: ['she', 'needs'], completions: ['help', 'water', 'food', 'to go', 'to rest', 'that', 'this', 'the', 'a'] },
+  // He/She needs variations (with possessive suggestions)
+  { pattern: ['he', 'needs'], completions: ['help', 'his', 'water', 'food', 'to go', 'to rest', 'that', 'this', 'the', 'a'] },
+  { pattern: ['she', 'needs'], completions: ['help', 'her', 'water', 'food', 'to go', 'to rest', 'that', 'this', 'the', 'a'] },
   { pattern: ['he', 'needs', 'to'], completions: ['go', 'eat', 'drink', 'rest', 'help'] },
   { pattern: ['she', 'needs', 'to'], completions: ['go', 'eat', 'drink', 'rest', 'help'] },
   { pattern: ['he', 'needs', 'the'], completions: ['toilet', 'bathroom', 'book'] },
   { pattern: ['she', 'needs', 'the'], completions: ['toilet', 'bathroom', 'book'] },
+  
+  // Pronoun + "needs help with" pattern (possessive suggestions)
+  { pattern: ['he', 'needs', 'help'], completions: ['with', 'his', 'please', 'now'] },
+  { pattern: ['she', 'needs', 'help'], completions: ['with', 'her', 'please', 'now'] },
+  { pattern: ['I', 'need', 'help'], completions: ['with', 'my', 'please', 'now'] },
+  { pattern: ['he', 'needs', 'help', 'with'], completions: ['his', 'the', 'this', 'that'] },
+  { pattern: ['she', 'needs', 'help', 'with'], completions: ['her', 'the', 'this', 'that'] },
+  { pattern: ['I', 'need', 'help', 'with'], completions: ['my', 'the', 'this', 'that'] },
   
   // We need variations
   { pattern: ['we', 'need'], completions: ['help', 'water', 'food', 'to go', 'to rest', 'that', 'this', 'to go home', 'the', 'a'] },
@@ -116,35 +127,79 @@ export const sentenceTemplates = [
   { pattern: ['dad', 'needs', 'to'], completions: ['go', 'rest', 'help'] },
   
   // My sister/brother need variations
-  { pattern: ['my', 'sister', 'needs'], completions: ['help', 'water', 'food', 'to go', 'the', 'a'] },
-  { pattern: ['my', 'brother', 'needs'], completions: ['help', 'water', 'food', 'to go', 'the', 'a'] },
-  { pattern: ['my', 'friend', 'needs'], completions: ['help', 'water', 'food', 'to go', 'the', 'a'] },
+  { pattern: ['my', 'sister', 'needs'], completions: ['help', 'water', 'food', 'to go', 'her', 'the', 'a'] },
+  { pattern: ['my', 'brother', 'needs'], completions: ['help', 'water', 'food', 'to go', 'his', 'the', 'a'] },
+  { pattern: ['my', 'friend', 'needs'], completions: ['help', 'water', 'food', 'to go', 'their', 'the', 'a'] },
   
-  // I like variations
-  { pattern: ['I', 'like'], completions: ['to play', 'to eat', 'this', 'that', 'it', 'you', 'playing', 'eating', 'red', 'blue', 'the', 'a'] },
+  // Additional possessive pronoun patterns for common verbs
+  { pattern: ['he', 'wants'], completions: ['his', 'to go', 'to play', 'to eat', 'to drink', 'some water', 'some food', 'that', 'more', 'help', 'the', 'a'] },
+  { pattern: ['she', 'wants'], completions: ['her', 'to go', 'to play', 'to eat', 'to drink', 'some water', 'some food', 'that', 'more', 'help', 'the', 'a'] },
+  { pattern: ['I', 'want'], completions: ['my', 'to go', 'to play', 'to eat', 'to drink', 'some water', 'some food', 'that', 'more', 'to go outside', 'to watch telly', 'help', 'the', 'a'] },
+  { pattern: ['you', 'want'], completions: ['your', 'to go', 'to play', 'to eat', 'to drink', 'some water', 'some food', 'that', 'more', 'to help me', 'to come', 'the', 'a'] },
+  { pattern: ['we', 'want'], completions: ['our', 'to go', 'to play', 'to eat', 'to drink', 'some water', 'some food', 'that', 'more', 'to go outside', 'to play together', 'the', 'a'] },
+  { pattern: ['they', 'want'], completions: ['their', 'to go', 'to play', 'to eat', 'to drink', 'some water', 'some food', 'that', 'more', 'help', 'the', 'a'] },
+  
+  { pattern: ['he', 'likes'], completions: ['his', 'to play', 'to eat', 'this', 'that', 'it', 'playing', 'eating', 'the', 'a'] },
+  { pattern: ['she', 'likes'], completions: ['her', 'to play', 'to eat', 'this', 'that', 'it', 'playing', 'eating', 'the', 'a'] },
+  { pattern: ['I', 'like'], completions: ['my', 'to play', 'to eat', 'this', 'that', 'it', 'you', 'playing', 'eating', 'red', 'blue', 'the', 'a'] },
+  { pattern: ['you', 'like'], completions: ['your', 'to play', 'to eat', 'this', 'that', 'it', 'playing', 'eating', 'the', 'a'] },
+  { pattern: ['we', 'like'], completions: ['our', 'to play', 'to eat', 'this', 'that', 'it', 'playing', 'eating', 'playing together', 'the', 'a'] },
+  { pattern: ['they', 'like'], completions: ['their', 'to play', 'to eat', 'this', 'that', 'it', 'playing', 'eating', 'the', 'a'] },
+  
+  { pattern: ['he', 'has'], completions: ['his', 'a toy', 'a book', 'water', 'food', 'this', 'that', 'something', 'to go', 'the', 'a'] },
+  { pattern: ['she', 'has'], completions: ['her', 'a toy', 'a book', 'water', 'food', 'this', 'that', 'something', 'to go', 'the', 'a'] },
+  { pattern: ['I', 'have'], completions: ['my', 'a toy', 'a book', 'water', 'food', 'this', 'that', 'something', 'to go', 'to tell you', 'the', 'a'] },
+  { pattern: ['you', 'have'], completions: ['your', 'to help me', 'to come', 'to see', 'this', 'that', 'something', 'the', 'a'] },
+  { pattern: ['we', 'have'], completions: ['our', 'to go', 'to eat', 'to play', 'this', 'that', 'something', 'fun', 'the', 'a'] },
+  { pattern: ['they', 'have'], completions: ['their', 'to go', 'to eat', 'this', 'that', 'something', 'the', 'a'] },
+  
+  { pattern: ['he', 'lost'], completions: ['his', 'the', 'a', 'something'] },
+  { pattern: ['she', 'lost'], completions: ['her', 'the', 'a', 'something'] },
+  { pattern: ['I', 'lost'], completions: ['my', 'the', 'a', 'something'] },
+  { pattern: ['you', 'lost'], completions: ['your', 'the', 'a', 'something'] },
+  { pattern: ['we', 'lost'], completions: ['our', 'the', 'a', 'something'] },
+  { pattern: ['they', 'lost'], completions: ['their', 'the', 'a', 'something'] },
+  
+  { pattern: ['he', 'found'], completions: ['his', 'the', 'a', 'something'] },
+  { pattern: ['she', 'found'], completions: ['her', 'the', 'a', 'something'] },
+  { pattern: ['I', 'found'], completions: ['my', 'the', 'a', 'something'] },
+  { pattern: ['you', 'found'], completions: ['your', 'the', 'a', 'something'] },
+  { pattern: ['we', 'found'], completions: ['our', 'the', 'a', 'something'] },
+  { pattern: ['they', 'found'], completions: ['their', 'the', 'a', 'something'] },
+  
+  { pattern: ['he', 'brought'], completions: ['his', 'the', 'a', 'something'] },
+  { pattern: ['she', 'brought'], completions: ['her', 'the', 'a', 'something'] },
+  { pattern: ['I', 'brought'], completions: ['my', 'the', 'a', 'something'] },
+  { pattern: ['you', 'brought'], completions: ['your', 'the', 'a', 'something'] },
+  { pattern: ['we', 'brought'], completions: ['our', 'the', 'a', 'something'] },
+  { pattern: ['they', 'brought'], completions: ['their', 'the', 'a', 'something'] },
+  
+  { pattern: ['he', 'forgot'], completions: ['his', 'the', 'a', 'something', 'to'] },
+  { pattern: ['she', 'forgot'], completions: ['her', 'the', 'a', 'something', 'to'] },
+  { pattern: ['I', 'forgot'], completions: ['my', 'the', 'a', 'something', 'to'] },
+  { pattern: ['you', 'forgot'], completions: ['your', 'the', 'a', 'something', 'to'] },
+  { pattern: ['we', 'forgot'], completions: ['our', 'the', 'a', 'something', 'to'] },
+  { pattern: ['they', 'forgot'], completions: ['their', 'the', 'a', 'something', 'to'] },
+  
+  // I like variations (with possessive)
   { pattern: ['I', 'like', 'to'], completions: ['play', 'eat', 'read', 'draw', 'watch', 'listen', 'go outside'] },
   { pattern: ['I', 'like', 'the'], completions: ['red one', 'blue one', 'big one', 'small one'] },
   
-  // You like variations
-  { pattern: ['you', 'like'], completions: ['to play', 'to eat', 'this', 'that', 'it', 'playing', 'eating', 'the', 'a'] },
+  // You like variations (with possessive)
   { pattern: ['you', 'like', 'to'], completions: ['play', 'eat', 'read', 'draw', 'watch', 'help'] },
   { pattern: ['you', 'like', 'the'], completions: ['red one', 'blue one', 'big one', 'small one'] },
   
-  // He/She likes variations
-  { pattern: ['he', 'likes'], completions: ['to play', 'to eat', 'this', 'that', 'it', 'playing', 'eating', 'the', 'a'] },
-  { pattern: ['she', 'likes'], completions: ['to play', 'to eat', 'this', 'that', 'it', 'playing', 'eating', 'the', 'a'] },
+  // He/She likes variations (with possessive)
   { pattern: ['he', 'likes', 'to'], completions: ['play', 'eat', 'read', 'draw', 'watch'] },
   { pattern: ['she', 'likes', 'to'], completions: ['play', 'eat', 'read', 'draw', 'watch'] },
   { pattern: ['he', 'likes', 'the'], completions: ['red one', 'blue one', 'big one', 'small one'] },
   { pattern: ['she', 'likes', 'the'], completions: ['red one', 'blue one', 'big one', 'small one'] },
   
-  // We like variations
-  { pattern: ['we', 'like'], completions: ['to play', 'to eat', 'this', 'that', 'it', 'playing', 'eating', 'playing together', 'the', 'a'] },
+  // We like variations (with possessive)
   { pattern: ['we', 'like', 'to'], completions: ['play', 'eat', 'play together', 'have fun', 'go outside'] },
   { pattern: ['we', 'like', 'the'], completions: ['red one', 'blue one', 'big one', 'small one'] },
   
-  // They like variations
-  { pattern: ['they', 'like'], completions: ['to play', 'to eat', 'this', 'that', 'it', 'playing', 'eating', 'the', 'a'] },
+  // They like variations (with possessive)
   { pattern: ['they', 'like', 'to'], completions: ['play', 'eat', 'read', 'draw', 'watch'] },
   { pattern: ['they', 'like', 'the'], completions: ['red one', 'blue one', 'big one', 'small one'] },
   
@@ -157,32 +212,26 @@ export const sentenceTemplates = [
   { pattern: ['my', 'brother', 'likes'], completions: ['to play', 'to eat', 'this', 'that', 'the', 'a'] },
   { pattern: ['my', 'friend', 'likes'], completions: ['to play', 'to eat', 'this', 'that', 'the', 'a'] },
   
-  // I have variations
-  { pattern: ['I', 'have'], completions: ['a toy', 'a book', 'water', 'food', 'this', 'that', 'something', 'to go', 'to tell you', 'the', 'a'] },
+  // I have variations (with possessive)
   { pattern: ['I', 'have', 'to'], completions: ['go', 'eat', 'sleep', 'tell you', 'go home', 'use toilet'] },
   { pattern: ['I', 'have', 'the'], completions: ['ball', 'book', 'toy', 'red one', 'blue one'] },
   { pattern: ['I', 'have', 'a'], completions: ['toy', 'book', 'ball', 'question'] },
   
-  // You have variations
-  { pattern: ['you', 'have'], completions: ['to help me', 'to come', 'to see', 'this', 'that', 'something', 'the', 'a'] },
+  // You have variations (with possessive)
   { pattern: ['you', 'have', 'to'], completions: ['help me', 'come', 'see', 'listen', 'know'] },
   { pattern: ['you', 'have', 'the'], completions: ['ball', 'book', 'toy', 'red one', 'blue one'] },
   
-  // He/She has variations
-  { pattern: ['he', 'has'], completions: ['a toy', 'a book', 'water', 'food', 'this', 'that', 'something', 'to go', 'the', 'a'] },
-  { pattern: ['she', 'has'], completions: ['a toy', 'a book', 'water', 'food', 'this', 'that', 'something', 'to go', 'the', 'a'] },
+  // He/She has variations (with possessive)
   { pattern: ['he', 'has', 'to'], completions: ['go', 'eat', 'sleep', 'go home', 'leave'] },
   { pattern: ['she', 'has', 'to'], completions: ['go', 'eat', 'sleep', 'go home', 'leave'] },
   { pattern: ['he', 'has', 'the'], completions: ['ball', 'book', 'toy', 'red one', 'blue one'] },
   { pattern: ['she', 'has', 'the'], completions: ['ball', 'book', 'toy', 'red one', 'blue one'] },
   
-  // We have variations
-  { pattern: ['we', 'have'], completions: ['to go', 'to eat', 'to play', 'this', 'that', 'something', 'fun', 'the', 'a'] },
+  // We have variations (with possessive)
   { pattern: ['we', 'have', 'to'], completions: ['go', 'eat', 'play', 'go home', 'leave', 'finish'] },
   { pattern: ['we', 'have', 'the'], completions: ['ball', 'book', 'toy', 'red one', 'blue one'] },
   
-  // They have variations
-  { pattern: ['they', 'have'], completions: ['to go', 'to eat', 'this', 'that', 'something', 'the', 'a'] },
+  // They have variations (with possessive)
   { pattern: ['they', 'have', 'to'], completions: ['go', 'eat', 'leave', 'finish'] },
   { pattern: ['they', 'have', 'the'], completions: ['ball', 'book', 'toy', 'red one', 'blue one'] },
   
