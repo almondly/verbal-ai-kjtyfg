@@ -57,11 +57,11 @@ const TileItem = memo(function TileItem({
 
   // Responsive font size - SIGNIFICANTLY INCREASED for better readability
   const getResponsiveFontSize = () => {
-    if (width >= 1400) return 24;
-    if (width >= 1200) return 22;
-    if (width >= 1000) return 20;
-    if (width >= 820) return 19;
-    if (width >= 680) return 18;
+    if (width >= 1400) return 40;
+    if (width >= 1200) return 38;
+    if (width >= 1000) return 36;
+    if (width >= 820) return 30;
+    if (width >= 680) return 29;
     return 16;
   };
 
@@ -69,9 +69,10 @@ const TileItem = memo(function TileItem({
   const fontSize = getResponsiveFontSize();
 
   // Determine which image to display
-  // Priority: tile.image (ARASAAC pictograms) > tile.imageUrl > tile.imageUri > NO FALLBACK
+  // Priority: tile.image (ARASAAC pictograms) > tile.imageUrl > tile.imageUri > NO FALLBACK (except for Add tile)
   const hasPictogram = !isAdd && tile.image && !pictogramError;
   const hasCustomImage = !isAdd && !hasPictogram && (tile.imageUrl || tile.imageUri) && !customImageError;
+  const shouldShowIcon = isAdd; // ONLY show icon for the Add tile
 
   return (
     <Animated.View
@@ -91,7 +92,7 @@ const TileItem = memo(function TileItem({
           { 
             backgroundColor: '#FFFFFF',
             borderColor: tileColor,
-            borderWidth: 6,
+            borderWidth: 10,
           }
         ]}
       >
@@ -116,7 +117,7 @@ const TileItem = memo(function TileItem({
                 setCustomImageError(true);
               }}
             />
-          ) : isAdd ? (
+          ) : shouldShowIcon ? (
             <Icon name="add-circle" size={80} color={tileColor} />
           ) : null}
         </View>
@@ -138,14 +139,14 @@ export default TileItem;
 
 const styles = StyleSheet.create({
   tileWrap: {
-    padding: 6,
+    padding: 3,
   },
   tile: {
     aspectRatio: 1,
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 12,
+    padding: 6,
     boxShadow: '0px 3px 10px rgba(0,0,0,0.12)',
   },
   iconWrap: {
@@ -153,31 +154,31 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 8,
+    marginBottom: 4,
   },
   pictogramImage: {
     width: '100%',
     height: '100%',
-    maxWidth: 180,
-    maxHeight: 180,
+    maxWidth: 200,
+    maxHeight: 200,
   },
   customImage: {
     width: '100%',
     height: '100%',
-    maxWidth: 180,
-    maxHeight: 180,
+    maxWidth: 200,
+    maxHeight: 200,
     borderRadius: 8,
   },
   textContainer: {
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 40,
+    minHeight: 30,
   },
   text: {
     fontFamily: 'Montserrat_700Bold',
     textAlign: 'center',
-    lineHeight: 22,
-    paddingHorizontal: 4,
+    lineHeight: 70,
+    paddingHorizontal: 2,
   },
 });
