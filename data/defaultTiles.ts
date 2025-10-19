@@ -34,9 +34,9 @@ const categoryColor: Record<string, string> = {
 const pictograms: Record<string, string> = {
   // Core vocabulary - Verified colorful ARASAAC pictograms
   i: 'https://static.arasaac.org/pictograms/8224/8224_2500.png',
-  you: 'https://static.arasaac.org/pictograms/1262/1262_2500.png',
-  he: 'https://static.arasaac.org/pictograms/1885/1885_2500.png',
-  she: 'https://static.arasaac.org/pictograms/9097/9097_2500.png',
+  you: 'https://static.arasaac.org/pictograms/2608/2608_2500.png',
+  he: 'https://static.arasaac.org/pictograms/6480/6480_2500.png',
+  she: 'https://static.arasaac.org/pictograms/7028/7028_2500.png',
   we: 'https://static.arasaac.org/pictograms/2544/2544_2500.png',
   they: 'https://static.arasaac.org/pictograms/2544/2544_2500.png',
   it: 'https://static.arasaac.org/pictograms/13054/13054_2500.png',
