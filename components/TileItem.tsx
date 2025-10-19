@@ -23,7 +23,8 @@ const TileItem = memo(function TileItem({
 }: Props) {
   const scale = useRef(new Animated.Value(1)).current;
   const { width } = useWindowDimensions();
-  const [imageError, setImageError] = useState(false);
+  const [pictogramError, setPictogramError] = useState(false);
+  const [customImageError, setCustomImageError] = useState(false);
 
   const handlePressIn = () => {
     Animated.spring(scale, { 
@@ -69,10 +70,8 @@ const TileItem = memo(function TileItem({
 
   // Determine which image to display
   // Priority: tile.image (ARASAAC pictograms) > tile.imageUrl > tile.imageUri > fallback icon
-  const pictogramUrl = !isAdd && tile.image && !imageError ? tile.image : null;
-  const customImageUrl = !isAdd && !pictogramUrl && (tile.imageUrl || tile.imageUri) && !imageError 
-    ? (tile.imageUrl || tile.imageUri) 
-    : null;
+  const hasPictogram = !isAdd && tile.image && !pictogramError;
+  const hasCustomImage = !isAdd && !hasPictogram && (tile.imageUrl || tile.imageUri) && !customImageError;
 
   return (
     <Animated.View
@@ -97,24 +96,24 @@ const TileItem = memo(function TileItem({
         ]}
       >
         <View style={styles.iconWrap}>
-          {pictogramUrl ? (
+          {hasPictogram ? (
             <Image
-              source={{ uri: pictogramUrl }}
+              source={{ uri: tile.image }}
               style={styles.pictogramImage}
               resizeMode="contain"
               onError={(error) => {
-                console.log('Failed to load ARASAAC pictogram for tile:', tile.text, error.nativeEvent.error);
-                setImageError(true);
+                console.log('Failed to load ARASAAC pictogram for tile:', tile.text, tile.image, error.nativeEvent.error);
+                setPictogramError(true);
               }}
             />
-          ) : customImageUrl ? (
+          ) : hasCustomImage ? (
             <Image
-              source={{ uri: customImageUrl }}
+              source={{ uri: tile.imageUrl || tile.imageUri }}
               style={styles.customImage}
               resizeMode="contain"
               onError={(error) => {
-                console.log('Failed to load custom image for tile:', tile.text, error.nativeEvent.error);
-                setImageError(true);
+                console.log('Failed to load custom image for tile:', tile.text, tile.imageUrl || tile.imageUri, error.nativeEvent.error);
+                setCustomImageError(true);
               }}
             />
           ) : (

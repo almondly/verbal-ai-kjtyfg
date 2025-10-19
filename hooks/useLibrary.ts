@@ -6,7 +6,7 @@ import { defaultTiles } from '../data/defaultTiles';
 
 const LIBRARY_KEY = 'aac_tiles_v1';
 const SEED_VERSION_KEY = 'aac_tiles_seed_version';
-const CURRENT_SEED_VERSION = 6; // Incremented to force update with fixed pictograms for I, you, he, all
+const CURRENT_SEED_VERSION = 7; // Incremented to force update with fixed image priority logic
 
 function mergeMissingDefaults(stored: Tile[], defaults: Tile[]): Tile[] {
   // Create a map of default tiles by ID for quick lookup
@@ -20,14 +20,16 @@ function mergeMissingDefaults(stored: Tile[], defaults: Tile[]): Tile[] {
     const defaultTile = defaultsMap.get(storedTile.id);
     if (defaultTile) {
       // If this is a default tile, update it with the latest default properties
-      // but preserve any custom user modifications (imageUri, imageUrl)
+      // Priority: user's custom imageUri > user's custom imageUrl > default image
+      const hasCustomImage = storedTile.imageUri || (storedTile.imageUrl && storedTile.imageUrl !== defaultTile.imageUrl);
+      
       return {
-        ...defaultTile,
+        ...defaultTile, // Start with all default properties
         // Preserve custom user images if they exist
         imageUri: storedTile.imageUri,
-        imageUrl: storedTile.imageUrl || defaultTile.imageUrl,
-        // Use the new default image if no custom image exists
-        image: storedTile.imageUri || storedTile.imageUrl ? storedTile.image : defaultTile.image,
+        imageUrl: hasCustomImage ? storedTile.imageUrl : defaultTile.imageUrl,
+        // Only override the default image if user has a custom image
+        image: hasCustomImage ? undefined : defaultTile.image,
       };
     }
     // Keep custom tiles as-is
@@ -82,7 +84,7 @@ export function useLibrary() {
         if (seedVersion < CURRENT_SEED_VERSION) {
           // Migrate: merge in any missing defaults AND update existing tiles with new images
           console.log(
-            `🔄 Migrating tiles: seedVersion ${seedVersion} -> ${CURRENT_SEED_VERSION} - Fixing I, you, he, all pictograms`
+            `🔄 Migrating tiles: seedVersion ${seedVersion} -> ${CURRENT_SEED_VERSION} - Fixing image priority logic`
           );
           const merged = mergeMissingDefaults(loadedTiles, defaultTiles);
           setTiles(merged);

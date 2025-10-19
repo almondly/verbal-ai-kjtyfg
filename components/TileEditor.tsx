@@ -67,18 +67,40 @@ export default function TileEditor({ visible, tile, onSave, onClose }: Props) {
       return;
     }
 
+    // Determine which image property to use
+    // Priority: imageUri (local file) > imageUrl (custom URL) > image (ARASAAC pictogram)
     const updatedTile: Tile = {
       ...tile,
       text: text.trim(),
       color,
-      imageUri,
-      // Preserve the image property for default tiles, or use imageUrl for custom tiles
-      image: imageUrl.trim() || tile.image,
-      imageUrl: imageUrl.trim() || undefined,
       category: selectedCategory,
     };
 
-    console.log('Saving tile with image:', updatedTile.image, 'imageUrl:', updatedTile.imageUrl);
+    // Handle image properties correctly
+    if (imageUri) {
+      // User selected a local image
+      updatedTile.imageUri = imageUri;
+      updatedTile.imageUrl = undefined;
+      updatedTile.image = undefined;
+    } else if (imageUrl.trim()) {
+      // User entered a URL or selected a pictogram
+      updatedTile.imageUri = undefined;
+      updatedTile.imageUrl = undefined;
+      updatedTile.image = imageUrl.trim();
+    } else {
+      // No image selected
+      updatedTile.imageUri = undefined;
+      updatedTile.imageUrl = undefined;
+      updatedTile.image = undefined;
+    }
+
+    console.log('Saving tile:', {
+      text: updatedTile.text,
+      image: updatedTile.image,
+      imageUrl: updatedTile.imageUrl,
+      imageUri: updatedTile.imageUri,
+    });
+    
     onSave(updatedTile);
     onClose();
   };
