@@ -42,14 +42,24 @@ export default function CommunicationScreen() {
   const [editingTile, setEditingTile] = useState<Tile | null>(null);
   const [lastSpokenText, setLastSpokenText] = useState<string>('');
 
+  const router = useRouter();
+
+  // Handle keyboard category selection - redirect to keyboard screen
+  useEffect(() => {
+    if (selectedCategory === 'keyboard') {
+      router.push('/keyboard');
+      // Reset to 'all' after navigation so when user comes back it's not stuck on keyboard
+      setSelectedCategory('all');
+    }
+  }, [selectedCategory, router]);
+
   const filteredTiles = useMemo(() => {
     if (selectedCategory === 'all') return tiles;
+    if (selectedCategory === 'keyboard') return []; // No tiles for keyboard category
     return tiles.filter(t => t.category === selectedCategory);
   }, [tiles, selectedCategory]);
 
   const { resetLearning } = useAI();
-
-  const router = useRouter();
 
   useEffect(() => {
     (async () => {
@@ -84,8 +94,11 @@ export default function CommunicationScreen() {
       const availableWords = tiles.map(t => t.text);
       
       // Pass the current category to getAdvancedSuggestions for category-aware recommendations
+      // Don't pass 'keyboard' category as it should redirect
+      const categoryForAI = (selectedCategory !== 'all' && selectedCategory !== 'keyboard') ? selectedCategory : undefined;
+      
       const [advanced, timeBased] = await Promise.all([
-        getAdvancedSuggestions(words, availableWords, 10, selectedCategory !== 'all' ? selectedCategory : undefined),
+        getAdvancedSuggestions(words, availableWords, 10, categoryForAI),
         getTimeBasedSuggestions(),
       ]);
 
@@ -154,7 +167,8 @@ export default function CommunicationScreen() {
     setLastSpokenText(text);
     
     // Record the sentence for AI learning with category context
-    await recordUserInput(text, selectedCategory !== 'all' ? selectedCategory : undefined);
+    const categoryForAI = (selectedCategory !== 'all' && selectedCategory !== 'keyboard') ? selectedCategory : undefined;
+    await recordUserInput(text, categoryForAI);
     
     // Clear the sentence after speaking
     setSentence([]);
@@ -302,7 +316,7 @@ export default function CommunicationScreen() {
           onResetTiles={resetTiles}
           mode="add"
           onAddTile={addTile}
-          defaultCategoryId={selectedCategory !== 'all' ? selectedCategory : undefined}
+          defaultCategoryId={selectedCategory !== 'all' && selectedCategory !== 'keyboard' ? selectedCategory : undefined}
           currentEmotion={currentEmotion}
           onEmotionChange={setCurrentEmotion}
         />

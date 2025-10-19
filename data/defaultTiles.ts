@@ -83,6 +83,8 @@ const pictograms: Record<string, string> = {
   turn: 'https://static.arasaac.org/pictograms/2735/2735_2500.png',
   open: 'https://static.arasaac.org/pictograms/1977/1977_2500.png',
   close: 'https://static.arasaac.org/pictograms/1976/1976_2500.png',
+  use: 'https://static.arasaac.org/pictograms/2341/2341_2500.png',
+  borrow: 'https://static.arasaac.org/pictograms/5724/5724_2500.png',
 
   'all done': 'https://static.arasaac.org/pictograms/5426/5426_2500.png',
   finished: 'https://static.arasaac.org/pictograms/5426/5426_2500.png',
@@ -359,7 +361,7 @@ const t = (category: string, text: string): Tile => ({
 
 // 🧱 Default core vocabulary
 export const defaultTiles: Tile[] = [
-  // Core - Enhanced with connecting words
+  // Core - Enhanced with connecting words and missing common words
   t('core', 'I'),
   t('core', 'you'),
   t('core', 'he'),
@@ -415,6 +417,8 @@ export const defaultTiles: Tile[] = [
   t('core', 'think'),
   t('core', 'know'),
   t('core', 'understand'),
+  t('core', 'use'),
+  t('core', 'borrow'),
   t('core', 'all done'),
   t('core', 'finished'),
   t('core', 'please'),

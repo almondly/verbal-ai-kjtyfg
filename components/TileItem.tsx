@@ -92,7 +92,7 @@ const TileItem = memo(function TileItem({
           { 
             backgroundColor: '#FFFFFF',
             borderColor: tileColor,
-            borderWidth: 10,
+            borderWidth: 40,
           }
         ]}
       >
