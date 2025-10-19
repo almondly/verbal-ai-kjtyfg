@@ -93,12 +93,25 @@ export default function CommunicationScreen() {
       const words = sentence.map(t => t.text);
       const availableWords = tiles.map(t => t.text);
       
-      // Pass the current category to getAdvancedSuggestions for category-aware recommendations
+      // CRITICAL FIX: Pass the current category AND the category tiles information
       // Don't pass 'keyboard' category as it should redirect
       const categoryForAI = (selectedCategory !== 'all' && selectedCategory !== 'keyboard') ? selectedCategory : undefined;
       
+      // Create category tiles mapping for proper filtering
+      const categoryTiles = tiles.map(tile => ({
+        text: tile.text,
+        category: tile.category || 'core'
+      }));
+      
+      console.log('🎯 Calling getAdvancedSuggestions with:', {
+        words,
+        availableWordsCount: availableWords.length,
+        categoryForAI,
+        categoryTilesCount: categoryTiles.length
+      });
+      
       const [advanced, timeBased] = await Promise.all([
-        getAdvancedSuggestions(words, availableWords, 10, categoryForAI),
+        getAdvancedSuggestions(words, availableWords, 10, categoryForAI, categoryTiles),
         getTimeBasedSuggestions(),
       ]);
 

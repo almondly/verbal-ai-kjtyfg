@@ -696,7 +696,8 @@ export function useAdvancedAI() {
     currentWords: string[],
     availableWords: string[] = [],
     maxSuggestions: number = 10,
-    currentCategory?: string
+    currentCategory?: string,
+    categoryTiles?: { text: string; category: string }[]
   ): Promise<AdvancedSuggestion[]> => {
     try {
       const suggestions: AdvancedSuggestion[] = [];
@@ -709,13 +710,14 @@ export function useAdvancedAI() {
       const tenseContext = detectTenseContext(currentWords);
       const sentenceStructure = analyzeSentenceStructure(currentWords);
 
-      console.log('Getting advanced suggestions for:', { 
+      console.log('🧠 Getting ULTRA-ENHANCED advanced suggestions for:', { 
         currentWords, 
         lastWord, 
         currentText, 
         tenseContext,
         sentenceStructure,
-        currentCategory 
+        currentCategory,
+        hasCategoryTiles: !!categoryTiles
       });
 
       // 0. Check if sentence needs polite ending
@@ -764,11 +766,11 @@ export function useAdvancedAI() {
         }
       });
 
-      // 2. CATEGORY-BASED CONTEXTUAL SUGGESTIONS (HIGH PRIORITY - NEW ENHANCED FEATURE)
+      // 2. CATEGORY-BASED CONTEXTUAL SUGGESTIONS (ULTRA-HIGH PRIORITY - FIXED!)
       if (currentCategory && currentCategory !== 'all' && currentCategory !== 'keyboard') {
-        console.log('Getting category-relevant words for category:', currentCategory);
-        const categoryWords = getCategoryRelevantWords(currentWords, currentCategory, availableWords);
-        console.log('Category words found:', categoryWords);
+        console.log('🎯 Getting FIXED category-relevant words for category:', currentCategory);
+        const categoryWords = getCategoryRelevantWords(currentWords, currentCategory, availableWords, categoryTiles);
+        console.log('✅ Category words found:', categoryWords);
         
         categoryWords.forEach((word, index) => {
           if (!suggestions.some(s => areSimilarWords(s.text.toLowerCase(), word.toLowerCase())) &&
@@ -1160,7 +1162,7 @@ export function useAdvancedAI() {
         .slice(0, maxSuggestions)
         .map(({ text, confidence, type, context }) => ({ text, confidence, type, context })); // Remove score from output
 
-      console.log('Generated advanced suggestions:', finalSuggestions);
+      console.log('✨ Generated ULTRA-ENHANCED advanced suggestions:', finalSuggestions);
       return finalSuggestions;
 
     } catch (err) {

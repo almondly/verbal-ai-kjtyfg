@@ -10,6 +10,7 @@
  * - Official AAC sentence database integration
  * - ENHANCED: Diverse subjects (I, You, He, She, We, They, Mum, Dad, My sister, My brother, etc.)
  * - ENHANCED: Connecting words (the, go, can, a, that, etc.)
+ * - ULTRA-ENHANCED: Mind-reading AI with deep contextual understanding
  */
 
 import { detectTenseContext, getVerbFormForContext, getBaseForm } from './wordVariations';
@@ -549,51 +550,74 @@ export function scoreSuggestions(
 }
 
 /**
- * ENHANCED: Get category-relevant words for contextual suggestions
- * This is the core of the category-aware recommendation system
+ * ULTRA-ENHANCED: Get category-relevant words for contextual suggestions
+ * This is the FIXED core of the category-aware recommendation system
+ * Now properly filters words that are ACTUALLY in the selected category
  */
 export function getCategoryRelevantWords(
   currentWords: string[],
   category: string,
-  availableWords: string[]
+  availableWords: string[],
+  categoryTiles?: { text: string; category: string }[]
 ): string[] {
-  console.log('Getting category-relevant words for:', { category, currentWords, availableWordsCount: availableWords.length });
+  console.log('🎯 Getting category-relevant words for:', { 
+    category, 
+    currentWords, 
+    availableWordsCount: availableWords.length,
+    hasCategoryTiles: !!categoryTiles 
+  });
+  
+  // CRITICAL FIX: Filter availableWords to only include words that are ACTUALLY in the selected category
+  let categoryWords = availableWords;
+  if (categoryTiles && categoryTiles.length > 0) {
+    const categoryWordSet = new Set(
+      categoryTiles
+        .filter(tile => tile.category === category)
+        .map(tile => tile.text.toLowerCase())
+    );
+    categoryWords = availableWords.filter(word => categoryWordSet.has(word.toLowerCase()));
+    console.log('✅ Filtered to category words:', { 
+      originalCount: availableWords.length, 
+      categoryCount: categoryWords.length,
+      categoryWords: categoryWords.slice(0, 10)
+    });
+  }
   
   // Enhanced category-specific word associations with more comprehensive vocabulary
   const categoryKeywords: { [key: string]: string[] } = {
-    'core': ['I', 'you', 'he', 'she', 'we', 'they', 'want', 'need', 'like', 'help', 'more', 'go', 'stop', 'yes', 'no', 'please', 'thank you', 'can', 'the', 'a', 'that'],
-    'people': ['mum', 'dad', 'mom', 'mother', 'father', 'friend', 'teacher', 'family', 'brother', 'sister', 'mate', 'grandma', 'grandpa', 'he', 'she', 'they', 'my'],
-    'actions': ['eat', 'drink', 'play', 'sleep', 'walk', 'run', 'read', 'write', 'watch', 'listen', 'sit', 'stand', 'jump', 'dance', 'go', 'can', 'the'],
-    'feelings': ['happy', 'sad', 'angry', 'scared', 'excited', 'tired', 'love', 'worried', 'calm', 'hurt', 'sick', 'good', 'bad', 'I', 'he', 'she', 'we', 'they'],
-    'food': ['water', 'juice', 'milk', 'apple', 'banana', 'bread', 'snack', 'lunch', 'dinner', 'breakfast', 'hungry', 'thirsty', 'eat', 'drink', 'the', 'a', 'can'],
-    'home': ['house', 'bed', 'bathroom', 'kitchen', 'TV', 'door', 'window', 'room', 'bedroom', 'toilet', 'sleep', 'rest', 'the', 'a', 'go', 'my'],
-    'school': ['book', 'pencil', 'paper', 'class', 'teacher', 'lunch', 'recess', 'learn', 'study', 'homework', 'read', 'write', 'the', 'a', 'my', 'can'],
-    'places': ['park', 'store', 'shop', 'school', 'home', 'playground', 'car', 'bus', 'outside', 'inside', 'the', 'a', 'go', 'can'],
-    'body': ['head', 'hand', 'foot', 'arm', 'leg', 'eye', 'ear', 'nose', 'mouth', 'hurt', 'pain', 'sick', 'my', 'the', 'a'],
-    'routines': ['morning', 'afternoon', 'evening', 'night', 'breakfast', 'lunch', 'dinner', 'bedtime', 'wake up', 'sleep', 'the', 'a', 'go'],
-    'questions': ['what', 'where', 'when', 'who', 'why', 'how', 'is', 'are', 'do', 'can', 'will', 'the', 'a', 'that'],
+    'core': ['I', 'you', 'he', 'she', 'we', 'they', 'want', 'need', 'like', 'help', 'more', 'go', 'stop', 'yes', 'no', 'please', 'thank you', 'can', 'the', 'a', 'that', 'this', 'use', 'borrow'],
+    'people': ['mum', 'dad', 'mom', 'mother', 'father', 'friend', 'teacher', 'family', 'brother', 'sister', 'mate', 'grandma', 'grandpa', 'he', 'she', 'they', 'my', 'boy', 'girl', 'man', 'woman', 'baby'],
+    'actions': ['eat', 'drink', 'play', 'sleep', 'walk', 'run', 'read', 'write', 'watch', 'listen', 'sit', 'stand', 'jump', 'dance', 'go', 'can', 'the', 'sing', 'draw', 'give', 'take', 'throw', 'catch', 'push', 'pull', 'wash', 'clean'],
+    'feelings': ['happy', 'sad', 'angry', 'scared', 'excited', 'tired', 'love', 'worried', 'calm', 'hurt', 'sick', 'good', 'bad', 'I', 'he', 'she', 'we', 'they', 'feel', 'surprised', 'bored', 'confused'],
+    'food': ['water', 'juice', 'milk', 'apple', 'banana', 'bread', 'snack', 'lunch', 'dinner', 'breakfast', 'hungry', 'thirsty', 'eat', 'drink', 'the', 'a', 'can', 'cheese', 'cookie', 'cake', 'pizza', 'sandwich', 'egg', 'chicken', 'fish', 'carrot'],
+    'home': ['house', 'bed', 'bathroom', 'kitchen', 'TV', 'door', 'window', 'room', 'bedroom', 'toilet', 'sleep', 'rest', 'the', 'a', 'go', 'my', 'chair', 'table', 'living room', 'phone', 'computer', 'tablet'],
+    'school': ['book', 'pencil', 'paper', 'class', 'teacher', 'lunch', 'recess', 'learn', 'study', 'homework', 'read', 'write', 'the', 'a', 'my', 'can', 'pen', 'crayon', 'scissors', 'glue', 'backpack', 'test'],
+    'places': ['park', 'store', 'shop', 'school', 'home', 'playground', 'car', 'bus', 'outside', 'inside', 'the', 'a', 'go', 'can', 'library', 'hospital', 'doctor', 'restaurant', 'train', 'airplane', 'beach'],
+    'body': ['head', 'hand', 'foot', 'arm', 'leg', 'eye', 'ear', 'nose', 'mouth', 'hurt', 'pain', 'sick', 'my', 'the', 'a', 'face', 'teeth', 'hair', 'fingers', 'feet', 'tummy'],
+    'routines': ['morning', 'afternoon', 'evening', 'night', 'breakfast', 'lunch', 'dinner', 'bedtime', 'wake up', 'sleep', 'the', 'a', 'go', 'snack time', 'bath time', 'brush teeth', 'get dressed', 'potty'],
+    'questions': ['what', 'where', 'when', 'who', 'why', 'how', 'is', 'are', 'do', 'can', 'will', 'the', 'a', 'that', 'which'],
     'colours': ['red', 'blue', 'green', 'yellow', 'orange', 'purple', 'pink', 'black', 'white', 'brown', 'the', 'a'],
-    'numbers': ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'more', 'less', 'the', 'a'],
-    'animals': ['dog', 'cat', 'bird', 'fish', 'horse', 'cow', 'pig', 'sheep', 'rabbit', 'pet', 'the', 'a', 'my'],
-    'clothing': ['shirt', 'pants', 'dress', 'shoes', 'socks', 'hat', 'coat', 'jacket', 'wear', 'put on', 'the', 'a', 'my'],
-    'weather': ['sunny', 'rainy', 'cloudy', 'windy', 'hot', 'cold', 'warm', 'cool', 'weather', 'outside', 'the', 'a'],
+    'numbers': ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'more', 'less', 'the', 'a', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
+    'animals': ['dog', 'cat', 'bird', 'fish', 'horse', 'cow', 'pig', 'sheep', 'rabbit', 'pet', 'the', 'a', 'my', 'chicken', 'duck', 'bear', 'lion', 'elephant', 'monkey'],
+    'clothing': ['shirt', 'pants', 'dress', 'shoes', 'socks', 'hat', 'coat', 'jacket', 'wear', 'put on', 'the', 'a', 'my', 'gloves'],
+    'weather': ['sunny', 'rainy', 'cloudy', 'windy', 'hot', 'cold', 'warm', 'cool', 'weather', 'outside', 'the', 'a', 'snowy'],
     'time': ['now', 'later', 'today', 'tomorrow', 'yesterday', 'morning', 'afternoon', 'evening', 'night', 'time', 'the', 'a'],
-    'toys': ['toy', 'ball', 'doll', 'game', 'puzzle', 'blocks', 'play', 'fun', 'the', 'a', 'my'],
+    'toys': ['toy', 'ball', 'doll', 'game', 'puzzle', 'blocks', 'play', 'fun', 'the', 'a', 'my', 'car', 'truck', 'train', 'bike', 'swing', 'slide'],
   };
   
   const relevantKeywords = categoryKeywords[category] || [];
-  console.log('Relevant keywords for category:', relevantKeywords);
+  console.log('📚 Relevant keywords for category:', relevantKeywords.slice(0, 10));
   
-  // If no current words, return category keywords that are in available words
+  // If no current words, return category keywords that are in category words
   if (currentWords.length === 0) {
-    const matches = availableWords.filter(word => 
+    const matches = categoryWords.filter(word => 
       relevantKeywords.some(keyword => 
         word.toLowerCase() === keyword.toLowerCase() ||
         word.toLowerCase().includes(keyword.toLowerCase()) ||
         keyword.toLowerCase().includes(word.toLowerCase())
       )
     ).slice(0, 8);
-    console.log('No current words, returning category matches:', matches);
+    console.log('🎯 No current words, returning category matches:', matches);
     return matches;
   }
   
@@ -604,7 +628,7 @@ export function getCategoryRelevantWords(
   // Context-aware filtering based on sentence structure
   const contextualMatches: { word: string; score: number }[] = [];
   
-  availableWords.forEach(word => {
+  categoryWords.forEach(word => {
     let score = 0;
     const lowerWord = word.toLowerCase();
     
@@ -618,13 +642,13 @@ export function getCategoryRelevantWords(
     if (isInCategory) {
       score += 10; // Base score for being in category
       
-      // Contextual boosting based on sentence patterns
+      // ULTRA-ENHANCED: Deep contextual boosting based on sentence patterns
       // Example: "I want" -> boost action words like "eat", "play", "go"
       if (sentenceContext.includes('i want') || sentenceContext.includes('want to') ||
           sentenceContext.includes('he wants') || sentenceContext.includes('she wants') ||
           sentenceContext.includes('we want') || sentenceContext.includes('they want')) {
-        if (['eat', 'drink', 'play', 'sleep', 'go', 'read', 'watch', 'the', 'a'].includes(lowerWord)) {
-          score += 5;
+        if (['eat', 'drink', 'play', 'sleep', 'go', 'read', 'watch', 'the', 'a', 'to'].includes(lowerWord)) {
+          score += 8;
         }
       }
       
@@ -633,7 +657,7 @@ export function getCategoryRelevantWords(
           sentenceContext.includes('he feels') || sentenceContext.includes('she feels') ||
           sentenceContext.includes('we feel') || sentenceContext.includes('they feel')) {
         if (['happy', 'sad', 'angry', 'scared', 'excited', 'tired', 'good', 'bad'].includes(lowerWord)) {
-          score += 5;
+          score += 8;
         }
       }
       
@@ -641,38 +665,83 @@ export function getCategoryRelevantWords(
       if (sentenceContext.includes('i need') || sentenceContext.includes('need') ||
           sentenceContext.includes('he needs') || sentenceContext.includes('she needs') ||
           sentenceContext.includes('we need') || sentenceContext.includes('they need')) {
-        if (['help', 'water', 'food', 'toilet', 'rest', 'break', 'the', 'a'].includes(lowerWord)) {
-          score += 5;
+        if (['help', 'water', 'food', 'toilet', 'rest', 'break', 'the', 'a', 'to'].includes(lowerWord)) {
+          score += 8;
         }
       }
       
       // Example: "where is" -> boost location/people words
       if (sentenceContext.includes('where is') || sentenceContext.includes('where')) {
         if (['mum', 'dad', 'toilet', 'home', 'school', 'park', 'he', 'she', 'my', 'the'].includes(lowerWord)) {
-          score += 5;
+          score += 8;
         }
       }
       
-      // Boost connecting words
-      if (['the', 'a', 'can', 'go', 'that', 'this'].includes(lowerWord)) {
-        score += 3;
+      // Example: "what is" -> boost descriptive/question words
+      if (sentenceContext.includes('what is') || sentenceContext.includes('what')) {
+        if (['that', 'this', 'your', 'the', 'time', 'happening'].includes(lowerWord)) {
+          score += 8;
+        }
+      }
+      
+      // Example: "can I" -> boost action/permission words
+      if (sentenceContext.includes('can i') || sentenceContext.includes('can you') ||
+          sentenceContext.includes('can we') || sentenceContext.includes('can')) {
+        if (['have', 'go', 'play', 'help', 'please', 'the', 'a'].includes(lowerWord)) {
+          score += 8;
+        }
+      }
+      
+      // Boost connecting words (always useful)
+      if (['the', 'a', 'can', 'go', 'that', 'this', 'to', 'and', 'or'].includes(lowerWord)) {
+        score += 5;
       }
       
       // Boost words that follow common patterns
       if (lastWord === 'to' && ['go', 'play', 'eat', 'drink', 'sleep', 'read', 'the'].includes(lowerWord)) {
-        score += 3;
+        score += 6;
       }
       
       if (lastWord === 'the' && ['toilet', 'park', 'shop', 'school', 'home', 'ball', 'book'].includes(lowerWord)) {
-        score += 3;
+        score += 6;
       }
       
-      if (lastWord === 'can' && ['I', 'you', 'he', 'she', 'we', 'they', 'go'].includes(lowerWord)) {
-        score += 3;
+      if (lastWord === 'can' && ['I', 'you', 'he', 'she', 'we', 'they', 'go', 'have'].includes(lowerWord)) {
+        score += 6;
       }
       
       if (lastWord === 'my' && ['mum', 'dad', 'sister', 'brother', 'friend', 'toy', 'book'].includes(lowerWord)) {
-        score += 3;
+        score += 6;
+      }
+      
+      if (lastWord === 'want' && ['to', 'the', 'a', 'some', 'more'].includes(lowerWord)) {
+        score += 6;
+      }
+      
+      if (lastWord === 'need' && ['to', 'the', 'a', 'help', 'water'].includes(lowerWord)) {
+        score += 6;
+      }
+      
+      // MIND-READING: Predict based on sentence intent
+      // If sentence starts with "I", predict common continuations
+      if (currentWords[0]?.toLowerCase() === 'i') {
+        if (['want', 'need', 'like', 'love', 'feel', 'am', 'have', 'can'].includes(lowerWord)) {
+          score += 7;
+        }
+      }
+      
+      // If sentence starts with "you", predict common continuations
+      if (currentWords[0]?.toLowerCase() === 'you') {
+        if (['are', 'can', 'want', 'need', 'like', 'have'].includes(lowerWord)) {
+          score += 7;
+        }
+      }
+      
+      // If sentence starts with question word, predict question structure
+      if (['what', 'where', 'when', 'who', 'why', 'how'].includes(currentWords[0]?.toLowerCase())) {
+        if (['is', 'are', 'do', 'does', 'can', 'will', 'the'].includes(lowerWord)) {
+          score += 7;
+        }
       }
       
       contextualMatches.push({ word, score });
@@ -685,6 +754,6 @@ export function getCategoryRelevantWords(
     .slice(0, 8)
     .map(m => m.word);
   
-  console.log('Category-relevant words found:', results);
+  console.log('✨ Category-relevant words found:', results);
   return results;
 }
