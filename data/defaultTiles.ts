@@ -33,11 +33,11 @@ const categoryColor: Record<string, string> = {
 
 const pictograms: Record<string, string> = {
   // Core vocabulary - Verified colorful ARASAAC pictograms
-  i: 'https://static.arasaac.org/pictograms/8224/8224_2500.png',
+  i: 'https://static.arasaac.org/pictograms/2617/2617_2500.png',
   you: 'https://static.arasaac.org/pictograms/2608/2608_2500.png',
   he: 'https://static.arasaac.org/pictograms/6480/6480_2500.png',
   she: 'https://static.arasaac.org/pictograms/7028/7028_2500.png',
-  we: 'https://static.arasaac.org/pictograms/2544/2544_2500.png',
+  we: 'https://static.arasaac.org/pictograms/7185/2544_2500.png',
   they: 'https://static.arasaac.org/pictograms/2544/2544_2500.png',
   it: 'https://static.arasaac.org/pictograms/13054/13054_2500.png',
   me: 'https://static.arasaac.org/pictograms/8224/8224_2500.png',
@@ -60,6 +60,19 @@ const pictograms: Record<string, string> = {
   that: 'https://static.arasaac.org/pictograms/2752/2752_2500.png',
   here: 'https://static.arasaac.org/pictograms/1043/1043_2500.png',
   there: 'https://static.arasaac.org/pictograms/1044/1044_2500.png',
+  the: 'https://static.arasaac.org/pictograms/2752/2752_2500.png',
+  a: 'https://static.arasaac.org/pictograms/1596/1596_2500.png',
+  an: 'https://static.arasaac.org/pictograms/1596/1596_2500.png',
+  can: 'https://static.arasaac.org/pictograms/2341/2341_2500.png',
+  will: 'https://static.arasaac.org/pictograms/2341/2341_2500.png',
+  have: 'https://static.arasaac.org/pictograms/2341/2341_2500.png',
+  has: 'https://static.arasaac.org/pictograms/2341/2341_2500.png',
+  do: 'https://static.arasaac.org/pictograms/1527/1527_2500.png',
+  does: 'https://static.arasaac.org/pictograms/1527/1527_2500.png',
+  is: 'https://static.arasaac.org/pictograms/1596/1596_2500.png',
+  are: 'https://static.arasaac.org/pictograms/1596/1596_2500.png',
+  was: 'https://static.arasaac.org/pictograms/1596/1596_2500.png',
+  were: 'https://static.arasaac.org/pictograms/1596/1596_2500.png',
 
   go: 'https://static.arasaac.org/pictograms/2922/2922_2500.png',
   stop: 'https://static.arasaac.org/pictograms/2707/2707_2500.png',
@@ -83,6 +96,9 @@ const pictograms: Record<string, string> = {
   or: 'https://static.arasaac.org/pictograms/1302/1302_2500.png',
   with: 'https://static.arasaac.org/pictograms/1729/1729_2500.png',
   without: 'https://static.arasaac.org/pictograms/1730/1730_2500.png',
+  but: 'https://static.arasaac.org/pictograms/1302/1302_2500.png',
+  if: 'https://static.arasaac.org/pictograms/3254/3254_2500.png',
+  then: 'https://static.arasaac.org/pictograms/2716/2716_2500.png',
 
   // People - Gender-specific where appropriate
   mom: 'https://static.arasaac.org/pictograms/2398/2398_2500.png',
@@ -126,6 +142,14 @@ const pictograms: Record<string, string> = {
   pull: 'https://static.arasaac.org/pictograms/2919/2919_2500.png',
   wash: 'https://static.arasaac.org/pictograms/2343/2343_2500.png',
   clean: 'https://static.arasaac.org/pictograms/2055/2055_2500.png',
+  get: 'https://static.arasaac.org/pictograms/2711/2711_2500.png',
+  find: 'https://static.arasaac.org/pictograms/2690/2690_2500.png',
+  see: 'https://static.arasaac.org/pictograms/2690/2690_2500.png',
+  hear: 'https://static.arasaac.org/pictograms/2729/2729_2500.png',
+  feel: 'https://static.arasaac.org/pictograms/7012/7012_2500.png',
+  think: 'https://static.arasaac.org/pictograms/2345/2345_2500.png',
+  know: 'https://static.arasaac.org/pictograms/2345/2345_2500.png',
+  understand: 'https://static.arasaac.org/pictograms/2345/2345_2500.png',
 
   // Feelings - Gender-neutral
   happy: 'https://static.arasaac.org/pictograms/7012/7012_2500.png',
@@ -140,6 +164,8 @@ const pictograms: Record<string, string> = {
   worried: 'https://static.arasaac.org/pictograms/7018/7018_2500.png',
   calm: 'https://static.arasaac.org/pictograms/7019/7019_2500.png',
   surprised: 'https://static.arasaac.org/pictograms/7020/7020_2500.png',
+  bored: 'https://static.arasaac.org/pictograms/7017/7017_2500.png',
+  confused: 'https://static.arasaac.org/pictograms/7018/7018_2500.png',
 
   // Food
   apple: 'https://static.arasaac.org/pictograms/7979/7979_2500.png',
@@ -188,6 +214,10 @@ const pictograms: Record<string, string> = {
   lunch: 'https://static.arasaac.org/pictograms/2105/2105_2500.png',
   recess: 'https://static.arasaac.org/pictograms/5708/5708_2500.png',
   class: 'https://static.arasaac.org/pictograms/2052/2052_2500.png',
+  homework: 'https://static.arasaac.org/pictograms/5999/5999_2500.png',
+  test: 'https://static.arasaac.org/pictograms/2351/2351_2500.png',
+  study: 'https://static.arasaac.org/pictograms/2050/2050_2500.png',
+  learn: 'https://static.arasaac.org/pictograms/2050/2050_2500.png',
 
   // Body
   head: 'https://static.arasaac.org/pictograms/2099/2099_2500.png',
@@ -329,7 +359,7 @@ const t = (category: string, text: string): Tile => ({
 
 // 🧱 Default core vocabulary
 export const defaultTiles: Tile[] = [
-  // Core
+  // Core - Enhanced with connecting words
   t('core', 'I'),
   t('core', 'you'),
   t('core', 'he'),
@@ -342,6 +372,19 @@ export const defaultTiles: Tile[] = [
   t('core', 'mine'),
   t('core', 'your'),
   t('core', 'all'),
+  t('core', 'the'),
+  t('core', 'a'),
+  t('core', 'an'),
+  t('core', 'can'),
+  t('core', 'will'),
+  t('core', 'have'),
+  t('core', 'has'),
+  t('core', 'do'),
+  t('core', 'does'),
+  t('core', 'is'),
+  t('core', 'are'),
+  t('core', 'was'),
+  t('core', 'were'),
   t('core', 'want'),
   t('core', 'need'),
   t('core', 'like'),
@@ -364,6 +407,14 @@ export const defaultTiles: Tile[] = [
   t('core', 'turn'),
   t('core', 'open'),
   t('core', 'close'),
+  t('core', 'get'),
+  t('core', 'find'),
+  t('core', 'see'),
+  t('core', 'hear'),
+  t('core', 'feel'),
+  t('core', 'think'),
+  t('core', 'know'),
+  t('core', 'understand'),
   t('core', 'all done'),
   t('core', 'finished'),
   t('core', 'please'),
@@ -373,6 +424,9 @@ export const defaultTiles: Tile[] = [
   t('core', 'because'),
   t('core', 'and'),
   t('core', 'or'),
+  t('core', 'but'),
+  t('core', 'if'),
+  t('core', 'then'),
   t('core', 'with'),
   t('core', 'without'),
 
@@ -432,6 +486,8 @@ export const defaultTiles: Tile[] = [
   t('feelings', 'worried'),
   t('feelings', 'calm'),
   t('feelings', 'surprised'),
+  t('feelings', 'bored'),
+  t('feelings', 'confused'),
 
   // Food
   t('food', 'apple'),
@@ -467,7 +523,7 @@ export const defaultTiles: Tile[] = [
   t('home', 'computer'),
   t('home', 'tablet'),
 
-  // School
+  // School - Enhanced with homework and study words
   t('school', 'school'),
   t('school', 'book'),
   t('school', 'pencil'),
@@ -480,6 +536,10 @@ export const defaultTiles: Tile[] = [
   t('school', 'lunch'),
   t('school', 'recess'),
   t('school', 'class'),
+  t('school', 'homework'),
+  t('school', 'test'),
+  t('school', 'study'),
+  t('school', 'learn'),
 
   // Body
   t('body', 'head'),
