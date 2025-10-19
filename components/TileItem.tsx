@@ -69,7 +69,7 @@ const TileItem = memo(function TileItem({
   const fontSize = getResponsiveFontSize();
 
   // Determine which image to display
-  // Priority: tile.image (ARASAAC pictograms) > tile.imageUrl > tile.imageUri > fallback icon
+  // Priority: tile.image (ARASAAC pictograms) > tile.imageUrl > tile.imageUri > NO FALLBACK
   const hasPictogram = !isAdd && tile.image && !pictogramError;
   const hasCustomImage = !isAdd && !hasPictogram && (tile.imageUrl || tile.imageUri) && !customImageError;
 
@@ -116,9 +116,9 @@ const TileItem = memo(function TileItem({
                 setCustomImageError(true);
               }}
             />
-          ) : (
-            <Icon name={isAdd ? 'add-circle' : 'chatbubble-ellipses'} size={80} color={tileColor} />
-          )}
+          ) : isAdd ? (
+            <Icon name="add-circle" size={80} color={tileColor} />
+          ) : null}
         </View>
         <View style={styles.textContainer}>
           <Text 
@@ -158,14 +158,14 @@ const styles = StyleSheet.create({
   pictogramImage: {
     width: '100%',
     height: '100%',
-    maxWidth: 120,
-    maxHeight: 120,
+    maxWidth: 180,
+    maxHeight: 180,
   },
   customImage: {
     width: '100%',
     height: '100%',
-    maxWidth: 120,
-    maxHeight: 120,
+    maxWidth: 180,
+    maxHeight: 180,
     borderRadius: 8,
   },
   textContainer: {

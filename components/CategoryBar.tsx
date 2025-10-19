@@ -47,7 +47,7 @@ export default function CategoryBar({ categories, selectedId, onSelect, style }:
                   {
                     backgroundColor: cat.color,
                     borderColor: active ? cat.color : colors.border,
-                    borderWidth: active ? 4 : 2,
+                    borderWidth: active ? 6 : 2,
                     opacity: active ? 1 : 0.85,
                     boxShadow: active ? `0px 0px 12px ${cat.color}` : '0px 3px 6px rgba(0,0,0,0.15)',
                   },
