@@ -55,14 +55,14 @@ const TileItem = memo(function TileItem({
     return colors.primary;
   };
 
-  // Responsive font size - adjusted for smaller tiles
+  // Responsive font size - SIGNIFICANTLY INCREASED for better readability
   const getResponsiveFontSize = () => {
-    if (width >= 1400) return 16;
-    if (width >= 1200) return 15;
-    if (width >= 1000) return 14;
-    if (width >= 820) return 13;
-    if (width >= 680) return 12;
-    return 11;
+    if (width >= 1400) return 24;
+    if (width >= 1200) return 22;
+    if (width >= 1000) return 20;
+    if (width >= 820) return 19;
+    if (width >= 680) return 18;
+    return 16;
   };
 
   const tileColor = getCategoryColor();
@@ -117,7 +117,7 @@ const TileItem = memo(function TileItem({
               }}
             />
           ) : (
-            <Icon name={isAdd ? 'add-circle' : 'chatbubble-ellipses'} size={50} color={tileColor} />
+            <Icon name={isAdd ? 'add-circle' : 'chatbubble-ellipses'} size={80} color={tileColor} />
           )}
         </View>
         <View style={styles.textContainer}>
@@ -138,46 +138,46 @@ export default TileItem;
 
 const styles = StyleSheet.create({
   tileWrap: {
-    padding: 4,
+    padding: 6,
   },
   tile: {
     aspectRatio: 1,
-    borderRadius: 12,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 8,
-    boxShadow: '0px 2px 8px rgba(0,0,0,0.1)',
+    padding: 12,
+    boxShadow: '0px 3px 10px rgba(0,0,0,0.12)',
   },
   iconWrap: {
     flex: 1,
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 6,
+    marginBottom: 8,
   },
   pictogramImage: {
     width: '100%',
     height: '100%',
-    maxWidth: 70,
-    maxHeight: 70,
+    maxWidth: 120,
+    maxHeight: 120,
   },
   customImage: {
     width: '100%',
     height: '100%',
-    maxWidth: 70,
-    maxHeight: 70,
-    borderRadius: 6,
+    maxWidth: 120,
+    maxHeight: 120,
+    borderRadius: 8,
   },
   textContainer: {
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 32,
+    minHeight: 40,
   },
   text: {
     fontFamily: 'Montserrat_700Bold',
     textAlign: 'center',
-    lineHeight: 16,
-    paddingHorizontal: 2,
+    lineHeight: 22,
+    paddingHorizontal: 4,
   },
 });
