@@ -8,6 +8,8 @@ import { useEffect, useState } from 'react';
 import { setupErrorLogging } from '../utils/errorLogger';
 import { useFonts, Montserrat_400Regular, Montserrat_600SemiBold, Montserrat_700Bold } from '@expo-google-fonts/montserrat';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import LandscapeGuard from '../components/LandscapeGuard';
+import * as ScreenOrientation from 'expo-screen-orientation';
 
 const STORAGE_KEY = 'emulated_device';
 
@@ -23,6 +25,17 @@ function RootLayoutInner() {
   useEffect(() => {
     setupErrorLogging();
     console.log('App layout initialized');
+    
+    // Lock orientation to landscape on native platforms
+    if (Platform.OS !== 'web') {
+      try {
+        ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
+        console.log('App orientation locked to landscape');
+      } catch (error) {
+        console.log('Failed to lock screen orientation:', error);
+      }
+    }
+    
     if (Platform.OS === 'web') {
       try {
         const params = new URLSearchParams(window.location.search);
@@ -58,31 +71,33 @@ function RootLayoutInner() {
   console.log('Fonts loaded, rendering app');
 
   return (
-    <SafeAreaView
-      style={[
-        commonStyles.wrapper,
-        {
-          paddingTop: insetsToUse.top,
-          paddingBottom: insetsToUse.bottom,
-          paddingLeft: insetsToUse.left,
-          paddingRight: insetsToUse.right,
-        },
-      ]}
-    >
-      <StatusBar style="dark" />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          animation: 'default',
-        }}
+    <LandscapeGuard>
+      <SafeAreaView
+        style={[
+          commonStyles.wrapper,
+          {
+            paddingTop: insetsToUse.top,
+            paddingBottom: insetsToUse.bottom,
+            paddingLeft: insetsToUse.left,
+            paddingRight: insetsToUse.right,
+          },
+        ]}
       >
-        <Stack.Screen name="index" />
-        <Stack.Screen name="main-menu" />
-        <Stack.Screen name="communication" />
-        <Stack.Screen name="keyboard" />
-        <Stack.Screen name="settings" />
-      </Stack>
-    </SafeAreaView>
+        <StatusBar style="dark" />
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            animation: 'default',
+          }}
+        >
+          <Stack.Screen name="index" />
+          <Stack.Screen name="main-menu" />
+          <Stack.Screen name="communication" />
+          <Stack.Screen name="keyboard" />
+          <Stack.Screen name="settings" />
+        </Stack>
+      </SafeAreaView>
+    </LandscapeGuard>
   );
 }
 
