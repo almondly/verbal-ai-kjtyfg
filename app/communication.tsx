@@ -34,7 +34,7 @@ export default function CommunicationScreen() {
   const { getAdvancedSuggestions, getTimeBasedSuggestions, recordUserInput } = useAdvancedAI();
   const { currentEmotion, setCurrentEmotion } = useEmotionSettings();
   const [sentence, setSentence] = useState<Tile[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState('core'); // CHANGED: Default to 'core' instead of 'all'
   const { tiles, addTile, updateTile, removeTile, resetTiles } = useLibrary();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [advancedSuggestions, setAdvancedSuggestions] = useState<any[]>([]);
@@ -48,8 +48,8 @@ export default function CommunicationScreen() {
   useEffect(() => {
     if (selectedCategory === 'keyboard') {
       router.push('/keyboard');
-      // Reset to 'all' after navigation so when user comes back it's not stuck on keyboard
-      setSelectedCategory('all');
+      // Reset to 'core' after navigation so when user comes back it's on core
+      setSelectedCategory('core');
     }
   }, [selectedCategory, router]);
 
