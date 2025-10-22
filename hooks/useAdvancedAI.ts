@@ -15,7 +15,8 @@ import {
   predictNextWords,
   analyzeSentenceStructure,
   scoreSuggestions,
-  getCategoryRelevantWords
+  getCategoryRelevantWords,
+  getContextualConnectingWords
 } from '../utils/sentenceCompletion';
 import { getContextualAACSentences, aacSentences } from '../utils/aacSentences';
 
@@ -720,6 +721,56 @@ export function useAdvancedAI() {
         hasCategoryTiles: !!categoryTiles
       });
 
+      // 0.5. WEB-BASED SENTENCE COMPLETION (Google-style AI predictions)
+      // Only call if we have at least 1 word and less than 6 words
+      if (currentWords.length >= 1 && currentWords.length <= 5) {
+        try {
+          console.log('🌐 Fetching web-based sentence completions...');
+          const { data: { url } } = await supabase.functions.invoke('complete-sentence', {
+            body: { 
+              currentText: currentWords.join(' '),
+              maxSuggestions: 3,
+              context: currentCategory
+            }
+          });
+          
+          if (url) {
+            const response = await fetch(url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ 
+                currentText: currentWords.join(' '),
+                maxSuggestions: 3,
+                context: currentCategory
+              })
+            });
+            
+            if (response.ok) {
+              const { suggestions: webSuggestions } = await response.json();
+              console.log('✅ Web-based suggestions:', webSuggestions);
+              
+              webSuggestions?.forEach((suggestion: string, index: number) => {
+                // Extract next word from web suggestion
+                const suggestionWords = suggestion.split(' ');
+                const nextWord = suggestionWords[0];
+                
+                if (nextWord && !suggestions.some(s => areSimilarWords(s.text.toLowerCase(), nextWord.toLowerCase()))) {
+                  suggestions.push({
+                    text: nextWord,
+                    confidence: Math.max(0.92, 0.97 - index * 0.02),
+                    type: 'common_phrase',
+                    context: `AI: "${suggestion}"`
+                  });
+                }
+              });
+            }
+          }
+        } catch (webError) {
+          console.log('Web-based completion error (non-critical):', webError);
+          // Continue with other suggestions if web completion fails
+        }
+      }
+
       // 0. Check if sentence needs polite ending
       if (needsPoliteEnding(currentWords)) {
         const politeEndings = ['please', 'thank you', 'thanks'];
@@ -734,6 +785,21 @@ export function useAdvancedAI() {
           }
         });
       }
+
+      // 0.75. CONTEXTUAL CONNECTING WORDS (ULTRA-HIGH PRIORITY)
+      // Suggest grammatically appropriate connecting words like "am", "the", "is", "are"
+      const contextualConnecting = getContextualConnectingWords(currentWords, 5);
+      contextualConnecting.forEach((word, index) => {
+        if (!suggestions.some(s => areSimilarWords(s.text.toLowerCase(), word.toLowerCase())) &&
+            !currentWords.some(w => areSimilarWords(w.toLowerCase(), word.toLowerCase()))) {
+          suggestions.push({
+            text: word,
+            confidence: Math.max(0.96, 0.99 - index * 0.01),
+            type: 'common_phrase',
+            context: `Connecting word: "${word}"`
+          });
+        }
+      });
 
       // 1. AAC Official Sentences (HIGHEST PRIORITY - from official AAC resources)
       const aacSuggestions = getContextualAACSentences(currentWords, 3);
