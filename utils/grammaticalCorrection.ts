@@ -10,6 +10,7 @@
  * 
  * FIXED: "I need help" is now correctly recognized as grammatically complete
  * FIXED: "he wants help with his homework" patterns are now properly handled
+ * FIXED: Removed unnecessary "to" suggestions for nouns
  */
 
 export interface GrammaticalSuggestion {
@@ -55,7 +56,8 @@ export function detectGrammaticalIssues(words: string[]): GrammaticalSuggestion[
     // CRITICAL FIX: Exclude nouns that don't need "am/is/are"
     const nounsNotNeedingVerb = [
       'help', 'water', 'food', 'time', 'break', 'rest', 'toilet', 'bathroom',
-      'mum', 'dad', 'friend', 'teacher', 'book', 'pencil', 'toy', 'ball'
+      'mum', 'dad', 'friend', 'teacher', 'book', 'pencil', 'toy', 'ball',
+      'homework', 'work', 'lunch', 'dinner', 'breakfast', 'snack'
     ];
     
     if (subjectPronouns[subject] && adjectives.includes(word2) && !nounsNotNeedingVerb.includes(word2)) {
@@ -94,7 +96,9 @@ export function detectGrammaticalIssues(words: string[]): GrammaticalSuggestion[
         'help', 'water', 'food', 'time', 'break', 'rest', 'toilet', 'bathroom',
         'mum', 'dad', 'friend', 'teacher', 'book', 'pencil', 'toy', 'ball',
         'home', 'school', 'park', 'shop', 'car', 'bus', 'bed', 'chair', 'table',
-        'apple', 'banana', 'milk', 'juice', 'snack', 'lunch', 'dinner', 'breakfast'
+        'apple', 'banana', 'milk', 'juice', 'snack', 'lunch', 'dinner', 'breakfast',
+        'homework', 'work', 'his', 'her', 'my', 'your', 'our', 'their', 'the', 'a',
+        'some', 'more', 'that', 'this', 'it'
       ];
       
       if (modalVerbs.includes(word2) && infinitiveVerbs.includes(word3) && !nounsNotNeedingTo.includes(word3)) {
@@ -114,51 +118,7 @@ export function detectGrammaticalIssues(words: string[]): GrammaticalSuggestion[
     }
   }
   
-  // Pattern 3: "I want water" vs "I want to go outside" - detect when "to" is needed
-  // This is more complex - we need to check if the word after "want/need" is a noun or verb
-  // CRITICAL FIX: Only suggest "to" for ACTION VERBS, not nouns
-  if (lowerWords.length >= 3) {
-    for (let i = 0; i < lowerWords.length - 2; i++) {
-      const word1 = lowerWords[i];
-      const word2 = lowerWords[i + 1];
-      const word3 = lowerWords[i + 2];
-      
-      const modalVerbs = ['want', 'need', 'like', 'love'];
-      const actionVerbs = [
-        'go', 'play', 'eat', 'drink', 'sleep', 'read', 'write', 'watch', 'listen',
-        'run', 'walk', 'jump', 'dance', 'sing', 'draw', 'paint', 'build', 'make',
-        'see', 'hear', 'feel', 'think', 'know', 'learn', 'teach', 'work',
-        'come', 'leave', 'stay', 'sit', 'stand', 'talk', 'speak', 'tell', 'ask'
-      ];
-      
-      // CRITICAL FIX: Nouns that should NOT have "to" inserted
-      const nounsNotNeedingTo = [
-        'help', 'water', 'food', 'time', 'break', 'rest', 'toilet', 'bathroom',
-        'mum', 'dad', 'friend', 'teacher', 'book', 'pencil', 'toy', 'ball',
-        'home', 'school', 'park', 'shop', 'car', 'bus', 'bed', 'chair', 'table'
-      ];
-      
-      // Check if pattern is "subject + want/need + action verb + ..."
-      if (modalVerbs.includes(word2) && actionVerbs.includes(word3) && !nounsNotNeedingTo.includes(word3)) {
-        // Check if "to" is already there
-        if (i + 3 < lowerWords.length && lowerWords[i + 2] !== 'to') {
-          const correctedWords = [...words];
-          correctedWords.splice(i + 2, 0, 'to');
-          const corrected = correctedWords.join(' ');
-          
-          suggestions.push({
-            original: originalText,
-            corrected,
-            confidence: 0.90,
-            explanation: `Added "to" before action verb "${words[i + 2]}"`
-          });
-          break;
-        }
-      }
-    }
-  }
-  
-  // Pattern 4: Subject + Verb agreement
+  // Pattern 3: Subject + Verb agreement
   // Examples: "He want" -> "He wants", "They wants" -> "They want"
   if (lowerWords.length >= 2) {
     for (let i = 0; i < lowerWords.length - 1; i++) {
@@ -210,7 +170,7 @@ export function detectGrammaticalIssues(words: string[]): GrammaticalSuggestion[
     }
   }
   
-  // Pattern 5: Missing articles "the" or "a"
+  // Pattern 4: Missing articles "the" or "a"
   // Examples: "I want ball" -> "I want the ball", "I see dog" -> "I see a dog"
   // CRITICAL FIX: Don't suggest articles for abstract nouns like "help", "time", "rest"
   if (lowerWords.length >= 3) {

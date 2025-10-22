@@ -15,6 +15,7 @@
  * - ULTRA-ENHANCED: Grammatical context awareness for "am", "is", "are", "the", etc.
  * - ULTRA-ENHANCED: Web-based sentence completion integration (Google-style predictions)
  * - CRITICAL FIX: "am" is IMMEDIATELY recommended after "I" with ULTRA-HIGH priority
+ * - CRITICAL FIX: Full sentence recommendations are now ULTRA-PROMINENT
  */
 
 import { detectTenseContext, getVerbFormForContext, getBaseForm } from './wordVariations';
@@ -65,36 +66,36 @@ const prioritizedInitialWords = [
 // CRITICAL FIX: "am" has ULTRA-HIGH priority after "I"
 const prioritizedConnectingWords = [
   // ULTRA-HIGH priority connecting words (MASSIVELY BOOSTED)
-  { word: 'am', priority: 200, context: 'Linking verb (I am)', grammaticalContext: ['I'] },
-  { word: 'is', priority: 150, context: 'Linking verb (he/she/it is)', grammaticalContext: ['he', 'she', 'it', 'that', 'this'] },
-  { word: 'are', priority: 150, context: 'Linking verb (you/we/they are)', grammaticalContext: ['you', 'we', 'they'] },
-  { word: 'the', priority: 145, context: 'Definite article', grammaticalContext: ['want', 'need', 'have', 'see', 'like', 'love', 'in', 'on', 'at', 'with'] },
-  { word: 'a', priority: 140, context: 'Indefinite article', grammaticalContext: ['want', 'need', 'have', 'see', 'like', 'love', 'in', 'on', 'at', 'with'] },
-  { word: 'to', priority: 135, context: 'Preposition/infinitive marker', grammaticalContext: ['want', 'need', 'like', 'love', 'go', 'going', 'have'] },
-  { word: 'and', priority: 130, context: 'Conjunction', grammaticalContext: [] },
-  { word: 'can', priority: 125, context: 'Modal verb', grammaticalContext: ['I', 'you', 'we', 'he', 'she', 'they'] },
+  { word: 'am', priority: 300, context: 'Linking verb (I am)', grammaticalContext: ['I'] },
+  { word: 'is', priority: 200, context: 'Linking verb (he/she/it is)', grammaticalContext: ['he', 'she', 'it', 'that', 'this'] },
+  { word: 'are', priority: 200, context: 'Linking verb (you/we/they are)', grammaticalContext: ['you', 'we', 'they'] },
+  { word: 'the', priority: 180, context: 'Definite article', grammaticalContext: ['want', 'need', 'have', 'see', 'like', 'love', 'in', 'on', 'at', 'with'] },
+  { word: 'a', priority: 170, context: 'Indefinite article', grammaticalContext: ['want', 'need', 'have', 'see', 'like', 'love', 'in', 'on', 'at', 'with'] },
+  { word: 'to', priority: 160, context: 'Preposition/infinitive marker', grammaticalContext: ['want', 'need', 'like', 'love', 'go', 'going', 'have'] },
+  { word: 'and', priority: 150, context: 'Conjunction', grammaticalContext: [] },
+  { word: 'can', priority: 145, context: 'Modal verb', grammaticalContext: ['I', 'you', 'we', 'he', 'she', 'they'] },
   
   // Very high priority
-  { word: 'want', priority: 120, context: 'Desire verb', grammaticalContext: ['I', 'you', 'we', 'they'] },
-  { word: 'need', priority: 120, context: 'Necessity verb', grammaticalContext: ['I', 'you', 'we', 'they'] },
-  { word: 'have', priority: 115, context: 'Possession verb', grammaticalContext: ['I', 'you', 'we', 'they'] },
-  { word: 'go', priority: 110, context: 'Movement verb', grammaticalContext: ['to', 'can', 'want', 'need'] },
-  { word: 'like', priority: 110, context: 'Preference verb', grammaticalContext: ['I', 'you', 'we', 'they'] },
-  { word: 'that', priority: 105, context: 'Demonstrative/conjunction', grammaticalContext: ['is', 'was', 'see', 'want', 'need'] },
-  { word: 'this', priority: 105, context: 'Demonstrative', grammaticalContext: ['is', 'was', 'see', 'want', 'need'] },
-  { word: 'with', priority: 100, context: 'Preposition', grammaticalContext: ['help', 'play', 'go', 'come'] },
-  { word: 'for', priority: 100, context: 'Preposition', grammaticalContext: ['time', 'wait', 'look'] },
-  { word: 'in', priority: 95, context: 'Preposition', grammaticalContext: ['am', 'is', 'are', 'go'] },
-  { word: 'on', priority: 95, context: 'Preposition', grammaticalContext: ['is', 'are', 'put', 'turn'] },
-  { word: 'at', priority: 90, context: 'Preposition', grammaticalContext: ['am', 'is', 'are', 'look'] },
-  { word: 'or', priority: 90, context: 'Conjunction', grammaticalContext: [] },
-  { word: 'but', priority: 85, context: 'Conjunction', grammaticalContext: [] },
-  { word: 'my', priority: 110, context: 'Possessive pronoun', grammaticalContext: ['I', 'want', 'need', 'have', 'lost', 'found'] },
-  { word: 'your', priority: 105, context: 'Possessive pronoun', grammaticalContext: ['you', 'want', 'need', 'have', 'lost', 'found'] },
-  { word: 'his', priority: 105, context: 'Possessive pronoun', grammaticalContext: ['he', 'wants', 'needs', 'has', 'lost', 'found'] },
-  { word: 'her', priority: 105, context: 'Possessive pronoun', grammaticalContext: ['she', 'wants', 'needs', 'has', 'lost', 'found'] },
-  { word: 'our', priority: 100, context: 'Possessive pronoun', grammaticalContext: ['we', 'want', 'need', 'have', 'lost', 'found'] },
-  { word: 'their', priority: 100, context: 'Possessive pronoun', grammaticalContext: ['they', 'want', 'need', 'have', 'lost', 'found'] },
+  { word: 'want', priority: 140, context: 'Desire verb', grammaticalContext: ['I', 'you', 'we', 'they'] },
+  { word: 'need', priority: 140, context: 'Necessity verb', grammaticalContext: ['I', 'you', 'we', 'they'] },
+  { word: 'have', priority: 135, context: 'Possession verb', grammaticalContext: ['I', 'you', 'we', 'they'] },
+  { word: 'go', priority: 130, context: 'Movement verb', grammaticalContext: ['to', 'can', 'want', 'need'] },
+  { word: 'like', priority: 130, context: 'Preference verb', grammaticalContext: ['I', 'you', 'we', 'they'] },
+  { word: 'that', priority: 125, context: 'Demonstrative/conjunction', grammaticalContext: ['is', 'was', 'see', 'want', 'need'] },
+  { word: 'this', priority: 125, context: 'Demonstrative', grammaticalContext: ['is', 'was', 'see', 'want', 'need'] },
+  { word: 'with', priority: 120, context: 'Preposition', grammaticalContext: ['help', 'play', 'go', 'come'] },
+  { word: 'for', priority: 120, context: 'Preposition', grammaticalContext: ['time', 'wait', 'look'] },
+  { word: 'in', priority: 115, context: 'Preposition', grammaticalContext: ['am', 'is', 'are', 'go'] },
+  { word: 'on', priority: 115, context: 'Preposition', grammaticalContext: ['is', 'are', 'put', 'turn'] },
+  { word: 'at', priority: 110, context: 'Preposition', grammaticalContext: ['am', 'is', 'are', 'look'] },
+  { word: 'or', priority: 110, context: 'Conjunction', grammaticalContext: [] },
+  { word: 'but', priority: 105, context: 'Conjunction', grammaticalContext: [] },
+  { word: 'my', priority: 130, context: 'Possessive pronoun', grammaticalContext: ['I', 'want', 'need', 'have', 'lost', 'found'] },
+  { word: 'your', priority: 125, context: 'Possessive pronoun', grammaticalContext: ['you', 'want', 'need', 'have', 'lost', 'found'] },
+  { word: 'his', priority: 125, context: 'Possessive pronoun', grammaticalContext: ['he', 'wants', 'needs', 'has', 'lost', 'found'] },
+  { word: 'her', priority: 125, context: 'Possessive pronoun', grammaticalContext: ['she', 'wants', 'needs', 'has', 'lost', 'found'] },
+  { word: 'our', priority: 120, context: 'Possessive pronoun', grammaticalContext: ['we', 'want', 'need', 'have', 'lost', 'found'] },
+  { word: 'their', priority: 120, context: 'Possessive pronoun', grammaticalContext: ['they', 'want', 'need', 'have', 'lost', 'found'] },
 ];
 
 // Enhanced sentence templates with pronoun variations and connecting words (Australian English)
@@ -741,22 +742,22 @@ export function scoreSuggestions(
       
       // CRITICAL FIX: ULTRA-MASSIVE BOOST for "am" after "I"
       if (suggestionLower === 'am' && lastWord === 'i') {
-        score += 200; // ULTRA-MASSIVE boost - this is VITAL!
+        score += 300; // ULTRA-MASSIVE boost - this is VITAL!
       } else if (suggestionLower === 'is' && ['he', 'she', 'it', 'that', 'this'].includes(lastWord)) {
-        score += 100; // MASSIVE boost
+        score += 150; // MASSIVE boost
       } else if (suggestionLower === 'are' && ['you', 'we', 'they'].includes(lastWord)) {
-        score += 100; // MASSIVE boost
+        score += 150; // MASSIVE boost
       }
       
       // SPECIAL BOOST: "the" and "a" after verbs
       if ((suggestionLower === 'the' || suggestionLower === 'a') && 
           ['want', 'need', 'have', 'see', 'like', 'love', 'in', 'on', 'at', 'with'].includes(lastWord)) {
-        score += 80; // Very high boost
+        score += 100; // Very high boost
       }
       
       // SPECIAL BOOST: "to" after "want", "need", "like", "love", "go"
       if (suggestionLower === 'to' && ['want', 'need', 'like', 'love', 'go', 'going', 'have'].includes(lastWord)) {
-        score += 80; // Very high boost
+        score += 100; // Very high boost
       }
     }
     
@@ -799,6 +800,11 @@ export function scoreSuggestions(
     // Boost score for polite endings
     if (suggestion.type === 'polite_ending') {
       score += 0.35;
+    }
+    
+    // CRITICAL FIX: ULTRA-HIGH boost for full sentence suggestions
+    if (suggestion.type === 'full_sentence') {
+      score += 50; // MASSIVE boost to make full sentences ultra-prominent
     }
     
     return { ...suggestion, score };
@@ -1093,16 +1099,16 @@ export function getContextualConnectingWords(currentWords: string[], maxWords: n
     
     // CRITICAL FIX: ULTRA-MASSIVE boost for "am" after "I"
     if (cw.word === 'am' && lastWord === 'i') {
-      priority += 200; // ULTRA-MASSIVE boost - this is VITAL!
+      priority += 300; // ULTRA-MASSIVE boost - this is VITAL!
     } else if (cw.word === 'is' && ['he', 'she', 'it', 'that', 'this'].includes(lastWord)) {
-      priority += 100;
+      priority += 150;
     } else if (cw.word === 'are' && ['you', 'we', 'they'].includes(lastWord)) {
-      priority += 100;
+      priority += 150;
     } else if ((cw.word === 'the' || cw.word === 'a') && 
                ['want', 'need', 'have', 'see', 'like', 'love'].includes(lastWord)) {
-      priority += 80;
+      priority += 100;
     } else if (cw.word === 'to' && ['want', 'need', 'like', 'love', 'go', 'have'].includes(lastWord)) {
-      priority += 80;
+      priority += 100;
     }
     
     contextualWords.push({ word: cw.word, priority });

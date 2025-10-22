@@ -37,24 +37,25 @@ const SIMPLIFIED_VOICES: TTSVoice[] = [
   { identifier: 'neutral', name: 'Neutral Voice', language: 'en-US' },
 ];
 
-// ENHANCED: Voice characteristics for MAXIMUM distinction using ACTUAL DIFFERENT VOICES
+// FIXED: Voice characteristics with CORRECT pitch assignments
+// Girl = HIGH pitch (female), Boy = LOW pitch (male)
 const VOICE_CHARACTERISTICS = {
   girl: {
-    pitchMultiplier: 1.6,    // Higher pitch
-    rateMultiplier: 1.15,    // Faster
-    description: 'High-pitched, energetic voice',
-    preferredVoiceNames: ['Samantha', 'Karen', 'Victoria', 'Allison', 'Susan', 'Zoe', 'Fiona', 'female']
+    pitchMultiplier: 1.8,    // VERY HIGH pitch for female voice
+    rateMultiplier: 1.2,     // Slightly faster
+    description: 'High-pitched, bright female voice',
+    preferredVoiceNames: ['Samantha', 'Karen', 'Victoria', 'Allison', 'Susan', 'Zoe', 'Fiona', 'female', 'woman']
   },
   boy: {
-    pitchMultiplier: 0.6,    // Lower pitch
+    pitchMultiplier: 0.5,    // VERY LOW pitch for male voice
     rateMultiplier: 0.85,    // Slower
-    description: 'Deep, steady voice',
-    preferredVoiceNames: ['Alex', 'Daniel', 'Fred', 'Aaron', 'Arthur', 'Tom', 'Oliver', 'male']
+    description: 'Deep, low-pitched male voice',
+    preferredVoiceNames: ['Alex', 'Daniel', 'Fred', 'Aaron', 'Arthur', 'Tom', 'Oliver', 'male', 'man']
   },
   neutral: {
     pitchMultiplier: 1.0,    // Standard pitch
     rateMultiplier: 1.0,     // Standard rate
-    description: 'Clear, balanced voice',
+    description: 'Clear, balanced neutral voice',
     preferredVoiceNames: ['Siri', 'Default', 'System', 'en-US-language']
   }
 };
