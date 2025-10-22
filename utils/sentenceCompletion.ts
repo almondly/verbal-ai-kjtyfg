@@ -14,6 +14,7 @@
  * - ULTRA-ENHANCED: Prioritized initial words and connecting words for better flow
  * - ULTRA-ENHANCED: Grammatical context awareness for "am", "is", "are", "the", etc.
  * - ULTRA-ENHANCED: Web-based sentence completion integration (Google-style predictions)
+ * - CRITICAL FIX: "am" is IMMEDIATELY recommended after "I" with ULTRA-HIGH priority
  */
 
 import { detectTenseContext, getVerbFormForContext, getBaseForm } from './wordVariations';
@@ -61,9 +62,10 @@ const prioritizedInitialWords = [
 ];
 
 // ULTRA-ENHANCED: Prioritized connecting words (should appear frequently)
+// CRITICAL FIX: "am" has ULTRA-HIGH priority after "I"
 const prioritizedConnectingWords = [
   // ULTRA-HIGH priority connecting words (MASSIVELY BOOSTED)
-  { word: 'am', priority: 150, context: 'Linking verb (I am)', grammaticalContext: ['I'] },
+  { word: 'am', priority: 200, context: 'Linking verb (I am)', grammaticalContext: ['I'] },
   { word: 'is', priority: 150, context: 'Linking verb (he/she/it is)', grammaticalContext: ['he', 'she', 'it', 'that', 'this'] },
   { word: 'are', priority: 150, context: 'Linking verb (you/we/they are)', grammaticalContext: ['you', 'we', 'they'] },
   { word: 'the', priority: 145, context: 'Definite article', grammaticalContext: ['want', 'need', 'have', 'see', 'like', 'love', 'in', 'on', 'at', 'with'] },
@@ -97,11 +99,13 @@ const prioritizedConnectingWords = [
 
 // Enhanced sentence templates with pronoun variations and connecting words (Australian English)
 export const sentenceTemplates = [
+  // CRITICAL FIX: "I" immediately followed by "am" with ULTRA-HIGH priority
+  { pattern: ['I'], completions: ['am', 'want', 'need', 'like', 'have', 'can', 'my'] },
+  
   // PRONOUN TO POSSESSIVE MAPPINGS (NEW FEATURE!)
   // When user types a pronoun, suggest the possessive form
   { pattern: ['he'], completions: ['wants', 'needs', 'likes', 'has', 'is', 'can', 'his'] },
   { pattern: ['she'], completions: ['wants', 'needs', 'likes', 'has', 'is', 'can', 'her'] },
-  { pattern: ['I'], completions: ['want', 'need', 'like', 'have', 'am', 'can', 'my'] },
   { pattern: ['you'], completions: ['want', 'need', 'like', 'have', 'are', 'can', 'your'] },
   { pattern: ['we'], completions: ['want', 'need', 'like', 'have', 'are', 'can', 'our'] },
   { pattern: ['they'], completions: ['want', 'need', 'like', 'have', 'are', 'can', 'their'] },
@@ -694,6 +698,7 @@ export function analyzeSentenceStructure(words: string[]): {
 /**
  * Score and rank sentence suggestions
  * ULTRA-ENHANCED: Now considers priority scores, grammatical context, and sentence structure
+ * CRITICAL FIX: "am" after "I" gets ULTRA-HIGH score boost
  */
 export function scoreSuggestions(
   suggestions: { text: string; type: string; confidence: number }[],
@@ -733,9 +738,9 @@ export function scoreSuggestions(
         }
       }
       
-      // SPECIAL BOOST: "am" after "I", "is" after "he/she/it", "are" after "you/we/they"
+      // CRITICAL FIX: ULTRA-MASSIVE BOOST for "am" after "I"
       if (suggestionLower === 'am' && lastWord === 'i') {
-        score += 100; // MASSIVE boost
+        score += 200; // ULTRA-MASSIVE boost - this is VITAL!
       } else if (suggestionLower === 'is' && ['he', 'she', 'it', 'that', 'this'].includes(lastWord)) {
         score += 100; // MASSIVE boost
       } else if (suggestionLower === 'are' && ['you', 'we', 'they'].includes(lastWord)) {
@@ -955,6 +960,11 @@ export function getCategoryRelevantWords(
         }
       }
       
+      // CRITICAL FIX: Example: "I" -> ULTRA-BOOST "am"
+      if (lastWord === 'i' && lowerWord === 'am') {
+        score += 20; // ULTRA-HIGH boost for "am" after "I"
+      }
+      
       // Example: "I am" -> boost state/activity words
       if (sentenceContext.includes('i am') || sentenceContext.includes('am') ||
           sentenceContext.includes('we are') || sentenceContext.includes('are')) {
@@ -1060,6 +1070,7 @@ export function getPrioritizedConnectingWords(maxWords: number = 10): string[] {
 /**
  * Get contextually appropriate connecting words based on current sentence
  * This ensures "am", "the", "is", "are" etc. are suggested at the right time
+ * CRITICAL FIX: "am" after "I" gets ULTRA-HIGH priority
  */
 export function getContextualConnectingWords(currentWords: string[], maxWords: number = 5): string[] {
   const lastWord = currentWords.length > 0 ? currentWords[currentWords.length - 1].toLowerCase() : '';
@@ -1079,9 +1090,9 @@ export function getContextualConnectingWords(currentWords: string[], maxWords: n
       }
     }
     
-    // Special boosts for specific patterns
+    // CRITICAL FIX: ULTRA-MASSIVE boost for "am" after "I"
     if (cw.word === 'am' && lastWord === 'i') {
-      priority += 100;
+      priority += 200; // ULTRA-MASSIVE boost - this is VITAL!
     } else if (cw.word === 'is' && ['he', 'she', 'it', 'that', 'this'].includes(lastWord)) {
       priority += 100;
     } else if (cw.word === 'are' && ['you', 'we', 'they'].includes(lastWord)) {

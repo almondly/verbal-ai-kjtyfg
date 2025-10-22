@@ -30,12 +30,11 @@ const DEFAULT_TTS_SETTINGS: TTSSettings = {
 
 const TTS_STORAGE_KEY = 'tts_settings';
 
-// Properly configured voice options for Male, Female, and Neutral
-// These are platform-specific identifiers that work correctly
+// SIMPLIFIED: Only 3 distinct voices - Girl, Boy, Neutral
 const SIMPLIFIED_VOICES: TTSVoice[] = [
+  { identifier: 'girl', name: 'Girl Voice', language: 'en-US' },
+  { identifier: 'boy', name: 'Boy Voice', language: 'en-US' },
   { identifier: 'neutral', name: 'Neutral Voice', language: 'en-US' },
-  { identifier: 'female', name: 'Female Voice', language: 'en-US' },
-  { identifier: 'male', name: 'Male Voice', language: 'en-US' },
 ];
 
 export function useTTSSettings() {
@@ -173,12 +172,12 @@ export function useTTSSettings() {
     
     console.log('Finding best voice for type:', voiceType);
     
-    // Platform-specific voice selection with improved male and neutral voices
+    // Platform-specific voice selection with DISTINCT voices
     if (Platform.OS === 'ios') {
-      // iOS voice identifiers
-      if (voiceType === 'male') {
+      // iOS voice identifiers - DISTINCT VOICES
+      if (voiceType === 'boy') {
         // Look for deeper male voices like Alex, Daniel, Fred
-        const maleVoice = systemVoices.find(v => 
+        const boyVoice = systemVoices.find(v => 
           v.identifier.includes('Alex') || 
           v.identifier.includes('Daniel') ||
           v.identifier.includes('Fred') ||
@@ -186,13 +185,13 @@ export function useTTSSettings() {
           v.name.toLowerCase().includes('daniel') ||
           v.name.toLowerCase().includes('fred')
         );
-        if (maleVoice) {
-          console.log('Found male voice:', maleVoice.identifier);
-          return maleVoice.identifier;
+        if (boyVoice) {
+          console.log('Found boy voice:', boyVoice.identifier);
+          return boyVoice.identifier;
         }
-      } else if (voiceType === 'female') {
+      } else if (voiceType === 'girl') {
         // Look for female voices like Samantha, Karen, Victoria
-        const femaleVoice = systemVoices.find(v => 
+        const girlVoice = systemVoices.find(v => 
           v.identifier.includes('Samantha') || 
           v.identifier.includes('Karen') ||
           v.identifier.includes('Victoria') ||
@@ -200,9 +199,9 @@ export function useTTSSettings() {
           v.name.toLowerCase().includes('karen') ||
           v.name.toLowerCase().includes('victoria')
         );
-        if (femaleVoice) {
-          console.log('Found female voice:', femaleVoice.identifier);
-          return femaleVoice.identifier;
+        if (girlVoice) {
+          console.log('Found girl voice:', girlVoice.identifier);
+          return girlVoice.identifier;
         }
       } else if (voiceType === 'neutral') {
         // Look for neutral voices - prefer Siri or default system voice
@@ -217,27 +216,27 @@ export function useTTSSettings() {
         }
       }
     } else if (Platform.OS === 'android') {
-      // Android voice identifiers
-      if (voiceType === 'male') {
+      // Android voice identifiers - DISTINCT VOICES
+      if (voiceType === 'boy') {
         // Look for male voices with lower pitch
-        const maleVoice = systemVoices.find(v => 
+        const boyVoice = systemVoices.find(v => 
           v.language === 'en-US' && 
           (v.name.toLowerCase().includes('male') || 
            v.name.toLowerCase().includes('man') ||
            v.quality === Speech.VoiceQuality.Enhanced)
         );
-        if (maleVoice) {
-          console.log('Found male voice:', maleVoice.identifier);
-          return maleVoice.identifier;
+        if (boyVoice) {
+          console.log('Found boy voice:', boyVoice.identifier);
+          return boyVoice.identifier;
         }
-      } else if (voiceType === 'female') {
-        const femaleVoice = systemVoices.find(v => 
+      } else if (voiceType === 'girl') {
+        const girlVoice = systemVoices.find(v => 
           v.language === 'en-US' && 
           v.name.toLowerCase().includes('female')
         );
-        if (femaleVoice) {
-          console.log('Found female voice:', femaleVoice.identifier);
-          return femaleVoice.identifier;
+        if (girlVoice) {
+          console.log('Found girl voice:', girlVoice.identifier);
+          return girlVoice.identifier;
         }
       } else if (voiceType === 'neutral') {
         // Look for default or standard voice
@@ -269,21 +268,21 @@ export function useTTSSettings() {
         rate: settings.rate,
       };
 
-      // Map our simplified voice types to actual system voices
+      // Map our simplified voice types to actual system voices with DISTINCT characteristics
       let voiceIdentifier: string | undefined;
       
-      if (settings.voiceIdentifier === 'male') {
-        voiceIdentifier = findBestVoice('male');
-        // Adjust pitch for more masculine sound
-        options.pitch = Math.max(0.7, settings.pitch - 0.2);
-      } else if (settings.voiceIdentifier === 'female') {
-        voiceIdentifier = findBestVoice('female');
-        // Keep pitch slightly higher for feminine sound
-        options.pitch = Math.min(1.3, settings.pitch + 0.1);
+      if (settings.voiceIdentifier === 'boy') {
+        voiceIdentifier = findBestVoice('boy');
+        // DISTINCT: Lower pitch for boy voice
+        options.pitch = Math.max(0.7, settings.pitch - 0.3);
+      } else if (settings.voiceIdentifier === 'girl') {
+        voiceIdentifier = findBestVoice('girl');
+        // DISTINCT: Higher pitch for girl voice
+        options.pitch = Math.min(1.4, settings.pitch + 0.2);
       } else if (settings.voiceIdentifier === 'neutral') {
         voiceIdentifier = findBestVoice('neutral');
-        // Neutral pitch - slightly lower than default but not as low as male
-        options.pitch = Math.max(0.85, settings.pitch - 0.1);
+        // DISTINCT: Neutral pitch - slightly lower than default
+        options.pitch = Math.max(0.9, settings.pitch);
       }
 
       // Only set voice if we found a matching one
@@ -319,21 +318,21 @@ export function useTTSSettings() {
         rate: settings.rate,
       };
 
-      // Map our simplified voice types to actual system voices
+      // Map our simplified voice types to actual system voices with DISTINCT characteristics
       let actualVoiceId: string | undefined;
       
-      if (voiceIdentifier === 'male') {
-        actualVoiceId = findBestVoice('male');
-        // Adjust pitch for more masculine sound
-        options.pitch = Math.max(0.7, settings.pitch - 0.2);
-      } else if (voiceIdentifier === 'female') {
-        actualVoiceId = findBestVoice('female');
-        // Keep pitch slightly higher for feminine sound
-        options.pitch = Math.min(1.3, settings.pitch + 0.1);
+      if (voiceIdentifier === 'boy') {
+        actualVoiceId = findBestVoice('boy');
+        // DISTINCT: Lower pitch for boy voice
+        options.pitch = Math.max(0.7, settings.pitch - 0.3);
+      } else if (voiceIdentifier === 'girl') {
+        actualVoiceId = findBestVoice('girl');
+        // DISTINCT: Higher pitch for girl voice
+        options.pitch = Math.min(1.4, settings.pitch + 0.2);
       } else if (voiceIdentifier === 'neutral') {
         actualVoiceId = findBestVoice('neutral');
-        // Neutral pitch - slightly lower than default but not as low as male
-        options.pitch = Math.max(0.85, settings.pitch - 0.1);
+        // DISTINCT: Neutral pitch
+        options.pitch = Math.max(0.9, settings.pitch);
       }
 
       if (actualVoiceId) {
