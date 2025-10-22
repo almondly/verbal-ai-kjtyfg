@@ -474,6 +474,7 @@ export const sentenceTemplates = [
   { pattern: ['go'], completions: ['home', 'outside', 'to school', 'to the park', 'to the shop', 'to bed', 'with me', 'with him', 'with her'] },
   { pattern: ['go', 'to'], completions: ['school', 'home', 'the park', 'the shop', 'bed', 'the toilet'] },
   { pattern: ['go', 'with'], completions: ['me', 'you', 'him', 'her', 'them', 'mum', 'dad'] },
+  { pattern: ['go', 'play'], completions: ['home', 'outside', 'at school', 'at the park', 'together', 'with him', 'with her'] },
   
   // "Let's" patterns
   { pattern: ['let\'s'], completions: ['play', 'go', 'eat', 'do math', 'play a game', 'read'] },
