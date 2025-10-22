@@ -19,6 +19,7 @@ import {
   getContextualConnectingWords
 } from '../utils/sentenceCompletion';
 import { getContextualAACSentences, aacSentences } from '../utils/aacSentences';
+import { detectGrammaticalIssues, getBestGrammaticalCorrection } from '../utils/grammaticalCorrection';
 
 export interface AdvancedSuggestion {
   text: string;
@@ -762,6 +763,42 @@ export function useAdvancedAI() {
         currentCategory,
         hasCategoryTiles: !!categoryTiles
       });
+
+      // 0. GRAMMATICAL CORRECTION (ULTRA-HIGH PRIORITY)
+      // Detect grammatically incomplete sentences and suggest corrections
+      // Examples: "I good" -> "I am good", "I want go outside" -> "I want to go outside"
+      if (currentWords.length >= 2 && currentWords.length <= 6) {
+        const grammaticalSuggestions = detectGrammaticalIssues(currentWords);
+        
+        grammaticalSuggestions.forEach((grammarSuggestion, index) => {
+          // Only suggest if confidence is high enough
+          if (grammarSuggestion.confidence >= 0.85) {
+            // Add the corrected full sentence as a suggestion
+            if (!suggestions.some(s => s.text.toLowerCase() === grammarSuggestion.corrected.toLowerCase())) {
+              suggestions.push({
+                text: grammarSuggestion.corrected,
+                confidence: grammarSuggestion.confidence,
+                type: 'full_sentence',
+                context: `Grammar: ${grammarSuggestion.explanation}`
+              });
+            }
+            
+            // Also suggest the next word that would complete the correction
+            const correctedWords = grammarSuggestion.corrected.split(' ');
+            if (correctedWords.length > currentWords.length) {
+              const nextWord = correctedWords[currentWords.length];
+              if (nextWord && !suggestions.some(s => areSimilarWords(s.text.toLowerCase(), nextWord.toLowerCase()))) {
+                suggestions.push({
+                  text: nextWord,
+                  confidence: grammarSuggestion.confidence - 0.02,
+                  type: 'common_phrase',
+                  context: `Grammar correction: adds "${nextWord}"`
+                });
+              }
+            }
+          }
+        });
+      }
 
       // 0.5. WEB-BASED SENTENCE COMPLETION (Google-style AI predictions)
       // Only call if we have at least 1 word and less than 6 words
