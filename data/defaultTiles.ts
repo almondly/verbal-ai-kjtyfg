@@ -88,6 +88,7 @@ const pictograms: Record<string, string> = {
   has: 'https://static.arasaac.org/pictograms/7802/7802_2500.png',
   do: 'https://static.arasaac.org/pictograms/32751/32751_2500.png',
   does: 'https://static.arasaac.org/pictograms/8477/8477_2500.png',
+  am: 'https://static.arasaac.org/pictograms/10366/10366_2500.png',
   is: 'https://static.arasaac.org/pictograms/10366/10366_2500.png',
   are: 'https://static.arasaac.org/pictograms/8477/8477_2500.png',
   was: 'https://static.arasaac.org/pictograms/8477/8477_2500.png',
@@ -403,6 +404,7 @@ export const defaultTiles: Tile[] = [
   t('greetings', 'excuse me'),
   
   // Core - Enhanced with connecting words and missing common words
+  // CRITICAL: "am" is now included as a core word for proper sentence construction
   t('core', 'I'),
   t('core', 'you'),
   t('core', 'he'),
@@ -424,6 +426,7 @@ export const defaultTiles: Tile[] = [
   t('core', 'has'),
   t('core', 'do'),
   t('core', 'does'),
+  t('core', 'am'),  // ✅ ADDED: Critical linking verb for "I am" sentences
   t('core', 'is'),
   t('core', 'are'),
   t('core', 'was'),
