@@ -37,22 +37,25 @@ const SIMPLIFIED_VOICES: TTSVoice[] = [
   { identifier: 'neutral', name: 'Neutral Voice', language: 'en-US' },
 ];
 
-// ENHANCED: Voice characteristics for MAXIMUM distinction
+// ENHANCED: Voice characteristics for MAXIMUM distinction using ACTUAL DIFFERENT VOICES
 const VOICE_CHARACTERISTICS = {
   girl: {
-    pitchMultiplier: 1.5,    // Much higher pitch (was 1.2)
-    rateMultiplier: 1.1,     // Slightly faster
-    description: 'High-pitched, energetic voice'
+    pitchMultiplier: 1.6,    // Higher pitch
+    rateMultiplier: 1.15,    // Faster
+    description: 'High-pitched, energetic voice',
+    preferredVoiceNames: ['Samantha', 'Karen', 'Victoria', 'Allison', 'Susan', 'Zoe', 'Fiona', 'female']
   },
   boy: {
-    pitchMultiplier: 0.65,   // Much lower pitch (was 0.7)
-    rateMultiplier: 0.9,     // Slightly slower
-    description: 'Deep, steady voice'
+    pitchMultiplier: 0.6,    // Lower pitch
+    rateMultiplier: 0.85,    // Slower
+    description: 'Deep, steady voice',
+    preferredVoiceNames: ['Alex', 'Daniel', 'Fred', 'Aaron', 'Arthur', 'Tom', 'Oliver', 'male']
   },
   neutral: {
     pitchMultiplier: 1.0,    // Standard pitch
     rateMultiplier: 1.0,     // Standard rate
-    description: 'Clear, balanced voice'
+    description: 'Clear, balanced voice',
+    preferredVoiceNames: ['Siri', 'Default', 'System', 'en-US-language']
   }
 };
 
@@ -87,7 +90,7 @@ export function useTTSSettings() {
       );
       
       console.log('English voices found:', englishVoices.length);
-      console.log('Available voice names:', englishVoices.map(v => v.name).join(', '));
+      console.log('Available voice names:', englishVoices.map(v => `${v.name} (${v.identifier})`).join(', '));
       setSystemVoices(englishVoices);
       
       // Always use our simplified three-voice system
@@ -192,102 +195,19 @@ export function useTTSSettings() {
     
     console.log('Finding best voice for type:', voiceType);
     
-    // Platform-specific voice selection with DISTINCT voices
-    if (Platform.OS === 'ios') {
-      // iOS voice identifiers - DISTINCT VOICES
-      if (voiceType === 'boy') {
-        // Look for deeper male voices - prioritize specific names
-        const boyVoiceNames = ['Alex', 'Daniel', 'Fred', 'Aaron', 'Arthur'];
-        for (const name of boyVoiceNames) {
-          const voice = systemVoices.find(v => 
-            v.identifier.includes(name) || 
-            v.name.toLowerCase().includes(name.toLowerCase())
-          );
-          if (voice) {
-            console.log('Found boy voice:', voice.identifier, voice.name);
-            return voice.identifier;
-          }
-        }
-        // Fallback: any male voice
-        const maleVoice = systemVoices.find(v => 
-          v.name.toLowerCase().includes('male') ||
-          v.name.toLowerCase().includes('man')
-        );
-        if (maleVoice) {
-          console.log('Found male voice:', maleVoice.identifier);
-          return maleVoice.identifier;
-        }
-      } else if (voiceType === 'girl') {
-        // Look for female voices - prioritize specific names
-        const girlVoiceNames = ['Samantha', 'Karen', 'Victoria', 'Allison', 'Susan'];
-        for (const name of girlVoiceNames) {
-          const voice = systemVoices.find(v => 
-            v.identifier.includes(name) || 
-            v.name.toLowerCase().includes(name.toLowerCase())
-          );
-          if (voice) {
-            console.log('Found girl voice:', voice.identifier, voice.name);
-            return voice.identifier;
-          }
-        }
-        // Fallback: any female voice
-        const femaleVoice = systemVoices.find(v => 
-          v.name.toLowerCase().includes('female') ||
-          v.name.toLowerCase().includes('woman')
-        );
-        if (femaleVoice) {
-          console.log('Found female voice:', femaleVoice.identifier);
-          return femaleVoice.identifier;
-        }
-      } else if (voiceType === 'neutral') {
-        // Look for neutral voices - prefer Siri or default system voice
-        const neutralVoiceNames = ['Siri', 'Default', 'System'];
-        for (const name of neutralVoiceNames) {
-          const voice = systemVoices.find(v => 
-            v.identifier.includes(name) ||
-            v.name.toLowerCase().includes(name.toLowerCase())
-          );
-          if (voice) {
-            console.log('Found neutral voice:', voice.identifier, voice.name);
-            return voice.identifier;
-          }
-        }
-      }
-    } else if (Platform.OS === 'android') {
-      // Android voice identifiers - DISTINCT VOICES
-      if (voiceType === 'boy') {
-        // Look for male voices with lower pitch
-        const boyVoice = systemVoices.find(v => 
-          v.language === 'en-US' && 
-          (v.name.toLowerCase().includes('male') || 
-           v.name.toLowerCase().includes('man') ||
-           v.quality === Speech.VoiceQuality.Enhanced)
-        );
-        if (boyVoice) {
-          console.log('Found boy voice:', boyVoice.identifier, boyVoice.name);
-          return boyVoice.identifier;
-        }
-      } else if (voiceType === 'girl') {
-        const girlVoice = systemVoices.find(v => 
-          v.language === 'en-US' && 
-          (v.name.toLowerCase().includes('female') ||
-           v.name.toLowerCase().includes('woman'))
-        );
-        if (girlVoice) {
-          console.log('Found girl voice:', girlVoice.identifier, girlVoice.name);
-          return girlVoice.identifier;
-        }
-      } else if (voiceType === 'neutral') {
-        // Look for default or standard voice
-        const neutralVoice = systemVoices.find(v => 
-          v.language === 'en-US' && 
-          (v.name.toLowerCase().includes('default') || 
-           v.name.toLowerCase().includes('standard'))
-        );
-        if (neutralVoice) {
-          console.log('Found neutral voice:', neutralVoice.identifier, neutralVoice.name);
-          return neutralVoice.identifier;
-        }
+    const characteristics = VOICE_CHARACTERISTICS[voiceType as keyof typeof VOICE_CHARACTERISTICS];
+    if (!characteristics) return undefined;
+
+    // Try to find a voice that matches the preferred names
+    for (const preferredName of characteristics.preferredVoiceNames) {
+      const voice = systemVoices.find(v => 
+        v.name.toLowerCase().includes(preferredName.toLowerCase()) ||
+        v.identifier.toLowerCase().includes(preferredName.toLowerCase())
+      );
+      
+      if (voice) {
+        console.log(`✅ Found ${voiceType} voice:`, voice.name, voice.identifier);
+        return voice.identifier;
       }
     }
     

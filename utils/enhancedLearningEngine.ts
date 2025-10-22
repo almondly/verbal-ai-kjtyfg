@@ -2,6 +2,10 @@
 /**
  * Enhanced Learning Engine
  * Implements adaptive learning, intent recognition, and personalized predictions
+ * 
+ * ENHANCED: Now properly stores and learns from duplicate sentences
+ * ENHANCED: Tracks sentence frequency and recommends based on usage patterns
+ * ENHANCED: Learns from user behavior and adapts suggestions over time
  */
 
 import { supabase } from '../app/integrations/supabase/client';
@@ -32,6 +36,7 @@ export interface IntentionSequence {
 /**
  * Track suggestion interaction (selected or ignored)
  * This is the core of adaptive learning
+ * ENHANCED: Now tracks full sentences and their frequency
  */
 export async function trackSuggestionInteraction(
   interaction: SuggestionInteraction
@@ -63,10 +68,192 @@ export async function trackSuggestionInteraction(
       });
     }
     
+    // ENHANCED: If suggestion was selected, track it as a complete sentence
+    if (interaction.wasSelected) {
+      await trackCompleteSentence(interaction.suggestionText, interaction.category);
+    }
+    
     // Update user prediction model based on interaction
     await updatePredictionModel(interaction);
   } catch (err) {
     console.log('Error in trackSuggestionInteraction:', err);
+  }
+}
+
+/**
+ * ENHANCED: Track complete sentences and their frequency
+ * This allows the AI to learn from duplicate sentences and recommend them more often
+ */
+async function trackCompleteSentence(sentence: string, category?: string): Promise<void> {
+  try {
+    const now = new Date();
+    const hour = now.getHours();
+    const dayOfWeek = now.getDay();
+    const words = sentence.toLowerCase().trim().split(/\s+/).filter(Boolean);
+    
+    // Track the complete sentence with frequency
+    const { data: existing, error: fetchError } = await supabase
+      .from('user_patterns')
+      .select('*')
+      .eq('pattern_type', 'complete_sentence')
+      .eq('pattern_key', sentence.toLowerCase())
+      .single();
+    
+    if (fetchError && fetchError.code !== 'PGRST116') {
+      console.log('Error fetching existing sentence:', fetchError);
+    }
+    
+    if (existing) {
+      // Increment frequency for duplicate sentence
+      const newFrequency = existing.frequency + 1;
+      const { error: updateError } = await supabase
+        .from('user_patterns')
+        .update({
+          frequency: newFrequency,
+          metadata: {
+            ...existing.metadata,
+            lastUsed: now.toISOString(),
+            wordCount: words.length,
+            category,
+            hour,
+            dayOfWeek,
+            usageHistory: [
+              ...(existing.metadata?.usageHistory || []).slice(-20), // Keep last 20 usages
+              { timestamp: now.toISOString(), hour, dayOfWeek }
+            ]
+          },
+          updated_at: now.toISOString()
+        })
+        .eq('id', existing.id);
+      
+      if (updateError) {
+        console.log('Error updating sentence frequency:', updateError);
+      } else {
+        console.log(`✅ Incremented sentence frequency to ${newFrequency}:`, sentence);
+      }
+    } else {
+      // Create new sentence entry
+      const { error: insertError } = await supabase
+        .from('user_patterns')
+        .insert({
+          pattern_type: 'complete_sentence',
+          pattern_key: sentence.toLowerCase(),
+          frequency: 1,
+          metadata: {
+            wordCount: words.length,
+            category,
+            hour,
+            dayOfWeek,
+            lastUsed: now.toISOString(),
+            usageHistory: [{ timestamp: now.toISOString(), hour, dayOfWeek }]
+          }
+        });
+      
+      if (insertError) {
+        console.log('Error inserting new sentence:', insertError);
+      } else {
+        console.log('✅ Tracked new sentence:', sentence);
+      }
+    }
+  } catch (err) {
+    console.log('Error in trackCompleteSentence:', err);
+  }
+}
+
+/**
+ * ENHANCED: Get frequently used complete sentences
+ * Returns sentences sorted by frequency, prioritizing duplicates
+ */
+export async function getFrequentSentences(
+  minFrequency: number = 2,
+  maxResults: number = 20
+): Promise<{ sentence: string; frequency: number; lastUsed: string }[]> {
+  try {
+    const { data, error } = await supabase
+      .from('user_patterns')
+      .select('pattern_key, frequency, metadata')
+      .eq('pattern_type', 'complete_sentence')
+      .gte('frequency', minFrequency)
+      .order('frequency', { ascending: false })
+      .limit(maxResults);
+    
+    if (error || !data) {
+      console.log('Error fetching frequent sentences:', error);
+      return [];
+    }
+    
+    return data.map(d => ({
+      sentence: d.pattern_key,
+      frequency: d.frequency,
+      lastUsed: d.metadata?.lastUsed || d.updated_at
+    }));
+  } catch (err) {
+    console.log('Error in getFrequentSentences:', err);
+    return [];
+  }
+}
+
+/**
+ * ENHANCED: Get contextually relevant sentences based on current input
+ * Prioritizes frequently used sentences that match the context
+ */
+export async function getContextualSentences(
+  currentWords: string[],
+  maxResults: number = 5
+): Promise<string[]> {
+  try {
+    const currentText = currentWords.join(' ').toLowerCase();
+    
+    // Get all complete sentences
+    const { data, error } = await supabase
+      .from('user_patterns')
+      .select('pattern_key, frequency, metadata')
+      .eq('pattern_type', 'complete_sentence')
+      .order('frequency', { ascending: false })
+      .limit(100);
+    
+    if (error || !data) {
+      console.log('Error fetching contextual sentences:', error);
+      return [];
+    }
+    
+    // Score sentences based on relevance to current input
+    const scoredSentences = data
+      .map(d => {
+        const sentence = d.pattern_key;
+        let score = d.frequency * 10; // Base score from frequency
+        
+        // Boost if sentence starts with current text
+        if (sentence.startsWith(currentText)) {
+          score += 100;
+        }
+        
+        // Boost if sentence contains all current words
+        const sentenceWords = sentence.split(' ');
+        const matchingWords = currentWords.filter(word => 
+          sentenceWords.some(sw => sw.toLowerCase() === word.toLowerCase())
+        );
+        score += matchingWords.length * 20;
+        
+        // Boost if recently used
+        const lastUsed = new Date(d.metadata?.lastUsed || d.updated_at);
+        const hoursSinceUse = (Date.now() - lastUsed.getTime()) / (1000 * 60 * 60);
+        if (hoursSinceUse < 24) {
+          score += 30;
+        } else if (hoursSinceUse < 168) { // 1 week
+          score += 15;
+        }
+        
+        return { sentence, score };
+      })
+      .filter(s => s.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, maxResults);
+    
+    return scoredSentences.map(s => s.sentence);
+  } catch (err) {
+    console.log('Error in getContextualSentences:', err);
+    return [];
   }
 }
 
@@ -86,13 +273,19 @@ async function updatePredictionModel(interaction: SuggestionInteraction): Promis
       selectedWords: {},
       ignoredWords: {},
       contextPatterns: {},
-      accuracyHistory: []
+      accuracyHistory: [],
+      sentenceFrequency: {} // ENHANCED: Track sentence frequency
     };
     
     // Update model based on interaction
     if (interaction.wasSelected) {
       const key = interaction.suggestionText.toLowerCase();
       modelData.selectedWords[key] = (modelData.selectedWords[key] || 0) + 1;
+      
+      // ENHANCED: Track sentence frequency
+      if (interaction.suggestionType === 'full_sentence' || interaction.contextWords.length >= 3) {
+        modelData.sentenceFrequency[key] = (modelData.sentenceFrequency[key] || 0) + 1;
+      }
       
       // Track context patterns for selected suggestions
       const contextKey = interaction.contextWords.join(' ').toLowerCase();
@@ -147,6 +340,7 @@ async function updatePredictionModel(interaction: SuggestionInteraction): Promis
 
 /**
  * Get personalized suggestions based on user's prediction model
+ * ENHANCED: Now includes frequently used sentences
  */
 export async function getPersonalizedSuggestions(
   contextWords: string[],
@@ -171,6 +365,24 @@ export async function getPersonalizedSuggestions(
     
     // Get context-specific patterns
     const contextPatterns = modelData.contextPatterns[contextKey] || {};
+    
+    // ENHANCED: Check for frequently used complete sentences
+    if (modelData.sentenceFrequency) {
+      Object.entries(modelData.sentenceFrequency).forEach(([sentence, freq]) => {
+        const frequency = freq as number;
+        if (frequency >= 2 && sentence.startsWith(contextWords.join(' ').toLowerCase())) {
+          // Extract next word from frequent sentence
+          const sentenceWords = sentence.split(' ');
+          if (sentenceWords.length > contextWords.length) {
+            const nextWord = sentenceWords[contextWords.length];
+            suggestions.push({
+              word: nextWord,
+              confidence: Math.min(1.0, frequency / 5) + 0.3 // Boost for frequent sentences
+            });
+          }
+        }
+      });
+    }
     
     // Score available words based on model
     availableWords.forEach(word => {
@@ -556,6 +768,7 @@ export async function getSemanticallyRelatedPhrases(
 
 /**
  * Get learning statistics for user
+ * ENHANCED: Now includes sentence frequency statistics
  */
 export async function getLearningStatistics(): Promise<{
   totalInteractions: number;
@@ -564,6 +777,7 @@ export async function getLearningStatistics(): Promise<{
   topIgnoredWords: string[];
   modelAccuracy: number;
   intentDistribution: { [key: string]: number };
+  frequentSentences: { sentence: string; frequency: number }[];
 }> {
   try {
     // Get interaction stats
@@ -617,13 +831,17 @@ export async function getLearningStatistics(): Promise<{
         (intentDistribution[intent.intent_type] || 0) + intent.frequency;
     });
     
+    // ENHANCED: Get frequent sentences
+    const frequentSentences = await getFrequentSentences(2, 10);
+    
     return {
       totalInteractions,
       selectionRate,
       topSelectedWords,
       topIgnoredWords,
       modelAccuracy,
-      intentDistribution
+      intentDistribution,
+      frequentSentences
     };
   } catch (err) {
     console.log('Error getting learning statistics:', err);
@@ -633,7 +851,8 @@ export async function getLearningStatistics(): Promise<{
       topSelectedWords: [],
       topIgnoredWords: [],
       modelAccuracy: 0,
-      intentDistribution: {}
+      intentDistribution: {},
+      frequentSentences: []
     };
   }
 }

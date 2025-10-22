@@ -7,6 +7,9 @@
  * - "I want go outside" -> "I want to go outside"
  * - "He happy" -> "He is happy"
  * - "They tired" -> "They are tired"
+ * 
+ * FIXED: "I need help" is now correctly recognized as grammatically complete
+ * FIXED: "he wants help with his homework" patterns are now properly handled
  */
 
 export interface GrammaticalSuggestion {
@@ -49,7 +52,13 @@ export function detectGrammaticalIssues(words: string[]): GrammaticalSuggestion[
       'hot', 'cold', 'warm', 'cool', 'big', 'small', 'nice', 'great', 'awesome'
     ];
     
-    if (subjectPronouns[subject] && adjectives.includes(word2)) {
+    // CRITICAL FIX: Exclude nouns that don't need "am/is/are"
+    const nounsNotNeedingVerb = [
+      'help', 'water', 'food', 'time', 'break', 'rest', 'toilet', 'bathroom',
+      'mum', 'dad', 'friend', 'teacher', 'book', 'pencil', 'toy', 'ball'
+    ];
+    
+    if (subjectPronouns[subject] && adjectives.includes(word2) && !nounsNotNeedingVerb.includes(word2)) {
       const verb = subjectPronouns[subject];
       const corrected = `${words[0]} ${verb} ${words[1]}`;
       
@@ -64,6 +73,7 @@ export function detectGrammaticalIssues(words: string[]): GrammaticalSuggestion[
   
   // Pattern 2: "I/He/She/They want go" (missing "to")
   // Examples: "I want go outside", "He want play"
+  // CRITICAL FIX: Only suggest "to" when followed by an ACTION VERB, not a noun
   if (lowerWords.length >= 3) {
     for (let i = 0; i < lowerWords.length - 2; i++) {
       const word1 = lowerWords[i];
@@ -75,10 +85,19 @@ export function detectGrammaticalIssues(words: string[]): GrammaticalSuggestion[
       const infinitiveVerbs = [
         'go', 'play', 'eat', 'drink', 'sleep', 'read', 'write', 'watch', 'listen',
         'run', 'walk', 'jump', 'dance', 'sing', 'draw', 'paint', 'build', 'make',
-        'see', 'hear', 'feel', 'think', 'know', 'learn', 'teach', 'help', 'work'
+        'see', 'hear', 'feel', 'think', 'know', 'learn', 'teach', 'work', 'come',
+        'leave', 'stay', 'sit', 'stand', 'talk', 'speak', 'tell', 'ask', 'use'
       ];
       
-      if (modalVerbs.includes(word2) && infinitiveVerbs.includes(word3)) {
+      // CRITICAL FIX: Nouns that should NOT have "to" inserted before them
+      const nounsNotNeedingTo = [
+        'help', 'water', 'food', 'time', 'break', 'rest', 'toilet', 'bathroom',
+        'mum', 'dad', 'friend', 'teacher', 'book', 'pencil', 'toy', 'ball',
+        'home', 'school', 'park', 'shop', 'car', 'bus', 'bed', 'chair', 'table',
+        'apple', 'banana', 'milk', 'juice', 'snack', 'lunch', 'dinner', 'breakfast'
+      ];
+      
+      if (modalVerbs.includes(word2) && infinitiveVerbs.includes(word3) && !nounsNotNeedingTo.includes(word3)) {
         // Insert "to" between modal verb and infinitive
         const correctedWords = [...words];
         correctedWords.splice(i + 2, 0, 'to');
@@ -97,6 +116,7 @@ export function detectGrammaticalIssues(words: string[]): GrammaticalSuggestion[
   
   // Pattern 3: "I want water" vs "I want to go outside" - detect when "to" is needed
   // This is more complex - we need to check if the word after "want/need" is a noun or verb
+  // CRITICAL FIX: Only suggest "to" for ACTION VERBS, not nouns
   if (lowerWords.length >= 3) {
     for (let i = 0; i < lowerWords.length - 2; i++) {
       const word1 = lowerWords[i];
@@ -107,12 +127,19 @@ export function detectGrammaticalIssues(words: string[]): GrammaticalSuggestion[
       const actionVerbs = [
         'go', 'play', 'eat', 'drink', 'sleep', 'read', 'write', 'watch', 'listen',
         'run', 'walk', 'jump', 'dance', 'sing', 'draw', 'paint', 'build', 'make',
-        'see', 'hear', 'feel', 'think', 'know', 'learn', 'teach', 'help', 'work',
+        'see', 'hear', 'feel', 'think', 'know', 'learn', 'teach', 'work',
         'come', 'leave', 'stay', 'sit', 'stand', 'talk', 'speak', 'tell', 'ask'
       ];
       
+      // CRITICAL FIX: Nouns that should NOT have "to" inserted
+      const nounsNotNeedingTo = [
+        'help', 'water', 'food', 'time', 'break', 'rest', 'toilet', 'bathroom',
+        'mum', 'dad', 'friend', 'teacher', 'book', 'pencil', 'toy', 'ball',
+        'home', 'school', 'park', 'shop', 'car', 'bus', 'bed', 'chair', 'table'
+      ];
+      
       // Check if pattern is "subject + want/need + action verb + ..."
-      if (modalVerbs.includes(word2) && actionVerbs.includes(word3)) {
+      if (modalVerbs.includes(word2) && actionVerbs.includes(word3) && !nounsNotNeedingTo.includes(word3)) {
         // Check if "to" is already there
         if (i + 3 < lowerWords.length && lowerWords[i + 2] !== 'to') {
           const correctedWords = [...words];
@@ -185,6 +212,7 @@ export function detectGrammaticalIssues(words: string[]): GrammaticalSuggestion[
   
   // Pattern 5: Missing articles "the" or "a"
   // Examples: "I want ball" -> "I want the ball", "I see dog" -> "I see a dog"
+  // CRITICAL FIX: Don't suggest articles for abstract nouns like "help", "time", "rest"
   if (lowerWords.length >= 3) {
     for (let i = 0; i < lowerWords.length - 2; i++) {
       const word1 = lowerWords[i];
@@ -197,8 +225,11 @@ export function detectGrammaticalIssues(words: string[]): GrammaticalSuggestion[
         'bathroom', 'toilet', 'park', 'shop', 'school', 'home', 'bed', 'chair', 'table'
       ];
       
+      // CRITICAL FIX: Abstract nouns that don't need articles
+      const abstractNouns = ['help', 'time', 'rest', 'break', 'homework', 'work'];
+      
       // Check if pattern is "verb + noun" (missing article)
-      if (verbsNeedingArticle.includes(word2) && commonNouns.includes(word3)) {
+      if (verbsNeedingArticle.includes(word2) && commonNouns.includes(word3) && !abstractNouns.includes(word3)) {
         // Decide between "a" and "the"
         // Use "the" for specific/unique things, "a" for general things
         const useThe = ['bathroom', 'toilet', 'park', 'shop', 'school', 'home', 'bed'].includes(word3);
