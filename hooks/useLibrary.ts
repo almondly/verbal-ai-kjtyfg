@@ -6,7 +6,7 @@ import { defaultTiles } from '../data/defaultTiles';
 
 const LIBRARY_KEY = 'aac_tiles_v1';
 const SEED_VERSION_KEY = 'aac_tiles_seed_version';
-const CURRENT_SEED_VERSION = 10; // Incremented to add missing words (use, borrow) and fix category recommendations
+const CURRENT_SEED_VERSION = 11; // Incremented to add Greetings & Manners category and optimize performance
 
 function mergeMissingDefaults(stored: Tile[], defaults: Tile[]): Tile[] {
   // Create a map of default tiles by ID for quick lookup
@@ -84,7 +84,7 @@ export function useLibrary() {
         if (seedVersion < CURRENT_SEED_VERSION) {
           // Migrate: merge in any missing defaults AND update existing tiles with new images
           console.log(
-            `🔄 Migrating tiles: seedVersion ${seedVersion} -> ${CURRENT_SEED_VERSION} - Adding missing words and improving category recommendations`
+            `🔄 Migrating tiles: seedVersion ${seedVersion} -> ${CURRENT_SEED_VERSION} - Adding Greetings & Manners category and optimizing performance`
           );
           const merged = mergeMissingDefaults(loadedTiles, defaultTiles);
           setTiles(merged);

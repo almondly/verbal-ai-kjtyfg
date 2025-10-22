@@ -3,6 +3,7 @@ import { Tile } from '../types';
 
 // 🎨 Category color palette
 const categoryColor: Record<string, string> = {
+  greetings: '#E74C3C',
   core: '#3498DB',
   people: '#9B59B6',
   actions: '#2ECC71',
@@ -32,6 +33,24 @@ const categoryColor: Record<string, string> = {
 // ========================================================================
 
 const pictograms: Record<string, string> = {
+  // Greetings and Manners - Essential social communication
+  hello: 'https://static.arasaac.org/pictograms/8486/8486_2500.png',
+  hi: 'https://static.arasaac.org/pictograms/8486/8486_2500.png',
+  goodbye: 'https://static.arasaac.org/pictograms/8130/8130_2500.png',
+  bye: 'https://static.arasaac.org/pictograms/8130/8130_2500.png',
+  'how are you': 'https://static.arasaac.org/pictograms/8486/8486_2500.png',
+  good: 'https://static.arasaac.org/pictograms/7012/7012_2500.png',
+  bad: 'https://static.arasaac.org/pictograms/7013/7013_2500.png',
+  'good morning': 'https://static.arasaac.org/pictograms/5722/5722_2500.png',
+  'good afternoon': 'https://static.arasaac.org/pictograms/5723/5723_2500.png',
+  'good evening': 'https://static.arasaac.org/pictograms/5725/5725_2500.png',
+  'good night': 'https://static.arasaac.org/pictograms/5726/5726_2500.png',
+  'see you': 'https://static.arasaac.org/pictograms/8130/8130_2500.png',
+  'see you later': 'https://static.arasaac.org/pictograms/8130/8130_2500.png',
+  welcome: 'https://static.arasaac.org/pictograms/8486/8486_2500.png',
+  sorry: 'https://static.arasaac.org/pictograms/8195/8195_2500.png',
+  'excuse me': 'https://static.arasaac.org/pictograms/8195/8195_2500.png',
+  
   // Core vocabulary - Verified colorful ARASAAC pictograms
   i: 'https://static.arasaac.org/pictograms/2617/2617_2500.png',
   you: 'https://static.arasaac.org/pictograms/2608/2608_2500.png',
@@ -361,6 +380,28 @@ const t = (category: string, text: string): Tile => ({
 
 // 🧱 Default core vocabulary
 export const defaultTiles: Tile[] = [
+  // Greetings and Manners - Essential for introductory communication
+  t('greetings', 'hello'),
+  t('greetings', 'hi'),
+  t('greetings', 'goodbye'),
+  t('greetings', 'bye'),
+  t('greetings', 'how are you'),
+  t('greetings', 'please'),
+  t('greetings', 'thank you'),
+  t('greetings', 'yes'),
+  t('greetings', 'no'),
+  t('greetings', 'good'),
+  t('greetings', 'bad'),
+  t('greetings', 'good morning'),
+  t('greetings', 'good afternoon'),
+  t('greetings', 'good evening'),
+  t('greetings', 'good night'),
+  t('greetings', 'see you'),
+  t('greetings', 'see you later'),
+  t('greetings', 'welcome'),
+  t('greetings', 'sorry'),
+  t('greetings', 'excuse me'),
+  
   // Core - Enhanced with connecting words and missing common words
   t('core', 'I'),
   t('core', 'you'),

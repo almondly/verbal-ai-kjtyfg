@@ -1,5 +1,5 @@
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useRef, useMemo } from 'react';
 import { supabase } from '../app/integrations/supabase/client';
 import { useAIPreferences } from './useAIPreferences';
 import { 
@@ -44,6 +44,15 @@ export function useAdvancedAI() {
     contexts: new Map(),
     temporalPatterns: new Map(),
   });
+
+  // PERFORMANCE OPTIMIZATION: Suggestion cache with LRU eviction
+  const suggestionCache = useRef<Map<string, { suggestions: AdvancedSuggestion[]; timestamp: number }>>(new Map());
+  const CACHE_TTL = 30000; // 30 seconds cache
+  const MAX_CACHE_SIZE = 100; // Maximum cache entries
+  
+  // PERFORMANCE OPTIMIZATION: Debounce timer
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+  const DEBOUNCE_DELAY = 150; // 150ms debounce
 
   // ChatGPT-style common phrases database - Australian English
   const commonPhrases: { [key: string]: string[] } = {
@@ -693,6 +702,26 @@ export function useAdvancedAI() {
     return areAdvancedSemanticallySimilar(normalizeWord(word1), normalizeWord(word2));
   };
 
+  // PERFORMANCE OPTIMIZATION: Clear old cache entries
+  const clearOldCache = useCallback(() => {
+    const now = Date.now();
+    const entries = Array.from(suggestionCache.current.entries());
+    
+    // Remove expired entries
+    entries.forEach(([key, value]) => {
+      if (now - value.timestamp > CACHE_TTL) {
+        suggestionCache.current.delete(key);
+      }
+    });
+    
+    // If still too large, remove oldest entries
+    if (suggestionCache.current.size > MAX_CACHE_SIZE) {
+      const sortedEntries = entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
+      const toRemove = sortedEntries.slice(0, suggestionCache.current.size - MAX_CACHE_SIZE);
+      toRemove.forEach(([key]) => suggestionCache.current.delete(key));
+    }
+  }, []);
+
   const getAdvancedSuggestions = useCallback(async (
     currentWords: string[],
     availableWords: string[] = [],
@@ -701,11 +730,24 @@ export function useAdvancedAI() {
     categoryTiles?: { text: string; category: string }[]
   ): Promise<AdvancedSuggestion[]> => {
     try {
-      const suggestions: AdvancedSuggestion[] = [];
-      
       const currentText = currentWords.join(' ').toLowerCase();
       const lastWord = currentWords[currentWords.length - 1]?.toLowerCase();
       const currentHour = new Date().getHours();
+      
+      // PERFORMANCE OPTIMIZATION: Check cache first
+      const cacheKey = `${currentText}|${currentCategory}|${maxSuggestions}`;
+      const cached = suggestionCache.current.get(cacheKey);
+      if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+        console.log('✨ Returning cached suggestions for:', currentText);
+        return cached.suggestions;
+      }
+      
+      // Clear old cache entries periodically
+      if (suggestionCache.current.size > MAX_CACHE_SIZE * 0.8) {
+        clearOldCache();
+      }
+      
+      const suggestions: AdvancedSuggestion[] = [];
       
       // Detect sentence context for tense-aware suggestions
       const tenseContext = detectTenseContext(currentWords);
@@ -1276,6 +1318,12 @@ export function useAdvancedAI() {
         .slice(0, maxSuggestions)
         .map(({ text, confidence, type, context }) => ({ text, confidence, type, context })); // Remove score from output
 
+      // PERFORMANCE OPTIMIZATION: Cache the results
+      suggestionCache.current.set(cacheKey, {
+        suggestions: finalSuggestions,
+        timestamp: Date.now()
+      });
+
       console.log('✨ Generated ULTRA-ENHANCED advanced suggestions:', finalSuggestions);
       return finalSuggestions;
 
@@ -1284,7 +1332,7 @@ export function useAdvancedAI() {
       setError('Failed to get suggestions');
       return [];
     }
-  }, [userPatterns, getContextualSuggestions]);
+  }, [userPatterns, getContextualSuggestions, clearOldCache]);
 
   // Helper function for time-based confidence boosting with Australian context
   const getTimeBasedBoost = (word: string, currentHour: number): number => {

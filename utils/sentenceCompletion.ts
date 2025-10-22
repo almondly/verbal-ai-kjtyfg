@@ -491,10 +491,22 @@ export const sentenceTemplates = [
   { pattern: ['I', 'don\'t'], completions: ['understand', 'like this', 'know', 'want that'] },
 ];
 
+// PERFORMANCE OPTIMIZATION: Cache for sentence completions
+const completionCache = new Map<string, string[]>();
+const COMPLETION_CACHE_SIZE = 200;
+
 /**
  * Find sentence completions based on current words
+ * OPTIMIZED: Now uses caching to reduce redundant calculations
  */
 export function findSentenceCompletions(currentWords: string[], maxCompletions: number = 5): string[] {
+  const cacheKey = `${currentWords.join('|')}|${maxCompletions}`;
+  
+  // Check cache first
+  if (completionCache.has(cacheKey)) {
+    return completionCache.get(cacheKey)!;
+  }
+  
   const completions: string[] = [];
   const lowerWords = currentWords.map(w => w.toLowerCase());
   
@@ -530,7 +542,17 @@ export function findSentenceCompletions(currentWords: string[], maxCompletions: 
     }
   }
   
-  return completions.slice(0, maxCompletions);
+  const result = completions.slice(0, maxCompletions);
+  
+  // Cache the result
+  if (completionCache.size > COMPLETION_CACHE_SIZE) {
+    // Clear oldest entries
+    const firstKey = completionCache.keys().next().value;
+    completionCache.delete(firstKey);
+  }
+  completionCache.set(cacheKey, result);
+  
+  return result;
 }
 
 /**
@@ -777,10 +799,15 @@ export function scoreSuggestions(
   }).sort((a, b) => b.score - a.score);
 }
 
+// PERFORMANCE OPTIMIZATION: Cache for category-relevant words
+const categoryCache = new Map<string, string[]>();
+const CATEGORY_CACHE_SIZE = 100;
+
 /**
  * ULTRA-ENHANCED: Get category-relevant words for contextual suggestions
  * This is the FIXED core of the category-aware recommendation system
  * Now properly filters words that are ACTUALLY in the selected category
+ * OPTIMIZED: Now uses caching to reduce redundant calculations
  */
 export function getCategoryRelevantWords(
   currentWords: string[],
@@ -788,6 +815,13 @@ export function getCategoryRelevantWords(
   availableWords: string[],
   categoryTiles?: { text: string; category: string }[]
 ): string[] {
+  const cacheKey = `${currentWords.join('|')}|${category}|${availableWords.length}`;
+  
+  // Check cache first
+  if (categoryCache.has(cacheKey)) {
+    return categoryCache.get(cacheKey)!;
+  }
+  
   console.log('🎯 Getting category-relevant words for:', { 
     category, 
     currentWords, 
@@ -813,6 +847,7 @@ export function getCategoryRelevantWords(
   
   // Enhanced category-specific word associations with more comprehensive vocabulary
   const categoryKeywords: { [key: string]: string[] } = {
+    'greetings': ['hello', 'hi', 'goodbye', 'bye', 'how are you', 'please', 'thank you', 'yes', 'no', 'good', 'bad', 'good morning', 'good afternoon', 'good evening', 'good night', 'see you', 'see you later', 'welcome', 'sorry', 'excuse me'],
     'core': ['I', 'you', 'he', 'she', 'we', 'they', 'want', 'need', 'like', 'help', 'more', 'go', 'stop', 'yes', 'no', 'please', 'thank you', 'can', 'the', 'a', 'that', 'this', 'use', 'borrow', 'am', 'is', 'are'],
     'people': ['mum', 'dad', 'mom', 'mother', 'father', 'friend', 'teacher', 'family', 'brother', 'sister', 'mate', 'grandma', 'grandpa', 'he', 'she', 'they', 'my', 'boy', 'girl', 'man', 'woman', 'baby'],
     'actions': ['eat', 'drink', 'play', 'sleep', 'walk', 'run', 'read', 'write', 'watch', 'listen', 'sit', 'stand', 'jump', 'dance', 'go', 'can', 'the', 'sing', 'draw', 'give', 'take', 'throw', 'catch', 'push', 'pull', 'wash', 'clean', 'am', 'is', 'are'],
@@ -989,6 +1024,14 @@ export function getCategoryRelevantWords(
     .sort((a, b) => b.score - a.score)
     .slice(0, 8)
     .map(m => m.word);
+  
+  // Cache the result
+  if (categoryCache.size > CATEGORY_CACHE_SIZE) {
+    // Clear oldest entries
+    const firstKey = categoryCache.keys().next().value;
+    categoryCache.delete(firstKey);
+  }
+  categoryCache.set(cacheKey, results);
   
   console.log('✨ Category-relevant words found:', results);
   return results;
