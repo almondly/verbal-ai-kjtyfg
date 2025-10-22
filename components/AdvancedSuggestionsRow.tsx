@@ -88,6 +88,7 @@ export default function AdvancedSuggestionsRow({
           const isTenseVariation = suggestion.type === 'tense_variation';
           const isCategoryContextual = suggestion.type === 'category_contextual';
           const isPoliteEnding = suggestion.type === 'polite_ending';
+          const isGrammarCorrection = suggestion.context?.toLowerCase().includes('grammar');
           
           return (
             <TouchableOpacity
@@ -98,6 +99,7 @@ export default function AdvancedSuggestionsRow({
                 isTenseVariation && styles.tenseVariationSuggestion,
                 isCategoryContextual && styles.categoryContextualSuggestion,
                 isPoliteEnding && styles.politeEndingSuggestion,
+                isGrammarCorrection && styles.grammarCorrectionSuggestion,
                 { borderLeftColor: getConfidenceColor(suggestion.confidence) }
               ]}
               onPress={() => onPressSuggestion(suggestion.text, isFullSentence)}
@@ -109,6 +111,7 @@ export default function AdvancedSuggestionsRow({
                   name={getTypeIcon(suggestion.type)}
                   size={14}
                   color={
+                    isGrammarCorrection ? '#10B981' :
                     isFullSentence ? colors.primary : 
                     isTenseVariation ? colors.warning : 
                     isCategoryContextual ? '#10B981' :
@@ -119,6 +122,7 @@ export default function AdvancedSuggestionsRow({
                 />
                 <Text style={[
                   styles.confidenceText,
+                  isGrammarCorrection && styles.grammarCorrectionConfidence,
                   isFullSentence && styles.fullSentenceConfidence,
                   isTenseVariation && styles.tenseVariationConfidence,
                   isCategoryContextual && styles.categoryContextualConfidence,
@@ -130,6 +134,7 @@ export default function AdvancedSuggestionsRow({
               <Text 
                 style={[
                   styles.suggestionText,
+                  isGrammarCorrection && styles.grammarCorrectionText,
                   isFullSentence && styles.fullSentenceText,
                   isTenseVariation && styles.tenseVariationText,
                   isCategoryContextual && styles.categoryContextualText,
@@ -139,7 +144,12 @@ export default function AdvancedSuggestionsRow({
               >
                 {suggestion.text}
               </Text>
-              {isFullSentence && (
+              {isGrammarCorrection && (
+                <View style={styles.labelBadge}>
+                  <Text style={styles.grammarLabel}>✓ Grammar Fix</Text>
+                </View>
+              )}
+              {isFullSentence && !isGrammarCorrection && (
                 <View style={styles.labelBadge}>
                   <Text style={styles.fullSentenceLabel}>Full Sentence</Text>
                 </View>
@@ -202,6 +212,13 @@ const styles = StyleSheet.create({
     minWidth: 90,
     maxWidth: 140,
   },
+  grammarCorrectionSuggestion: {
+    backgroundColor: '#ECFDF5',
+    borderLeftColor: '#10B981',
+    borderLeftWidth: 4,
+    minWidth: 140,
+    maxWidth: 200,
+  },
   fullSentenceSuggestion: {
     backgroundColor: '#EEF2FF',
     borderLeftColor: colors.primary,
@@ -238,6 +255,9 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     fontFamily: 'Montserrat_600SemiBold',
   },
+  grammarCorrectionConfidence: {
+    color: '#10B981',
+  },
   fullSentenceConfidence: {
     color: colors.primary,
   },
@@ -255,6 +275,11 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat_600SemiBold',
     color: colors.text,
     lineHeight: 16,
+  },
+  grammarCorrectionText: {
+    fontSize: 11,
+    lineHeight: 15,
+    color: '#10B981',
   },
   fullSentenceText: {
     fontSize: 11,
@@ -276,6 +301,13 @@ const styles = StyleSheet.create({
   labelBadge: {
     marginTop: 4,
     alignSelf: 'flex-start',
+  },
+  grammarLabel: {
+    fontSize: 8,
+    fontFamily: 'Montserrat_600SemiBold',
+    color: '#10B981',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   fullSentenceLabel: {
     fontSize: 8,

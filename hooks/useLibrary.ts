@@ -6,7 +6,7 @@ import { defaultTiles } from '../data/defaultTiles';
 
 const LIBRARY_KEY = 'aac_tiles_v1';
 const SEED_VERSION_KEY = 'aac_tiles_seed_version';
-const CURRENT_SEED_VERSION = 11; // Incremented to add Greetings & Manners category and optimize performance
+const CURRENT_SEED_VERSION = 12; // Incremented to fix tile colors and AI improvements
 
 function mergeMissingDefaults(stored: Tile[], defaults: Tile[]): Tile[] {
   // Create a map of default tiles by ID for quick lookup
@@ -15,7 +15,7 @@ function mergeMissingDefaults(stored: Tile[], defaults: Tile[]): Tile[] {
     defaultsMap.set(d.id, d);
   }
 
-  // Update stored tiles with new default properties (especially images)
+  // Update stored tiles with new default properties (especially images and colors)
   const updatedTiles = stored.map(storedTile => {
     const defaultTile = defaultsMap.get(storedTile.id);
     if (defaultTile) {
@@ -24,12 +24,14 @@ function mergeMissingDefaults(stored: Tile[], defaults: Tile[]): Tile[] {
       const hasCustomImage = storedTile.imageUri || (storedTile.imageUrl && storedTile.imageUrl !== defaultTile.imageUrl);
       
       return {
-        ...defaultTile, // Start with all default properties
+        ...defaultTile, // Start with all default properties (including updated colors)
         // Preserve custom user images if they exist
         imageUri: storedTile.imageUri,
         imageUrl: hasCustomImage ? storedTile.imageUrl : defaultTile.imageUrl,
         // Only override the default image if user has a custom image
         image: hasCustomImage ? undefined : defaultTile.image,
+        // Always use the latest color from defaults
+        color: defaultTile.color,
       };
     }
     // Keep custom tiles as-is
@@ -82,9 +84,9 @@ export function useLibrary() {
         }
 
         if (seedVersion < CURRENT_SEED_VERSION) {
-          // Migrate: merge in any missing defaults AND update existing tiles with new images
+          // Migrate: merge in any missing defaults AND update existing tiles with new images and colors
           console.log(
-            `🔄 Migrating tiles: seedVersion ${seedVersion} -> ${CURRENT_SEED_VERSION} - Adding Greetings & Manners category and optimizing performance`
+            `🔄 Migrating tiles: seedVersion ${seedVersion} -> ${CURRENT_SEED_VERSION} - Fixing tile colors and AI improvements`
           );
           const merged = mergeMissingDefaults(loadedTiles, defaultTiles);
           setTiles(merged);
