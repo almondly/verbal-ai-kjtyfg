@@ -216,7 +216,7 @@ export const sentenceTemplates = [
   { pattern: ['my', 'friend', 'needs'], completions: ['help', 'water', 'food', 'to go', 'their', 'the', 'a'] },
   
   // Additional possessive pronoun patterns for common verbs
-  { pattern: ['he', 'wants'], completions: ['his', 'to go', 'to play', 'to eat', 'to drink', 'some water', 'some food', 'that', 'more', 'help', 'the', 'a'] },
+  { pattern: ['he', 'wants'], completions: ['his', 'to go', 'to play', 'to eat', 'to drink', 'some water', 'some food', 'that', 'more', 'help', 'the', 'a', 'help with his'] },
   { pattern: ['she', 'wants'], completions: ['her', 'to go', 'to play', 'to eat', 'to drink', 'some water', 'some food', 'that', 'more', 'help', 'the', 'a'] },
   { pattern: ['I', 'want'], completions: ['my', 'to go', 'to play', 'to eat', 'to drink', 'some water', 'some food', 'that', 'more', 'to go outside', 'to watch telly', 'help', 'the', 'a', 'water'] },
   { pattern: ['you', 'want'], completions: ['your', 'to go', 'to play', 'to eat', 'to drink', 'some water', 'some food', 'that', 'more', 'to help me', 'to come', 'the', 'a'] },
