@@ -62,7 +62,7 @@ export default function TabbedSettingsSheet({
   // Pictogram selector state
   const [showPictogramSelector, setShowPictogramSelector] = useState(false);
   
-  const { settings: ttsSettings, availableVoices, updateSettings: updateTTSSettings, speak } = useTTSSettings();
+  const { settings: ttsSettings, availableVoices, updateSettings: updateTTSSettings, speak, testVoice, getVoiceCharacteristics } = useTTSSettings();
   const { 
     preferenceCategories, 
     savePreference, 
@@ -145,8 +145,8 @@ export default function TabbedSettingsSheet({
       language,
     });
     
-    // Test the voice
-    await speak('Hello! This is how I sound!');
+    // Test the voice with a longer phrase to demonstrate the difference
+    await testVoice(voiceIdentifier);
   };
 
   const handlePreferenceSelect = async (category: string, key: string, value: string) => {
@@ -203,15 +203,20 @@ export default function TabbedSettingsSheet({
           <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false}>
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Text-to-Speech Voice</Text>
+              <Text style={styles.helperText}>
+                Choose from three DISTINCT voice options. Each voice has unique pitch and speed characteristics for maximum clarity.
+              </Text>
               <View style={styles.currentVoiceContainer}>
                 <View style={styles.voiceInfoContainer}>
                   <Text style={styles.currentVoiceText}>Current Voice</Text>
                   <Text style={styles.currentVoiceSubtext}>{ttsSettings.voiceName}</Text>
-                  <Text style={styles.currentVoiceLanguage}>{ttsSettings.language}</Text>
+                  <Text style={styles.voiceDescription}>
+                    {getVoiceCharacteristics(ttsSettings.voiceIdentifier).description}
+                  </Text>
                 </View>
                 <TouchableOpacity 
                   style={styles.testVoiceBtn}
-                  onPress={() => speak('Hello! This is how I sound!')}
+                  onPress={() => testVoice(ttsSettings.voiceIdentifier)}
                   activeOpacity={0.8}
                 >
                   <Icon name="volume-high-outline" size={20} color={colors.primary} />
@@ -220,33 +225,59 @@ export default function TabbedSettingsSheet({
               </View>
               
               <View style={styles.voicesContainer}>
-                <Text style={styles.voicesTitle}>Available Clear Voices</Text>
+                <Text style={styles.voicesTitle}>Available Voices - Tap to Select & Preview</Text>
                 <View style={styles.voicesList}>
-                  {availableVoices.map((voice) => (
-                    <TouchableOpacity
-                      key={voice.identifier}
-                      style={[
-                        styles.voiceOption,
-                        ttsSettings.voiceIdentifier === voice.identifier && styles.voiceOptionSelected,
-                      ]}
-                      onPress={() => handleVoiceSelect(voice.identifier, voice.name, voice.language)}
-                      activeOpacity={0.8}
-                    >
-                      <View style={styles.voiceInfo}>
-                        <Text style={styles.voiceName}>{voice.name}</Text>
-                        <Text style={styles.voiceLanguage}>{voice.language}</Text>
-                      </View>
-                      {ttsSettings.voiceIdentifier === voice.identifier && (
-                        <Icon name="checkmark-circle" size={24} color={colors.primary} />
-                      )}
-                    </TouchableOpacity>
-                  ))}
+                  {availableVoices.map((voice) => {
+                    const characteristics = getVoiceCharacteristics(voice.identifier);
+                    const isSelected = ttsSettings.voiceIdentifier === voice.identifier;
+                    
+                    return (
+                      <TouchableOpacity
+                        key={voice.identifier}
+                        style={[
+                          styles.voiceOption,
+                          isSelected && styles.voiceOptionSelected,
+                        ]}
+                        onPress={() => handleVoiceSelect(voice.identifier, voice.name, voice.language)}
+                        activeOpacity={0.8}
+                      >
+                        <View style={styles.voiceInfo}>
+                          <View style={styles.voiceNameRow}>
+                            <Text style={styles.voiceName}>{voice.name}</Text>
+                            {isSelected && (
+                              <Icon name="checkmark-circle" size={24} color={colors.primary} />
+                            )}
+                          </View>
+                          <Text style={styles.voiceCharacteristics}>
+                            {characteristics.description}
+                          </Text>
+                          <View style={styles.voiceStatsRow}>
+                            <View style={styles.voiceStat}>
+                              <Icon name="musical-notes-outline" size={14} color={colors.textSecondary} />
+                              <Text style={styles.voiceStatText}>
+                                Pitch: {characteristics.pitchMultiplier}x
+                              </Text>
+                            </View>
+                            <View style={styles.voiceStat}>
+                              <Icon name="speedometer-outline" size={14} color={colors.textSecondary} />
+                              <Text style={styles.voiceStatText}>
+                                Speed: {characteristics.rateMultiplier}x
+                              </Text>
+                            </View>
+                          </View>
+                        </View>
+                      </TouchableOpacity>
+                    );
+                  })}
                 </View>
               </View>
             </View>
 
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Voice Settings</Text>
+              <Text style={styles.sectionTitle}>Fine-Tune Voice Settings</Text>
+              <Text style={styles.helperText}>
+                Adjust these to further customize the selected voice (optional).
+              </Text>
               <View style={styles.sliderContainer}>
                 <Text style={styles.sliderLabel}>Speech Rate: {ttsSettings.rate.toFixed(1)}</Text>
                 <View style={styles.sliderButtons}>
@@ -721,11 +752,12 @@ const styles = StyleSheet.create({
     color: colors.text,
     marginTop: 4,
   },
-  currentVoiceLanguage: {
-    fontSize: 12,
+  voiceDescription: {
+    fontSize: 13,
     fontFamily: 'Montserrat_400Regular',
     color: colors.textSecondary,
-    marginTop: 4,
+    marginTop: 6,
+    fontStyle: 'italic',
   },
   testVoiceBtn: {
     flexDirection: 'row',
@@ -753,35 +785,54 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   voicesList: {
-    maxHeight: 280,
+    maxHeight: 400,
   },
   voiceOption: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     padding: 16,
     borderRadius: 12,
     marginBottom: 12,
     backgroundColor: colors.background,
+    borderWidth: 2,
+    borderColor: 'transparent',
   },
   voiceOptionSelected: {
     backgroundColor: '#EEF2FF',
-    borderWidth: 2,
     borderColor: colors.primary,
   },
   voiceInfo: {
     flex: 1,
   },
+  voiceNameRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
   voiceName: {
     fontSize: 16,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Montserrat_700Bold',
     color: colors.text,
   },
-  voiceLanguage: {
-    fontSize: 14,
+  voiceCharacteristics: {
+    fontSize: 13,
     fontFamily: 'Montserrat_400Regular',
     color: colors.textSecondary,
-    marginTop: 4,
+    marginBottom: 8,
+    fontStyle: 'italic',
+  },
+  voiceStatsRow: {
+    flexDirection: 'row',
+    gap: 16 as any,
+  },
+  voiceStat: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4 as any,
+  },
+  voiceStatText: {
+    fontSize: 12,
+    fontFamily: 'Montserrat_600SemiBold',
+    color: colors.textSecondary,
   },
   sliderContainer: {
     backgroundColor: '#F9FAFB',

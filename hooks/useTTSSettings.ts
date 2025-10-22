@@ -37,6 +37,25 @@ const SIMPLIFIED_VOICES: TTSVoice[] = [
   { identifier: 'neutral', name: 'Neutral Voice', language: 'en-US' },
 ];
 
+// ENHANCED: Voice characteristics for MAXIMUM distinction
+const VOICE_CHARACTERISTICS = {
+  girl: {
+    pitchMultiplier: 1.5,    // Much higher pitch (was 1.2)
+    rateMultiplier: 1.1,     // Slightly faster
+    description: 'High-pitched, energetic voice'
+  },
+  boy: {
+    pitchMultiplier: 0.65,   // Much lower pitch (was 0.7)
+    rateMultiplier: 0.9,     // Slightly slower
+    description: 'Deep, steady voice'
+  },
+  neutral: {
+    pitchMultiplier: 1.0,    // Standard pitch
+    rateMultiplier: 1.0,     // Standard rate
+    description: 'Clear, balanced voice'
+  }
+};
+
 export function useTTSSettings() {
   const [settings, setSettings] = useState<TTSSettings>(DEFAULT_TTS_SETTINGS);
   const [availableVoices, setAvailableVoices] = useState<TTSVoice[]>(SIMPLIFIED_VOICES);
@@ -68,6 +87,7 @@ export function useTTSSettings() {
       );
       
       console.log('English voices found:', englishVoices.length);
+      console.log('Available voice names:', englishVoices.map(v => v.name).join(', '));
       setSystemVoices(englishVoices);
       
       // Always use our simplified three-voice system
@@ -176,43 +196,61 @@ export function useTTSSettings() {
     if (Platform.OS === 'ios') {
       // iOS voice identifiers - DISTINCT VOICES
       if (voiceType === 'boy') {
-        // Look for deeper male voices like Alex, Daniel, Fred
-        const boyVoice = systemVoices.find(v => 
-          v.identifier.includes('Alex') || 
-          v.identifier.includes('Daniel') ||
-          v.identifier.includes('Fred') ||
-          v.name.toLowerCase().includes('alex') ||
-          v.name.toLowerCase().includes('daniel') ||
-          v.name.toLowerCase().includes('fred')
+        // Look for deeper male voices - prioritize specific names
+        const boyVoiceNames = ['Alex', 'Daniel', 'Fred', 'Aaron', 'Arthur'];
+        for (const name of boyVoiceNames) {
+          const voice = systemVoices.find(v => 
+            v.identifier.includes(name) || 
+            v.name.toLowerCase().includes(name.toLowerCase())
+          );
+          if (voice) {
+            console.log('Found boy voice:', voice.identifier, voice.name);
+            return voice.identifier;
+          }
+        }
+        // Fallback: any male voice
+        const maleVoice = systemVoices.find(v => 
+          v.name.toLowerCase().includes('male') ||
+          v.name.toLowerCase().includes('man')
         );
-        if (boyVoice) {
-          console.log('Found boy voice:', boyVoice.identifier);
-          return boyVoice.identifier;
+        if (maleVoice) {
+          console.log('Found male voice:', maleVoice.identifier);
+          return maleVoice.identifier;
         }
       } else if (voiceType === 'girl') {
-        // Look for female voices like Samantha, Karen, Victoria
-        const girlVoice = systemVoices.find(v => 
-          v.identifier.includes('Samantha') || 
-          v.identifier.includes('Karen') ||
-          v.identifier.includes('Victoria') ||
-          v.name.toLowerCase().includes('samantha') ||
-          v.name.toLowerCase().includes('karen') ||
-          v.name.toLowerCase().includes('victoria')
+        // Look for female voices - prioritize specific names
+        const girlVoiceNames = ['Samantha', 'Karen', 'Victoria', 'Allison', 'Susan'];
+        for (const name of girlVoiceNames) {
+          const voice = systemVoices.find(v => 
+            v.identifier.includes(name) || 
+            v.name.toLowerCase().includes(name.toLowerCase())
+          );
+          if (voice) {
+            console.log('Found girl voice:', voice.identifier, voice.name);
+            return voice.identifier;
+          }
+        }
+        // Fallback: any female voice
+        const femaleVoice = systemVoices.find(v => 
+          v.name.toLowerCase().includes('female') ||
+          v.name.toLowerCase().includes('woman')
         );
-        if (girlVoice) {
-          console.log('Found girl voice:', girlVoice.identifier);
-          return girlVoice.identifier;
+        if (femaleVoice) {
+          console.log('Found female voice:', femaleVoice.identifier);
+          return femaleVoice.identifier;
         }
       } else if (voiceType === 'neutral') {
         // Look for neutral voices - prefer Siri or default system voice
-        const neutralVoice = systemVoices.find(v => 
-          v.identifier.includes('Siri') ||
-          v.name.toLowerCase().includes('siri') ||
-          v.identifier.includes('Default')
-        );
-        if (neutralVoice) {
-          console.log('Found neutral voice:', neutralVoice.identifier);
-          return neutralVoice.identifier;
+        const neutralVoiceNames = ['Siri', 'Default', 'System'];
+        for (const name of neutralVoiceNames) {
+          const voice = systemVoices.find(v => 
+            v.identifier.includes(name) ||
+            v.name.toLowerCase().includes(name.toLowerCase())
+          );
+          if (voice) {
+            console.log('Found neutral voice:', voice.identifier, voice.name);
+            return voice.identifier;
+          }
         }
       }
     } else if (Platform.OS === 'android') {
@@ -226,16 +264,17 @@ export function useTTSSettings() {
            v.quality === Speech.VoiceQuality.Enhanced)
         );
         if (boyVoice) {
-          console.log('Found boy voice:', boyVoice.identifier);
+          console.log('Found boy voice:', boyVoice.identifier, boyVoice.name);
           return boyVoice.identifier;
         }
       } else if (voiceType === 'girl') {
         const girlVoice = systemVoices.find(v => 
           v.language === 'en-US' && 
-          v.name.toLowerCase().includes('female')
+          (v.name.toLowerCase().includes('female') ||
+           v.name.toLowerCase().includes('woman'))
         );
         if (girlVoice) {
-          console.log('Found girl voice:', girlVoice.identifier);
+          console.log('Found girl voice:', girlVoice.identifier, girlVoice.name);
           return girlVoice.identifier;
         }
       } else if (voiceType === 'neutral') {
@@ -246,7 +285,7 @@ export function useTTSSettings() {
            v.name.toLowerCase().includes('standard'))
         );
         if (neutralVoice) {
-          console.log('Found neutral voice:', neutralVoice.identifier);
+          console.log('Found neutral voice:', neutralVoice.identifier, neutralVoice.name);
           return neutralVoice.identifier;
         }
       }
@@ -254,46 +293,46 @@ export function useTTSSettings() {
     
     // Fallback: return first English voice
     const fallbackVoice = systemVoices.find(v => v.language === 'en-US' || v.language.startsWith('en-'));
-    console.log('Using fallback voice:', fallbackVoice?.identifier);
+    console.log('Using fallback voice:', fallbackVoice?.identifier, fallbackVoice?.name);
     return fallbackVoice?.identifier;
   }, [systemVoices]);
+
+  // Get voice characteristics for a given voice type
+  const getVoiceCharacteristics = useCallback((voiceType: string) => {
+    return VOICE_CHARACTERISTICS[voiceType as keyof typeof VOICE_CHARACTERISTICS] || VOICE_CHARACTERISTICS.neutral;
+  }, []);
 
   const speak = useCallback(async (text: string) => {
     try {
       console.log('Speaking text with settings:', { text, settings });
       
+      // Get voice characteristics for maximum distinction
+      const characteristics = getVoiceCharacteristics(settings.voiceIdentifier);
+      
       const options: Speech.SpeechOptions = {
         language: settings.language,
-        pitch: settings.pitch,
-        rate: settings.rate,
+        // Apply dramatic pitch and rate adjustments
+        pitch: settings.pitch * characteristics.pitchMultiplier,
+        rate: settings.rate * characteristics.rateMultiplier,
       };
 
-      // Map our simplified voice types to actual system voices with DISTINCT characteristics
-      let voiceIdentifier: string | undefined;
-      
-      if (settings.voiceIdentifier === 'boy') {
-        voiceIdentifier = findBestVoice('boy');
-        // DISTINCT: Lower pitch for boy voice
-        options.pitch = Math.max(0.7, settings.pitch - 0.3);
-      } else if (settings.voiceIdentifier === 'girl') {
-        voiceIdentifier = findBestVoice('girl');
-        // DISTINCT: Higher pitch for girl voice
-        options.pitch = Math.min(1.4, settings.pitch + 0.2);
-      } else if (settings.voiceIdentifier === 'neutral') {
-        voiceIdentifier = findBestVoice('neutral');
-        // DISTINCT: Neutral pitch - slightly lower than default
-        options.pitch = Math.max(0.9, settings.pitch);
-      }
+      // Clamp values to safe ranges
+      options.pitch = Math.max(0.5, Math.min(2.0, options.pitch!));
+      options.rate = Math.max(0.5, Math.min(2.0, options.rate!));
+
+      // Map our simplified voice types to actual system voices
+      const voiceIdentifier = findBestVoice(settings.voiceIdentifier);
 
       // Only set voice if we found a matching one
       if (voiceIdentifier) {
         options.voice = voiceIdentifier;
         console.log('Using voice identifier:', voiceIdentifier);
       } else {
-        console.log('No specific voice found, using system default');
+        console.log('No specific voice found, using system default with adjusted pitch/rate');
       }
 
       console.log('Speech options:', options);
+      console.log('Voice characteristics applied:', characteristics);
       await Speech.speak(text, options);
     } catch (err) {
       console.log('Error speaking text:', err);
@@ -308,32 +347,26 @@ export function useTTSSettings() {
         console.log('Fallback speech also failed:', fallbackErr);
       }
     }
-  }, [settings, findBestVoice]);
+  }, [settings, findBestVoice, getVoiceCharacteristics]);
 
   const testVoice = useCallback(async (voiceIdentifier: string) => {
     try {
+      // Get voice characteristics for maximum distinction
+      const characteristics = getVoiceCharacteristics(voiceIdentifier);
+      
       const options: Speech.SpeechOptions = {
         language: settings.language,
-        pitch: settings.pitch,
-        rate: settings.rate,
+        // Apply dramatic pitch and rate adjustments
+        pitch: settings.pitch * characteristics.pitchMultiplier,
+        rate: settings.rate * characteristics.rateMultiplier,
       };
 
-      // Map our simplified voice types to actual system voices with DISTINCT characteristics
-      let actualVoiceId: string | undefined;
-      
-      if (voiceIdentifier === 'boy') {
-        actualVoiceId = findBestVoice('boy');
-        // DISTINCT: Lower pitch for boy voice
-        options.pitch = Math.max(0.7, settings.pitch - 0.3);
-      } else if (voiceIdentifier === 'girl') {
-        actualVoiceId = findBestVoice('girl');
-        // DISTINCT: Higher pitch for girl voice
-        options.pitch = Math.min(1.4, settings.pitch + 0.2);
-      } else if (voiceIdentifier === 'neutral') {
-        actualVoiceId = findBestVoice('neutral');
-        // DISTINCT: Neutral pitch
-        options.pitch = Math.max(0.9, settings.pitch);
-      }
+      // Clamp values to safe ranges
+      options.pitch = Math.max(0.5, Math.min(2.0, options.pitch!));
+      options.rate = Math.max(0.5, Math.min(2.0, options.rate!));
+
+      // Map our simplified voice types to actual system voices
+      const actualVoiceId = findBestVoice(voiceIdentifier);
 
       if (actualVoiceId) {
         options.voice = actualVoiceId;
@@ -341,13 +374,22 @@ export function useTTSSettings() {
       }
 
       console.log('Testing voice with options:', options);
-      await Speech.speak('Hello, this is how I sound!', options);
+      console.log('Voice characteristics applied:', characteristics);
+      
+      // Use a longer test phrase to better demonstrate the voice
+      const testPhrase = voiceIdentifier === 'girl' 
+        ? 'Hi! I am the girl voice. I sound bright and cheerful!'
+        : voiceIdentifier === 'boy'
+        ? 'Hello. I am the boy voice. I sound deep and steady.'
+        : 'Hello, I am the neutral voice. I sound clear and balanced.';
+      
+      await Speech.speak(testPhrase, options);
     } catch (err) {
       console.log('Error testing voice:', err);
       // Fallback test
       await Speech.speak('Hello, this is how I sound!');
     }
-  }, [settings, findBestVoice]);
+  }, [settings, findBestVoice, getVoiceCharacteristics]);
 
   return {
     settings,
@@ -357,5 +399,6 @@ export function useTTSSettings() {
     updateSettings,
     speak,
     testVoice,
+    getVoiceCharacteristics,
   };
 }
