@@ -11,10 +11,87 @@
  * - ENHANCED: Diverse subjects (I, You, He, She, We, They, Mum, Dad, My sister, My brother, etc.)
  * - ENHANCED: Connecting words (the, go, can, a, that, etc.)
  * - ULTRA-ENHANCED: Mind-reading AI with deep contextual understanding
+ * - ULTRA-ENHANCED: Prioritized initial words and connecting words for better flow
  */
 
 import { detectTenseContext, getVerbFormForContext, getBaseForm } from './wordVariations';
 import { getContextualAACSentences, aacSentences } from './aacSentences';
+
+// ULTRA-ENHANCED: Prioritized initial words for sentence starts
+const prioritizedInitialWords = [
+  // Ultra-high priority (most common sentence starters)
+  { word: 'I', priority: 100, context: 'First person subject' },
+  { word: 'Can', priority: 95, context: 'Permission/ability question' },
+  { word: 'What', priority: 90, context: 'Question word' },
+  { word: 'Where', priority: 90, context: 'Location question' },
+  { word: 'I\'m', priority: 90, context: 'I am contraction' },
+  { word: 'Thank', priority: 85, context: 'Gratitude' },
+  { word: 'Please', priority: 85, context: 'Polite request' },
+  { word: 'Hi', priority: 85, context: 'Greeting' },
+  { word: 'Hello', priority: 85, context: 'Greeting' },
+  { word: 'Sorry', priority: 85, context: 'Apology' },
+  { word: 'Yes', priority: 85, context: 'Affirmation' },
+  { word: 'No', priority: 85, context: 'Negation' },
+  
+  // High priority
+  { word: 'He', priority: 80, context: 'Third person male subject' },
+  { word: 'She', priority: 80, context: 'Third person female subject' },
+  { word: 'We', priority: 80, context: 'First person plural subject' },
+  { word: 'They', priority: 75, context: 'Third person plural subject' },
+  { word: 'You', priority: 75, context: 'Second person subject' },
+  { word: 'How', priority: 75, context: 'Question word' },
+  { word: 'When', priority: 75, context: 'Time question' },
+  { word: 'Who', priority: 75, context: 'Person question' },
+  { word: 'Why', priority: 70, context: 'Reason question' },
+  { word: 'Let\'s', priority: 70, context: 'Suggestion' },
+  { word: 'More', priority: 70, context: 'Quantity request' },
+  { word: 'All', priority: 65, context: 'Completion' },
+  { word: 'Goodbye', priority: 65, context: 'Farewell' },
+  
+  // Medium priority
+  { word: 'My', priority: 60, context: 'Possessive' },
+  { word: 'The', priority: 60, context: 'Article' },
+  { word: 'This', priority: 60, context: 'Demonstrative' },
+  { word: 'That', priority: 60, context: 'Demonstrative' },
+  { word: 'It', priority: 55, context: 'Pronoun' },
+  { word: 'Mum', priority: 55, context: 'Family member' },
+  { word: 'Dad', priority: 55, context: 'Family member' },
+];
+
+// ULTRA-ENHANCED: Prioritized connecting words (should appear frequently)
+const prioritizedConnectingWords = [
+  // Ultra-high priority connecting words
+  { word: 'am', priority: 100, context: 'Linking verb (I am)' },
+  { word: 'is', priority: 100, context: 'Linking verb (he/she/it is)' },
+  { word: 'are', priority: 100, context: 'Linking verb (you/we/they are)' },
+  { word: 'the', priority: 95, context: 'Definite article' },
+  { word: 'a', priority: 95, context: 'Indefinite article' },
+  { word: 'to', priority: 95, context: 'Preposition/infinitive marker' },
+  { word: 'and', priority: 90, context: 'Conjunction' },
+  { word: 'can', priority: 90, context: 'Modal verb' },
+  
+  // High priority
+  { word: 'want', priority: 85, context: 'Desire verb' },
+  { word: 'need', priority: 85, context: 'Necessity verb' },
+  { word: 'have', priority: 80, context: 'Possession verb' },
+  { word: 'go', priority: 80, context: 'Movement verb' },
+  { word: 'like', priority: 80, context: 'Preference verb' },
+  { word: 'that', priority: 75, context: 'Demonstrative/conjunction' },
+  { word: 'this', priority: 75, context: 'Demonstrative' },
+  { word: 'with', priority: 70, context: 'Preposition' },
+  { word: 'for', priority: 70, context: 'Preposition' },
+  { word: 'in', priority: 70, context: 'Preposition' },
+  { word: 'on', priority: 65, context: 'Preposition' },
+  { word: 'at', priority: 65, context: 'Preposition' },
+  { word: 'or', priority: 65, context: 'Conjunction' },
+  { word: 'but', priority: 60, context: 'Conjunction' },
+  { word: 'my', priority: 75, context: 'Possessive pronoun' },
+  { word: 'your', priority: 70, context: 'Possessive pronoun' },
+  { word: 'his', priority: 70, context: 'Possessive pronoun' },
+  { word: 'her', priority: 70, context: 'Possessive pronoun' },
+  { word: 'our', priority: 65, context: 'Possessive pronoun' },
+  { word: 'their', priority: 65, context: 'Possessive pronoun' },
+];
 
 // Enhanced sentence templates with pronoun variations and connecting words (Australian English)
 export const sentenceTemplates = [
@@ -28,7 +105,7 @@ export const sentenceTemplates = [
   { pattern: ['they'], completions: ['want', 'need', 'like', 'have', 'are', 'can', 'their'] },
   
   // Connecting words - THE
-  { pattern: ['the'], completions: ['cat', 'dog', 'ball', 'book', 'toy', 'park', 'shop', 'toilet', 'car', 'bus'] },
+  { pattern: ['the'], completions: ['cat', 'dog', 'ball', 'book', 'toy', 'park', 'shop', 'toilet', 'car', 'bus', 'bathroom'] },
   { pattern: ['the', 'cat'], completions: ['is', 'was', 'can', 'wants', 'needs'] },
   { pattern: ['the', 'dog'], completions: ['is', 'was', 'can', 'wants', 'needs'] },
   
@@ -39,7 +116,7 @@ export const sentenceTemplates = [
   
   // Connecting words - THAT
   { pattern: ['that'], completions: ['is', 'was', 'can', 'looks', 'sounds'] },
-  { pattern: ['that', 'is'], completions: ['good', 'bad', 'nice', 'mine', 'yours', 'his', 'hers'] },
+  { pattern: ['that', 'is'], completions: ['good', 'bad', 'nice', 'mine', 'yours', 'his', 'hers', 'loud'] },
   { pattern: ['that', 'was'], completions: ['good', 'bad', 'nice', 'fun'] },
   
   // Connecting words - THIS
@@ -48,8 +125,9 @@ export const sentenceTemplates = [
   
   // I want variations (with possessive)
   { pattern: ['I', 'want', 'to'], completions: ['go', 'play', 'eat', 'drink', 'sleep', 'read', 'draw', 'watch', 'go outside', 'go home'] },
-  { pattern: ['I', 'want', 'the'], completions: ['ball', 'book', 'toy', 'red one', 'blue one'] },
+  { pattern: ['I', 'want', 'the'], completions: ['ball', 'book', 'toy', 'red one', 'blue one', 'bathroom'] },
   { pattern: ['I', 'want', 'a'], completions: ['toy', 'book', 'snack', 'drink'] },
+  { pattern: ['I', 'want'], completions: ['to', 'the', 'a', 'water', 'help', 'more', 'that'] },
   
   // You want variations (with possessive)
   { pattern: ['you', 'want', 'to'], completions: ['go', 'play', 'eat', 'drink', 'help me', 'come', 'see', 'know'] },
@@ -84,10 +162,10 @@ export const sentenceTemplates = [
   { pattern: ['my', 'friend', 'wants'], completions: ['to play', 'to go', 'that', 'the', 'a'] },
   
   // I need variations
-  { pattern: ['I', 'need'], completions: ['help', 'the toilet', 'water', 'food', 'a break', 'to go', 'to rest', 'mum', 'dad', 'you', 'the', 'a'] },
+  { pattern: ['I', 'need'], completions: ['help', 'the toilet', 'the bathroom', 'water', 'food', 'a break', 'to go', 'to rest', 'mum', 'dad', 'you', 'the', 'a', 'a pencil'] },
   { pattern: ['I', 'need', 'to'], completions: ['go', 'eat', 'drink', 'sleep', 'rest', 'use toilet', 'go home'] },
   { pattern: ['I', 'need', 'the'], completions: ['toilet', 'bathroom', 'book', 'pencil'] },
-  { pattern: ['I', 'need', 'a'], completions: ['break', 'drink', 'snack', 'rest'] },
+  { pattern: ['I', 'need', 'a'], completions: ['break', 'drink', 'snack', 'rest', 'pencil'] },
   
   // You need variations
   { pattern: ['you', 'need'], completions: ['to help me', 'to come', 'to see', 'to know', 'this', 'that', 'the', 'a'] },
@@ -134,7 +212,7 @@ export const sentenceTemplates = [
   // Additional possessive pronoun patterns for common verbs
   { pattern: ['he', 'wants'], completions: ['his', 'to go', 'to play', 'to eat', 'to drink', 'some water', 'some food', 'that', 'more', 'help', 'the', 'a'] },
   { pattern: ['she', 'wants'], completions: ['her', 'to go', 'to play', 'to eat', 'to drink', 'some water', 'some food', 'that', 'more', 'help', 'the', 'a'] },
-  { pattern: ['I', 'want'], completions: ['my', 'to go', 'to play', 'to eat', 'to drink', 'some water', 'some food', 'that', 'more', 'to go outside', 'to watch telly', 'help', 'the', 'a'] },
+  { pattern: ['I', 'want'], completions: ['my', 'to go', 'to play', 'to eat', 'to drink', 'some water', 'some food', 'that', 'more', 'to go outside', 'to watch telly', 'help', 'the', 'a', 'water'] },
   { pattern: ['you', 'want'], completions: ['your', 'to go', 'to play', 'to eat', 'to drink', 'some water', 'some food', 'that', 'more', 'to help me', 'to come', 'the', 'a'] },
   { pattern: ['we', 'want'], completions: ['our', 'to go', 'to play', 'to eat', 'to drink', 'some water', 'some food', 'that', 'more', 'to go outside', 'to play together', 'the', 'a'] },
   { pattern: ['they', 'want'], completions: ['their', 'to go', 'to play', 'to eat', 'to drink', 'some water', 'some food', 'that', 'more', 'help', 'the', 'a'] },
@@ -287,7 +365,7 @@ export const sentenceTemplates = [
   { pattern: ['how'], completions: ['are you', 'are you going', 'was your day', 'do you feel', 'old are you', 'is he', 'is she', 'are they'] },
   
   // Can/Could/Would with pronoun variations
-  { pattern: ['can', 'I'], completions: ['have', 'go', 'play', 'please', 'have water', 'have food', 'go outside', 'have the', 'have a'] },
+  { pattern: ['can', 'I'], completions: ['have', 'go', 'play', 'please', 'have water', 'have food', 'go outside', 'have the', 'have a', 'have that'] },
   { pattern: ['can', 'you'], completions: ['help me', 'please', 'show me', 'teach me', 'come here', 'give me the', 'give me a'] },
   { pattern: ['can', 'we'], completions: ['go', 'play', 'eat', 'have', 'go outside', 'go home', 'have the', 'have a'] },
   { pattern: ['can', 'he'], completions: ['come', 'help', 'play', 'go', 'have the', 'have a'] },
@@ -322,17 +400,29 @@ export const sentenceTemplates = [
   { pattern: ['my', 'sister', 'feels'], completions: ['happy', 'sad', 'tired', 'excited'] },
   { pattern: ['my', 'brother', 'feels'], completions: ['happy', 'sad', 'tired', 'excited'] },
   
-  { pattern: ['I', 'am'], completions: ['happy', 'sad', 'tired', 'excited', 'hungry', 'thirsty', 'ready', 'finished'] },
+  { pattern: ['I', 'am'], completions: ['happy', 'sad', 'tired', 'excited', 'hungry', 'thirsty', 'ready', 'finished', 'reading', 'eating'] },
   { pattern: ['you', 'are'], completions: ['happy', 'sad', 'tired', 'excited', 'ready', 'nice'] },
   { pattern: ['he', 'is'], completions: ['happy', 'sad', 'tired', 'excited', 'hungry', 'ready'] },
   { pattern: ['she', 'is'], completions: ['happy', 'sad', 'tired', 'excited', 'hungry', 'ready'] },
-  { pattern: ['we', 'are'], completions: ['happy', 'sad', 'tired', 'excited', 'ready', 'going'] },
+  { pattern: ['we', 'are'], completions: ['happy', 'sad', 'tired', 'excited', 'ready', 'going', 'eating'] },
   { pattern: ['they', 'are'], completions: ['happy', 'sad', 'tired', 'excited', 'ready', 'coming'] },
   { pattern: ['mum', 'is'], completions: ['happy', 'sad', 'tired', 'ready', 'here', 'coming'] },
   { pattern: ['dad', 'is'], completions: ['happy', 'sad', 'tired', 'ready', 'here', 'coming'] },
   { pattern: ['my', 'sister', 'is'], completions: ['happy', 'sad', 'tired', 'ready', 'here'] },
   { pattern: ['my', 'brother', 'is'], completions: ['happy', 'sad', 'tired', 'ready', 'here'] },
-  { pattern: ['I\'m'], completions: ['happy', 'sad', 'tired', 'excited', 'hungry', 'thirsty', 'ready', 'finished', 'sorry'] },
+  { pattern: ['I\'m'], completions: ['happy', 'sad', 'tired', 'excited', 'hungry', 'thirsty', 'ready', 'finished', 'sorry', 'sick'] },
+  
+  // "It is" patterns for descriptions
+  { pattern: ['it', 'is'], completions: ['big', 'small', 'red', 'blue', 'green', 'yellow', 'loud', 'quiet', 'hot', 'cold'] },
+  { pattern: ['it', 'is', 'big'], completions: ['and red', 'and blue', 'and green', 'and yellow', 'and orange', 'and purple', 'and pink', 'and black', 'and white', 'and brown'] },
+  { pattern: ['it', 'is', 'big', 'and'], completions: ['red', 'blue', 'green', 'yellow', 'orange', 'purple', 'pink', 'black', 'white', 'brown'] },
+  
+  // "I see" patterns
+  { pattern: ['I', 'see'], completions: ['a dog', 'a cat', 'a bird', 'a car', 'the', 'a'] },
+  { pattern: ['I', 'see', 'a'], completions: ['dog', 'cat', 'bird', 'car', 'ball', 'book'] },
+  
+  // "That is" patterns
+  { pattern: ['that', 'is'], completions: ['loud', 'quiet', 'big', 'small', 'nice', 'good', 'bad'] },
   
   // Actions
   { pattern: ['want', 'to'], completions: ['go', 'play', 'eat', 'drink', 'sleep', 'read', 'draw', 'watch'] },
@@ -360,7 +450,7 @@ export const sentenceTemplates = [
   
   // Family
   { pattern: ['where', 'is'], completions: ['mum', 'dad', 'my mate', 'my friend', 'my sister', 'my brother'] },
-  { pattern: ['I', 'want'], completions: ['mum', 'dad', 'my toy', 'my book', 'my sister', 'my brother'] },
+  { pattern: ['I', 'want'], completions: ['mum', 'dad', 'my toy', 'my book', 'my sister', 'my brother', 'water', 'to go', 'the', 'a'] },
   { pattern: ['my'], completions: ['mum', 'dad', 'mate', 'friend', 'toy', 'book', 'favourite', 'sister', 'brother'] },
   
   // Food
@@ -369,7 +459,7 @@ export const sentenceTemplates = [
   { pattern: ['have'], completions: ['water', 'food', 'lunch', 'tea', 'a snack', 'a drink', 'the', 'a'] },
   
   // Activities
-  { pattern: ['play'], completions: ['outside', 'with toys', 'games', 'with mates', 'at the park', 'together'] },
+  { pattern: ['play'], completions: ['outside', 'with toys', 'games', 'with mates', 'at the park', 'together', 'a game'] },
   { pattern: ['watch'], completions: ['telly', 'TV', 'a movie', 'cartoons', 'the'] },
   { pattern: ['read'], completions: ['a book', 'a story', 'with me', 'the'] },
   { pattern: ['draw'], completions: ['a picture', 'with me', 'something'] },
@@ -378,6 +468,25 @@ export const sentenceTemplates = [
   { pattern: ['go'], completions: ['home', 'outside', 'to school', 'to the park', 'to the shop', 'to bed', 'with me', 'with him', 'with her'] },
   { pattern: ['go', 'to'], completions: ['school', 'home', 'the park', 'the shop', 'bed', 'the toilet'] },
   { pattern: ['go', 'with'], completions: ['me', 'you', 'him', 'her', 'them', 'mum', 'dad'] },
+  
+  // "Let's" patterns
+  { pattern: ['let\'s'], completions: ['play', 'go', 'eat', 'do math', 'play a game', 'read'] },
+  { pattern: ['let\'s', 'play'], completions: ['a game', 'outside', 'together'] },
+  
+  // "More" patterns
+  { pattern: ['more'], completions: ['please', 'water', 'food'] },
+  
+  // "All" patterns
+  { pattern: ['all'], completions: ['done', 'finished'] },
+  
+  // "Turn" patterns
+  { pattern: ['turn'], completions: ['the page', 'around', 'left', 'right'] },
+  
+  // "I finished" patterns
+  { pattern: ['I', 'finished'], completions: ['my work', 'eating', 'reading', 'playing'] },
+  
+  // "I don't" patterns
+  { pattern: ['I', 'don\'t'], completions: ['understand', 'like this', 'know', 'want that'] },
 ];
 
 /**
@@ -560,6 +669,7 @@ export function analyzeSentenceStructure(words: string[]): {
 
 /**
  * Score and rank sentence suggestions
+ * ENHANCED: Now considers priority scores from AAC sentences
  */
 export function scoreSuggestions(
   suggestions: { text: string; type: string; confidence: number }[],
@@ -568,6 +678,24 @@ export function scoreSuggestions(
 ): { text: string; type: string; confidence: number; score: number }[] {
   return suggestions.map(suggestion => {
     let score = suggestion.confidence;
+    
+    // ULTRA-HIGH BOOST: Check if this is a prioritized initial word (for sentence starts)
+    if (currentWords.length === 0) {
+      const prioritizedWord = prioritizedInitialWords.find(
+        pw => pw.word.toLowerCase() === suggestion.text.toLowerCase()
+      );
+      if (prioritizedWord) {
+        score += prioritizedWord.priority * 0.5; // Massive boost for prioritized initial words
+      }
+    }
+    
+    // ULTRA-HIGH BOOST: Check if this is a prioritized connecting word
+    const connectingWord = prioritizedConnectingWords.find(
+      cw => cw.word.toLowerCase() === suggestion.text.toLowerCase()
+    );
+    if (connectingWord) {
+      score += connectingWord.priority * 0.3; // Significant boost for connecting words
+    }
     
     // Boost score based on user frequency
     const userFreq = userFrequency.get(suggestion.text.toLowerCase()) || 0;
@@ -634,24 +762,24 @@ export function getCategoryRelevantWords(
   
   // Enhanced category-specific word associations with more comprehensive vocabulary
   const categoryKeywords: { [key: string]: string[] } = {
-    'core': ['I', 'you', 'he', 'she', 'we', 'they', 'want', 'need', 'like', 'help', 'more', 'go', 'stop', 'yes', 'no', 'please', 'thank you', 'can', 'the', 'a', 'that', 'this', 'use', 'borrow'],
+    'core': ['I', 'you', 'he', 'she', 'we', 'they', 'want', 'need', 'like', 'help', 'more', 'go', 'stop', 'yes', 'no', 'please', 'thank you', 'can', 'the', 'a', 'that', 'this', 'use', 'borrow', 'am', 'is', 'are'],
     'people': ['mum', 'dad', 'mom', 'mother', 'father', 'friend', 'teacher', 'family', 'brother', 'sister', 'mate', 'grandma', 'grandpa', 'he', 'she', 'they', 'my', 'boy', 'girl', 'man', 'woman', 'baby'],
-    'actions': ['eat', 'drink', 'play', 'sleep', 'walk', 'run', 'read', 'write', 'watch', 'listen', 'sit', 'stand', 'jump', 'dance', 'go', 'can', 'the', 'sing', 'draw', 'give', 'take', 'throw', 'catch', 'push', 'pull', 'wash', 'clean'],
-    'feelings': ['happy', 'sad', 'angry', 'scared', 'excited', 'tired', 'love', 'worried', 'calm', 'hurt', 'sick', 'good', 'bad', 'I', 'he', 'she', 'we', 'they', 'feel', 'surprised', 'bored', 'confused'],
-    'food': ['water', 'juice', 'milk', 'apple', 'banana', 'bread', 'snack', 'lunch', 'dinner', 'breakfast', 'hungry', 'thirsty', 'eat', 'drink', 'the', 'a', 'can', 'cheese', 'cookie', 'cake', 'pizza', 'sandwich', 'egg', 'chicken', 'fish', 'carrot'],
-    'home': ['house', 'bed', 'bathroom', 'kitchen', 'TV', 'door', 'window', 'room', 'bedroom', 'toilet', 'sleep', 'rest', 'the', 'a', 'go', 'my', 'chair', 'table', 'living room', 'phone', 'computer', 'tablet'],
-    'school': ['book', 'pencil', 'paper', 'class', 'teacher', 'lunch', 'recess', 'learn', 'study', 'homework', 'read', 'write', 'the', 'a', 'my', 'can', 'pen', 'crayon', 'scissors', 'glue', 'backpack', 'test'],
-    'places': ['park', 'store', 'shop', 'school', 'home', 'playground', 'car', 'bus', 'outside', 'inside', 'the', 'a', 'go', 'can', 'library', 'hospital', 'doctor', 'restaurant', 'train', 'airplane', 'beach'],
-    'body': ['head', 'hand', 'foot', 'arm', 'leg', 'eye', 'ear', 'nose', 'mouth', 'hurt', 'pain', 'sick', 'my', 'the', 'a', 'face', 'teeth', 'hair', 'fingers', 'feet', 'tummy'],
-    'routines': ['morning', 'afternoon', 'evening', 'night', 'breakfast', 'lunch', 'dinner', 'bedtime', 'wake up', 'sleep', 'the', 'a', 'go', 'snack time', 'bath time', 'brush teeth', 'get dressed', 'potty'],
+    'actions': ['eat', 'drink', 'play', 'sleep', 'walk', 'run', 'read', 'write', 'watch', 'listen', 'sit', 'stand', 'jump', 'dance', 'go', 'can', 'the', 'sing', 'draw', 'give', 'take', 'throw', 'catch', 'push', 'pull', 'wash', 'clean', 'am', 'is', 'are'],
+    'feelings': ['happy', 'sad', 'angry', 'scared', 'excited', 'tired', 'love', 'worried', 'calm', 'hurt', 'sick', 'good', 'bad', 'I', 'he', 'she', 'we', 'they', 'feel', 'surprised', 'bored', 'confused', 'am', 'is', 'are'],
+    'food': ['water', 'juice', 'milk', 'apple', 'banana', 'bread', 'snack', 'lunch', 'dinner', 'breakfast', 'hungry', 'thirsty', 'eat', 'drink', 'the', 'a', 'can', 'cheese', 'cookie', 'cake', 'pizza', 'sandwich', 'egg', 'chicken', 'fish', 'carrot', 'want', 'need', 'am', 'is'],
+    'home': ['house', 'bed', 'bathroom', 'kitchen', 'TV', 'door', 'window', 'room', 'bedroom', 'toilet', 'sleep', 'rest', 'the', 'a', 'go', 'my', 'chair', 'table', 'living room', 'phone', 'computer', 'tablet', 'need', 'want'],
+    'school': ['book', 'pencil', 'paper', 'class', 'teacher', 'lunch', 'recess', 'learn', 'study', 'homework', 'read', 'write', 'the', 'a', 'my', 'can', 'pen', 'crayon', 'scissors', 'glue', 'backpack', 'test', 'need', 'want', 'finished', 'math'],
+    'places': ['park', 'store', 'shop', 'school', 'home', 'playground', 'car', 'bus', 'outside', 'inside', 'the', 'a', 'go', 'can', 'library', 'hospital', 'doctor', 'restaurant', 'train', 'airplane', 'beach', 'want', 'need'],
+    'body': ['head', 'hand', 'foot', 'arm', 'leg', 'eye', 'ear', 'nose', 'mouth', 'hurt', 'pain', 'sick', 'my', 'the', 'a', 'face', 'teeth', 'hair', 'fingers', 'feet', 'tummy', 'need'],
+    'routines': ['morning', 'afternoon', 'evening', 'night', 'breakfast', 'lunch', 'dinner', 'bedtime', 'wake up', 'sleep', 'the', 'a', 'go', 'snack time', 'bath time', 'brush teeth', 'get dressed', 'potty', 'am', 'is', 'are'],
     'questions': ['what', 'where', 'when', 'who', 'why', 'how', 'is', 'are', 'do', 'can', 'will', 'the', 'a', 'that', 'which'],
-    'colours': ['red', 'blue', 'green', 'yellow', 'orange', 'purple', 'pink', 'black', 'white', 'brown', 'the', 'a'],
+    'colours': ['red', 'blue', 'green', 'yellow', 'orange', 'purple', 'pink', 'black', 'white', 'brown', 'the', 'a', 'is', 'and'],
     'numbers': ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'more', 'less', 'the', 'a', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
-    'animals': ['dog', 'cat', 'bird', 'fish', 'horse', 'cow', 'pig', 'sheep', 'rabbit', 'pet', 'the', 'a', 'my', 'chicken', 'duck', 'bear', 'lion', 'elephant', 'monkey'],
+    'animals': ['dog', 'cat', 'bird', 'fish', 'horse', 'cow', 'pig', 'sheep', 'rabbit', 'pet', 'the', 'a', 'my', 'chicken', 'duck', 'bear', 'lion', 'elephant', 'monkey', 'see'],
     'clothing': ['shirt', 'pants', 'dress', 'shoes', 'socks', 'hat', 'coat', 'jacket', 'wear', 'put on', 'the', 'a', 'my', 'gloves'],
-    'weather': ['sunny', 'rainy', 'cloudy', 'windy', 'hot', 'cold', 'warm', 'cool', 'weather', 'outside', 'the', 'a', 'snowy'],
-    'time': ['now', 'later', 'today', 'tomorrow', 'yesterday', 'morning', 'afternoon', 'evening', 'night', 'time', 'the', 'a'],
-    'toys': ['toy', 'ball', 'doll', 'game', 'puzzle', 'blocks', 'play', 'fun', 'the', 'a', 'my', 'car', 'truck', 'train', 'bike', 'swing', 'slide'],
+    'weather': ['sunny', 'rainy', 'cloudy', 'windy', 'hot', 'cold', 'warm', 'cool', 'weather', 'outside', 'the', 'a', 'snowy', 'is'],
+    'time': ['now', 'later', 'today', 'tomorrow', 'yesterday', 'morning', 'afternoon', 'evening', 'night', 'time', 'the', 'a', 'is'],
+    'toys': ['toy', 'ball', 'doll', 'game', 'puzzle', 'blocks', 'play', 'fun', 'the', 'a', 'my', 'car', 'truck', 'train', 'bike', 'swing', 'slide', 'want'],
   };
   
   const relevantKeywords = categoryKeywords[category] || [];
@@ -696,7 +824,7 @@ export function getCategoryRelevantWords(
       if (sentenceContext.includes('i want') || sentenceContext.includes('want to') ||
           sentenceContext.includes('he wants') || sentenceContext.includes('she wants') ||
           sentenceContext.includes('we want') || sentenceContext.includes('they want')) {
-        if (['eat', 'drink', 'play', 'sleep', 'go', 'read', 'watch', 'the', 'a', 'to'].includes(lowerWord)) {
+        if (['eat', 'drink', 'play', 'sleep', 'go', 'read', 'watch', 'the', 'a', 'to', 'water'].includes(lowerWord)) {
           score += 8;
         }
       }
@@ -714,14 +842,14 @@ export function getCategoryRelevantWords(
       if (sentenceContext.includes('i need') || sentenceContext.includes('need') ||
           sentenceContext.includes('he needs') || sentenceContext.includes('she needs') ||
           sentenceContext.includes('we need') || sentenceContext.includes('they need')) {
-        if (['help', 'water', 'food', 'toilet', 'rest', 'break', 'the', 'a', 'to'].includes(lowerWord)) {
+        if (['help', 'water', 'food', 'toilet', 'bathroom', 'rest', 'break', 'the', 'a', 'to', 'pencil'].includes(lowerWord)) {
           score += 8;
         }
       }
       
       // Example: "where is" -> boost location/people words
       if (sentenceContext.includes('where is') || sentenceContext.includes('where')) {
-        if (['mum', 'dad', 'toilet', 'home', 'school', 'park', 'he', 'she', 'my', 'the'].includes(lowerWord)) {
+        if (['mum', 'dad', 'toilet', 'bathroom', 'home', 'school', 'park', 'he', 'she', 'my', 'the'].includes(lowerWord)) {
           score += 8;
         }
       }
@@ -741,8 +869,16 @@ export function getCategoryRelevantWords(
         }
       }
       
+      // Example: "I am" -> boost state/activity words
+      if (sentenceContext.includes('i am') || sentenceContext.includes('am') ||
+          sentenceContext.includes('we are') || sentenceContext.includes('are')) {
+        if (['happy', 'sad', 'tired', 'hungry', 'thirsty', 'reading', 'eating', 'finished'].includes(lowerWord)) {
+          score += 8;
+        }
+      }
+      
       // Boost connecting words (always useful)
-      if (['the', 'a', 'can', 'go', 'that', 'this', 'to', 'and', 'or'].includes(lowerWord)) {
+      if (['the', 'a', 'can', 'go', 'that', 'this', 'to', 'and', 'or', 'am', 'is', 'are'].includes(lowerWord)) {
         score += 5;
       }
       
@@ -751,7 +887,7 @@ export function getCategoryRelevantWords(
         score += 6;
       }
       
-      if (lastWord === 'the' && ['toilet', 'park', 'shop', 'school', 'home', 'ball', 'book'].includes(lowerWord)) {
+      if (lastWord === 'the' && ['toilet', 'bathroom', 'park', 'shop', 'school', 'home', 'ball', 'book', 'page'].includes(lowerWord)) {
         score += 6;
       }
       
@@ -759,22 +895,22 @@ export function getCategoryRelevantWords(
         score += 6;
       }
       
-      if (lastWord === 'my' && ['mum', 'dad', 'sister', 'brother', 'friend', 'toy', 'book'].includes(lowerWord)) {
+      if (lastWord === 'my' && ['mum', 'dad', 'sister', 'brother', 'friend', 'toy', 'book', 'work'].includes(lowerWord)) {
         score += 6;
       }
       
-      if (lastWord === 'want' && ['to', 'the', 'a', 'some', 'more'].includes(lowerWord)) {
+      if (lastWord === 'want' && ['to', 'the', 'a', 'some', 'more', 'water'].includes(lowerWord)) {
         score += 6;
       }
       
-      if (lastWord === 'need' && ['to', 'the', 'a', 'help', 'water'].includes(lowerWord)) {
+      if (lastWord === 'need' && ['to', 'the', 'a', 'help', 'water', 'bathroom'].includes(lowerWord)) {
         score += 6;
       }
       
       // MIND-READING: Predict based on sentence intent
       // If sentence starts with "I", predict common continuations
       if (currentWords[0]?.toLowerCase() === 'i') {
-        if (['want', 'need', 'like', 'love', 'feel', 'am', 'have', 'can'].includes(lowerWord)) {
+        if (['want', 'need', 'like', 'love', 'feel', 'am', 'have', 'can', 'see'].includes(lowerWord)) {
           score += 7;
         }
       }
@@ -805,4 +941,24 @@ export function getCategoryRelevantWords(
   
   console.log('✨ Category-relevant words found:', results);
   return results;
+}
+
+/**
+ * Get prioritized initial words for sentence starts
+ */
+export function getPrioritizedInitialWords(maxWords: number = 10): string[] {
+  return prioritizedInitialWords
+    .sort((a, b) => b.priority - a.priority)
+    .slice(0, maxWords)
+    .map(pw => pw.word);
+}
+
+/**
+ * Get prioritized connecting words
+ */
+export function getPrioritizedConnectingWords(maxWords: number = 10): string[] {
+  return prioritizedConnectingWords
+    .sort((a, b) => b.priority - a.priority)
+    .slice(0, maxWords)
+    .map(cw => cw.word);
 }
