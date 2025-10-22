@@ -21,8 +21,11 @@ import CommunicationGrid from '../components/CommunicationGrid';
 import { useAdvancedAI } from '../hooks/useAdvancedAI';
 import { useTTSSettings } from '../hooks/useTTSSettings';
 import { useRouter } from 'expo-router';
+import { useIdleDetection } from '../hooks/useIdleDetection';
 
 export default function CommunicationScreen() {
+  const router = useRouter();
+
   useEffect(() => {
     (async () => {
       if (Platform.OS !== 'web') {
@@ -30,6 +33,15 @@ export default function CommunicationScreen() {
       }
     })();
   }, []);
+
+  // Idle detection - navigate to home after 15 seconds
+  const { resetTimer } = useIdleDetection({
+    timeout: 15000, // 15 seconds
+    onIdle: () => {
+      console.log('User idle for 15 seconds, navigating to home screen');
+      router.push('/main-menu');
+    },
+  });
 
   const { getAdvancedSuggestions, getTimeBasedSuggestions, recordUserInput } = useAdvancedAI();
   const { currentEmotion, setCurrentEmotion } = useEmotionSettings();
@@ -41,8 +53,6 @@ export default function CommunicationScreen() {
   const { speak } = useTTSSettings();
   const [editingTile, setEditingTile] = useState<Tile | null>(null);
   const [lastSpokenText, setLastSpokenText] = useState<string>('');
-
-  const router = useRouter();
 
   // Handle keyboard category selection - redirect to keyboard screen
   useEffect(() => {
@@ -129,47 +139,56 @@ export default function CommunicationScreen() {
   }, [sentence, tiles, getAdvancedSuggestions, getTimeBasedSuggestions, selectedCategory]);
 
   const handleTilePress = useCallback((tile: Tile) => {
+    resetTimer(); // Reset idle timer on user activity
     setSentence(prev => [...prev, tile]);
-  }, []);
+  }, [resetTimer]);
 
   const handleTileLongPress = useCallback((tile: Tile) => {
+    resetTimer(); // Reset idle timer on user activity
     if (tile.id.startsWith('custom-')) {
       removeTile(tile.id);
     }
-  }, [removeTile]);
+  }, [removeTile, resetTimer]);
 
   const handleTileEdit = useCallback((tile: Tile) => {
+    resetTimer(); // Reset idle timer on user activity
     setEditingTile(tile);
-  }, []);
+  }, [resetTimer]);
 
   const handleSaveEdit = useCallback((updatedTile: Tile) => {
+    resetTimer(); // Reset idle timer on user activity
     updateTile(updatedTile);
     setEditingTile(null);
-  }, [updateTile]);
+  }, [updateTile, resetTimer]);
 
   const handleRemoveFromSentence = useCallback((index: number) => {
+    resetTimer(); // Reset idle timer on user activity
     setSentence(prev => prev.filter((_, i) => i !== index));
-  }, []);
+  }, [resetTimer]);
 
   const handleClearSentence = useCallback(() => {
+    resetTimer(); // Reset idle timer on user activity
     setSentence([]);
-  }, []);
+  }, [resetTimer]);
 
   const handleDeleteLastWord = useCallback(() => {
+    resetTimer(); // Reset idle timer on user activity
     setSentence(prev => {
       if (prev.length === 0) return prev;
       return prev.slice(0, -1);
     });
-  }, []);
+  }, [resetTimer]);
 
   const handleReplayLastSentence = useCallback(async () => {
+    resetTimer(); // Reset idle timer on user activity
     if (!lastSpokenText.trim()) return;
     
     const normalized = normalizeForTTS(lastSpokenText);
     await speak(normalized);
-  }, [lastSpokenText, speak]);
+  }, [lastSpokenText, speak, resetTimer]);
 
   const handleSpeak = useCallback(async () => {
+    resetTimer(); // Reset idle timer on user activity
     const text = sentence.map(t => t.text).join(' ');
     if (!text.trim()) return;
     
@@ -185,7 +204,7 @@ export default function CommunicationScreen() {
     
     // Clear the sentence after speaking
     setSentence([]);
-  }, [sentence, speak, recordUserInput, selectedCategory]);
+  }, [sentence, speak, recordUserInput, selectedCategory, resetTimer]);
 
   const normalizeForTTS = (text: string): string => {
     return text
@@ -202,15 +221,18 @@ export default function CommunicationScreen() {
   };
 
   const handleBackToMenu = useCallback(() => {
+    resetTimer(); // Reset idle timer on user activity
     router.push('/main-menu');
-  }, [router]);
+  }, [router, resetTimer]);
 
   const handleOpenSettings = useCallback(() => {
+    resetTimer(); // Reset idle timer on user activity
     router.push('/settings');
-  }, [router]);
+  }, [router, resetTimer]);
 
   // Handle suggestion press with full sentence replacement logic
   const handleSuggestionPress = useCallback((text: string, isFullSentence: boolean) => {
+    resetTimer(); // Reset idle timer on user activity
     if (isFullSentence) {
       // Clear existing sentence and replace with the full sentence
       const words = text.split(' ');
@@ -231,11 +253,29 @@ export default function CommunicationScreen() {
       };
       handleTilePress(tile);
     }
-  }, [handleTilePress]);
+  }, [handleTilePress, resetTimer]);
+
+  const handleCategorySelect = useCallback((categoryId: string) => {
+    resetTimer(); // Reset idle timer on user activity
+    setSelectedCategory(categoryId);
+  }, [resetTimer]);
+
+  const handleSettingsOpen = useCallback(() => {
+    resetTimer(); // Reset idle timer on user activity
+    setSettingsOpen(true);
+  }, [resetTimer]);
+
+  const handleSettingsClose = useCallback(() => {
+    resetTimer(); // Reset idle timer on user activity
+    setSettingsOpen(false);
+  }, [resetTimer]);
 
   return (
     <LandscapeGuard>
-      <View style={[commonStyles.container, styles.container]}>
+      <View 
+        style={[commonStyles.container, styles.container]}
+        onTouchStart={resetTimer} // Reset timer on any touch
+      >
         {/* Top Bar with Back, Emotion, and Settings */}
         <View style={styles.topBar}>
           <TouchableOpacity 
@@ -280,6 +320,7 @@ export default function CommunicationScreen() {
               suggestions={advancedSuggestions}
               onPressSuggestion={handleSuggestionPress}
               onRemoveWord={(word) => {
+                resetTimer(); // Reset idle timer on user activity
                 // Remove the word from the sentence when tense is changed
                 setSentence(prev => {
                   const index = prev.findIndex(t => t.text.toLowerCase() === word.toLowerCase());
@@ -305,7 +346,7 @@ export default function CommunicationScreen() {
           <CategoryBar
             categories={categories}
             selectedId={selectedCategory}
-            onSelect={setSelectedCategory}
+            onSelect={handleCategorySelect}
           />
         </View>
 
@@ -316,7 +357,7 @@ export default function CommunicationScreen() {
             onTilePress={handleTilePress}
             onTileLongPress={handleTileLongPress}
             onTileEdit={handleTileEdit}
-            onAddTile={() => setSettingsOpen(true)}
+            onAddTile={handleSettingsOpen}
             selectedCategory={selectedCategory}
           />
         </View>
@@ -324,7 +365,7 @@ export default function CommunicationScreen() {
         {/* Settings Sheet - Only for adding tiles */}
         <TabbedSettingsSheet
           open={settingsOpen}
-          onClose={() => setSettingsOpen(false)}
+          onClose={handleSettingsClose}
           onResetLearning={resetLearning}
           onResetTiles={resetTiles}
           mode="add"
@@ -340,7 +381,10 @@ export default function CommunicationScreen() {
             visible={!!editingTile}
             tile={editingTile}
             onSave={handleSaveEdit}
-            onClose={() => setEditingTile(null)}
+            onClose={() => {
+              resetTimer(); // Reset idle timer on user activity
+              setEditingTile(null);
+            }}
           />
         )}
       </View>

@@ -13,8 +13,11 @@ import { useAdvancedAI } from '../hooks/useAdvancedAI';
 import { useTTSSettings } from '../hooks/useTTSSettings';
 import Icon from '../components/Icon';
 import { useRouter } from 'expo-router';
+import { useIdleDetection } from '../hooks/useIdleDetection';
 
 export default function KeyboardScreen() {
+  const router = useRouter();
+
   useEffect(() => {
     (async () => {
       if (Platform.OS !== 'web') {
@@ -23,6 +26,15 @@ export default function KeyboardScreen() {
     })();
   }, []);
 
+  // Idle detection - navigate to home after 15 seconds
+  const { resetTimer } = useIdleDetection({
+    timeout: 15000, // 15 seconds
+    onIdle: () => {
+      console.log('User idle for 15 seconds, navigating to home screen');
+      router.push('/main-menu');
+    },
+  });
+
   const [typedText, setTypedText] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const { getAdvancedSuggestions, getTimeBasedSuggestions, recordUserInput } = useAdvancedAI();
@@ -30,8 +42,6 @@ export default function KeyboardScreen() {
   const { speak } = useTTSSettings();
   const [advancedSuggestions, setAdvancedSuggestions] = useState<any[]>([]);
   const [lastSpokenText, setLastSpokenText] = useState<string>('');
-
-  const router = useRouter();
 
   useEffect(() => {
     (async () => {
@@ -82,22 +92,25 @@ export default function KeyboardScreen() {
   }, [typedText, getAdvancedSuggestions, getTimeBasedSuggestions, selectedCategory]);
 
   const handleDeleteLastWord = useCallback(() => {
+    resetTimer(); // Reset idle timer on user activity
     setTypedText(prev => {
       const words = prev.trim().split(/\s+/);
       if (words.length === 0 || (words.length === 1 && !words[0])) return '';
       words.pop();
       return words.join(' ');
     });
-  }, []);
+  }, [resetTimer]);
 
   const handleReplayLastSentence = useCallback(async () => {
+    resetTimer(); // Reset idle timer on user activity
     if (!lastSpokenText.trim()) return;
     
     const normalized = normalizeForTTS(lastSpokenText);
     await speak(normalized);
-  }, [lastSpokenText, speak]);
+  }, [lastSpokenText, speak, resetTimer]);
 
   const handleSpeak = useCallback(async () => {
+    resetTimer(); // Reset idle timer on user activity
     if (!typedText.trim()) return;
     
     const normalized = normalizeForTTS(typedText);
@@ -108,7 +121,7 @@ export default function KeyboardScreen() {
     
     // Record the sentence for AI learning
     await recordUserInput(typedText, selectedCategory !== 'all' ? selectedCategory : undefined);
-  }, [typedText, speak, recordUserInput, selectedCategory]);
+  }, [typedText, speak, recordUserInput, selectedCategory, resetTimer]);
 
   const normalizeForTTS = (text: string): string => {
     return text
@@ -125,15 +138,18 @@ export default function KeyboardScreen() {
   };
 
   const handleBackToMenu = useCallback(() => {
+    resetTimer(); // Reset idle timer on user activity
     router.push('/main-menu');
-  }, [router]);
+  }, [router, resetTimer]);
 
   const handleOpenSettings = useCallback(() => {
+    resetTimer(); // Reset idle timer on user activity
     router.push('/settings');
-  }, [router]);
+  }, [router, resetTimer]);
 
   // Handle suggestion press with full sentence replacement logic
   const handleSuggestionPress = useCallback((text: string, isFullSentence: boolean) => {
+    resetTimer(); // Reset idle timer on user activity
     if (isFullSentence) {
       // Replace entire text with the full sentence
       setTypedText(text);
@@ -144,11 +160,29 @@ export default function KeyboardScreen() {
         return trimmed ? `${trimmed} ${text}` : text;
       });
     }
-  }, []);
+  }, [resetTimer]);
+
+  const handleTextChange = useCallback((text: string) => {
+    resetTimer(); // Reset idle timer on user activity
+    setTypedText(text);
+  }, [resetTimer]);
+
+  const handleClearText = useCallback(() => {
+    resetTimer(); // Reset idle timer on user activity
+    setTypedText('');
+  }, [resetTimer]);
+
+  const handleCategorySelect = useCallback((categoryId: string) => {
+    resetTimer(); // Reset idle timer on user activity
+    setSelectedCategory(categoryId);
+  }, [resetTimer]);
 
   return (
     <LandscapeGuard>
-      <View style={[commonStyles.container, styles.container]}>
+      <View 
+        style={[commonStyles.container, styles.container]}
+        onTouchStart={resetTimer} // Reset timer on any touch
+      >
         {/* Top Bar with Back, Emotion, and Settings */}
         <View style={styles.topBar}>
           <TouchableOpacity 
@@ -178,7 +212,7 @@ export default function KeyboardScreen() {
           <TextInput
             style={styles.textInput}
             value={typedText}
-            onChangeText={setTypedText}
+            onChangeText={handleTextChange}
             placeholder="Type your message here..."
             placeholderTextColor={colors.textSecondary}
             multiline
@@ -208,7 +242,7 @@ export default function KeyboardScreen() {
             <View style={styles.rightActions}>
               <TouchableOpacity 
                 style={styles.clearButton} 
-                onPress={() => setTypedText('')}
+                onPress={handleClearText}
                 activeOpacity={0.8}
               >
                 <Icon name="close-circle-outline" size={24} color={colors.textSecondary} />
@@ -234,6 +268,7 @@ export default function KeyboardScreen() {
               suggestions={advancedSuggestions}
               onPressSuggestion={handleSuggestionPress}
               onRemoveWord={(word) => {
+                resetTimer(); // Reset idle timer on user activity
                 // Remove the word from the typed text when tense is changed
                 setTypedText(prev => {
                   const words = prev.trim().split(/\s+/);
@@ -261,7 +296,7 @@ export default function KeyboardScreen() {
           <CategoryBar
             categories={categories}
             selectedId={selectedCategory}
-            onSelect={setSelectedCategory}
+            onSelect={handleCategorySelect}
           />
         </View>
       </View>
