@@ -1,6 +1,6 @@
 
-import { useCallback, useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Platform, ScrollView } from 'react-native';
+import { useCallback, useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Platform, ScrollView, PanResponder } from 'react-native';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { commonStyles, colors } from '../styles/commonStyles';
 import CategoryBar from '../components/CategoryBar';
@@ -26,7 +26,7 @@ export default function KeyboardScreen() {
     })();
   }, []);
 
-  // Idle detection - navigate to home after 60 seconds (increased from 15)
+  // Idle detection - navigate to home after 60 seconds
   const { resetTimer } = useIdleDetection({
     timeout: 60000, // 60 seconds
     onIdle: () => {
@@ -34,6 +34,21 @@ export default function KeyboardScreen() {
       router.push('/main-menu');
     },
   });
+
+  // Create a PanResponder to capture ALL touch events on the screen
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => {
+        resetTimer();
+        return false; // Don't capture the event, just reset timer
+      },
+      onMoveShouldSetPanResponder: () => {
+        resetTimer();
+        return false; // Don't capture the event, just reset timer
+      },
+      onPanResponderTerminationRequest: () => true,
+    })
+  ).current;
 
   const [typedText, setTypedText] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -181,7 +196,7 @@ export default function KeyboardScreen() {
     <LandscapeGuard>
       <View 
         style={[commonStyles.container, styles.container]}
-        onTouchStart={resetTimer} // Reset timer on any touch
+        {...panResponder.panHandlers}
       >
         {/* Top Bar with Back, Emotion, and Settings */}
         <View style={styles.topBar}>
@@ -217,6 +232,8 @@ export default function KeyboardScreen() {
             placeholderTextColor={colors.textSecondary}
             multiline
             autoFocus
+            onTouchStart={resetTimer}
+            onFocus={resetTimer}
           />
           <View style={styles.inputActions}>
             <View style={styles.leftActions}>
