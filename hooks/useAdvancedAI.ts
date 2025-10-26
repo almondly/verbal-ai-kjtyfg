@@ -960,17 +960,19 @@ export function useAdvancedAI() {
       }
 
       // 2. CATEGORY-BASED CONTEXTUAL SUGGESTIONS (ULTRA-HIGH PRIORITY - FIXED!)
+      // CRITICAL FIX: Only show category suggestions when in a specific category
       if (currentCategory && currentCategory !== 'all' && currentCategory !== 'keyboard') {
-        console.log('🎯 Getting FIXED category-relevant words for category:', currentCategory);
+        console.log('🎯 Getting STRICT category-relevant words for category:', currentCategory);
         const categoryWords = getCategoryRelevantWords(currentWords, currentCategory, availableWords, categoryTiles);
-        console.log('✅ Category words found:', categoryWords);
+        console.log('✅ STRICT category words found:', categoryWords);
         
+        // CRITICAL FIX: Only add category words if they're actually relevant
         categoryWords.forEach((word, index) => {
           if (!suggestions.some(s => areSimilarWords(s.text.toLowerCase(), word.toLowerCase())) &&
               !currentWords.some(w => areSimilarWords(w.toLowerCase(), word.toLowerCase()))) {
             suggestions.push({
               text: word,
-              confidence: Math.max(0.85, 0.95 - index * 0.03),
+              confidence: Math.max(0.88, 0.96 - index * 0.02), // Higher confidence for category words
               type: 'category_contextual',
               context: `From ${currentCategory} category`
             });
@@ -1273,20 +1275,38 @@ export function useAdvancedAI() {
       }
 
       // 17. Add full sentence suggestions as last options (ENHANCED WITH AAC)
+      // CRITICAL FIX: STRICT relevance filtering for full sentences
       if (currentWords.length >= 1 && currentWords.length <= 4) {
-        // Prioritize AAC sentences
+        // STRICT FILTERING: Only suggest sentences that are HIGHLY relevant
         const aacFullSentences = aacSentences
           .filter(aacSent => {
             const sentenceLower = aacSent.text.toLowerCase();
-            return sentenceLower.startsWith(currentText) || 
-                   currentWords.some(word => sentenceLower.includes(word.toLowerCase()));
+            const sentenceWords = sentenceLower.split(' ');
+            
+            // STRICT: Sentence must either:
+            // 1. Start with the exact current text, OR
+            // 2. Contain ALL current words in order
+            const startsWithCurrent = sentenceLower.startsWith(currentText);
+            
+            // Check if all current words appear in sentence in order
+            let lastIndex = -1;
+            const containsAllInOrder = currentWords.every(word => {
+              const index = sentenceWords.indexOf(word.toLowerCase(), lastIndex + 1);
+              if (index > lastIndex) {
+                lastIndex = index;
+                return true;
+              }
+              return false;
+            });
+            
+            return startsWithCurrent || (containsAllInOrder && currentWords.length >= 2);
           })
           .sort((a, b) => {
             // Sort by frequency: high > medium > low
             const freqOrder = { high: 3, medium: 2, low: 1 };
             return freqOrder[b.frequency] - freqOrder[a.frequency];
           })
-          .slice(0, 5)
+          .slice(0, 3) // Reduced to 3 most relevant
           .map(s => s.text);
 
         const relevantSentences = [
@@ -1294,18 +1314,32 @@ export function useAdvancedAI() {
           ...fullSentenceTemplates
             .filter(sentence => {
               const sentenceLower = sentence.toLowerCase();
-              return (sentenceLower.startsWith(currentText) || 
-                     currentWords.some(word => sentenceLower.includes(word.toLowerCase()))) &&
+              const sentenceWords = sentenceLower.split(' ');
+              
+              // STRICT: Same filtering as AAC sentences
+              const startsWithCurrent = sentenceLower.startsWith(currentText);
+              
+              let lastIndex = -1;
+              const containsAllInOrder = currentWords.every(word => {
+                const index = sentenceWords.indexOf(word.toLowerCase(), lastIndex + 1);
+                if (index > lastIndex) {
+                  lastIndex = index;
+                  return true;
+                }
+                return false;
+              });
+              
+              return (startsWithCurrent || (containsAllInOrder && currentWords.length >= 2)) &&
                      !aacFullSentences.includes(sentence);
             })
-        ].slice(0, 5);
+        ].slice(0, 3); // Reduced to 3 most relevant
 
         relevantSentences.forEach((sentence, index) => {
           if (!suggestions.some(s => s.text.toLowerCase() === sentence.toLowerCase())) {
             const isAAC = aacFullSentences.includes(sentence);
             suggestions.push({
               text: sentence,
-              confidence: Math.max(0.75, (isAAC ? 0.90 : 0.85) - index * 0.05),
+              confidence: Math.max(0.78, (isAAC ? 0.92 : 0.87) - index * 0.04),
               type: 'full_sentence',
               context: isAAC ? 'Official AAC sentence' : 'Complete sentence suggestion'
             });

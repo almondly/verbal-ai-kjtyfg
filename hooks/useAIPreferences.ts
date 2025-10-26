@@ -42,9 +42,9 @@ export function useAIPreferences() {
             { value: 'red', label: 'Red', colour: '#FF6B6B' },
             { value: 'blue', label: 'Blue', colour: '#4ECDC4' },
             { value: 'green', label: 'Green', colour: '#45B7D1' },
-            { value: 'yellow', label: 'Yellow', colour: '#F7DC6F' },  // FIXED: Was showing orange
+            { value: 'yellow', label: 'Yellow', colour: '#F7DC6F' },  
             { value: 'purple', label: 'Purple', colour: '#98D8C8' },
-            { value: 'orange', label: 'Orange', colour: '#FFA07A' },  // FIXED: Was showing yellow
+            { value: 'orange', label: 'Orange', colour: '#FFA07A' },  
             { value: 'pink', label: 'Pink', colour: '#BB8FCE' },
             { value: 'black', label: 'Black', colour: '#2C3E50' },
           ]

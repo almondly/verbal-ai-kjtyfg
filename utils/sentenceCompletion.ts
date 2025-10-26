@@ -187,13 +187,31 @@ export const sentenceTemplates = [
   { pattern: ['he', 'needs', 'the'], completions: ['toilet', 'bathroom', 'book'] },
   { pattern: ['she', 'needs', 'the'], completions: ['toilet', 'bathroom', 'book'] },
   
-  // Pronoun + "needs help with" pattern (possessive suggestions)
-  { pattern: ['he', 'needs', 'help'], completions: ['with', 'his', 'please', 'now'] },
-  { pattern: ['she', 'needs', 'help'], completions: ['with', 'her', 'please', 'now'] },
-  { pattern: ['I', 'need', 'help'], completions: ['with', 'my', 'please', 'now'] },
+  // Pronoun + "needs help with" pattern (possessive suggestions) - ENHANCED
+  { pattern: ['he', 'needs', 'help'], completions: ['with', 'please', 'now'] },
+  { pattern: ['she', 'needs', 'help'], completions: ['with', 'please', 'now'] },
+  { pattern: ['I', 'need', 'help'], completions: ['with', 'please', 'now'] },
   { pattern: ['he', 'needs', 'help', 'with'], completions: ['his', 'the', 'this', 'that'] },
   { pattern: ['she', 'needs', 'help', 'with'], completions: ['her', 'the', 'this', 'that'] },
   { pattern: ['I', 'need', 'help', 'with'], completions: ['my', 'the', 'this', 'that'] },
+  { pattern: ['you', 'need', 'help', 'with'], completions: ['your', 'the', 'this', 'that'] },
+  { pattern: ['we', 'need', 'help', 'with'], completions: ['our', 'the', 'this', 'that'] },
+  { pattern: ['they', 'need', 'help', 'with'], completions: ['their', 'the', 'this', 'that'] },
+  
+  // CRITICAL FIX: "help with his/her/my homework" patterns
+  { pattern: ['help', 'with', 'his'], completions: ['homework', 'work', 'book', 'toy'] },
+  { pattern: ['help', 'with', 'her'], completions: ['homework', 'work', 'book', 'toy'] },
+  { pattern: ['help', 'with', 'my'], completions: ['homework', 'work', 'book', 'toy'] },
+  { pattern: ['help', 'with', 'your'], completions: ['homework', 'work', 'book', 'toy'] },
+  { pattern: ['help', 'with', 'our'], completions: ['homework', 'work', 'book', 'toy'] },
+  { pattern: ['help', 'with', 'their'], completions: ['homework', 'work', 'book', 'toy'] },
+  
+  // CRITICAL FIX: "he wants help with his" patterns
+  { pattern: ['he', 'wants', 'help'], completions: ['with', 'please', 'now'] },
+  { pattern: ['she', 'wants', 'help'], completions: ['with', 'please', 'now'] },
+  { pattern: ['he', 'wants', 'help', 'with'], completions: ['his', 'the', 'this', 'that'] },
+  { pattern: ['she', 'wants', 'help', 'with'], completions: ['her', 'the', 'this', 'that'] },
+  { pattern: ['I', 'want', 'help', 'with'], completions: ['my', 'the', 'this', 'that'] },
   
   // We need variations
   { pattern: ['we', 'need'], completions: ['help', 'water', 'food', 'to go', 'to rest', 'that', 'this', 'to go home', 'the', 'a'] },
@@ -820,6 +838,7 @@ const CATEGORY_CACHE_SIZE = 100;
  * This is the FIXED core of the category-aware recommendation system
  * Now properly filters words that are ACTUALLY in the selected category
  * OPTIMIZED: Now uses caching to reduce redundant calculations
+ * CRITICAL FIX: Stricter category filtering to prevent irrelevant suggestions
  */
 export function getCategoryRelevantWords(
   currentWords: string[],
@@ -841,58 +860,76 @@ export function getCategoryRelevantWords(
     hasCategoryTiles: !!categoryTiles 
   });
   
-  // CRITICAL FIX: Filter availableWords to only include words that are ACTUALLY in the selected category
+  // CRITICAL FIX: STRICT category filtering - ONLY show words from the selected category
   let categoryWords = availableWords;
-  if (categoryTiles && categoryTiles.length > 0) {
+  if (categoryTiles && categoryTiles.length > 0 && category !== 'all' && category !== 'keyboard') {
     const categoryWordSet = new Set(
       categoryTiles
         .filter(tile => tile.category === category)
         .map(tile => tile.text.toLowerCase())
     );
+    
+    // STRICT FILTERING: Only include words that are EXACTLY in this category
     categoryWords = availableWords.filter(word => categoryWordSet.has(word.toLowerCase()));
-    console.log('✅ Filtered to category words:', { 
+    
+    console.log('✅ STRICT category filtering applied:', { 
+      category,
       originalCount: availableWords.length, 
       categoryCount: categoryWords.length,
       categoryWords: categoryWords.slice(0, 10)
     });
+    
+    // If no category words found, return empty array (don't show irrelevant words)
+    if (categoryWords.length === 0) {
+      console.log('⚠️ No words found in category, returning empty array');
+      categoryCache.set(cacheKey, []);
+      return [];
+    }
   }
   
-  // Enhanced category-specific word associations with more comprehensive vocabulary
+  // CRITICAL FIX: Remove generic connecting words from category keywords
+  // These should only appear when grammatically appropriate, not as category suggestions
   const categoryKeywords: { [key: string]: string[] } = {
     'greetings': ['hello', 'hi', 'goodbye', 'bye', 'how are you', 'please', 'thank you', 'yes', 'no', 'good', 'bad', 'good morning', 'good afternoon', 'good evening', 'good night', 'see you', 'see you later', 'welcome', 'sorry', 'excuse me'],
-    'core': ['I', 'you', 'he', 'she', 'we', 'they', 'want', 'need', 'like', 'help', 'more', 'go', 'stop', 'yes', 'no', 'please', 'thank you', 'can', 'the', 'a', 'that', 'this', 'use', 'borrow', 'am', 'is', 'are'],
-    'people': ['mum', 'dad', 'mom', 'mother', 'father', 'friend', 'teacher', 'family', 'brother', 'sister', 'mate', 'grandma', 'grandpa', 'he', 'she', 'they', 'my', 'boy', 'girl', 'man', 'woman', 'baby'],
-    'actions': ['eat', 'drink', 'play', 'sleep', 'walk', 'run', 'read', 'write', 'watch', 'listen', 'sit', 'stand', 'jump', 'dance', 'go', 'can', 'the', 'sing', 'draw', 'give', 'take', 'throw', 'catch', 'push', 'pull', 'wash', 'clean', 'am', 'is', 'are'],
-    'feelings': ['happy', 'sad', 'angry', 'scared', 'excited', 'tired', 'love', 'worried', 'calm', 'hurt', 'sick', 'good', 'bad', 'I', 'he', 'she', 'we', 'they', 'feel', 'surprised', 'bored', 'confused', 'am', 'is', 'are'],
-    'food': ['water', 'juice', 'milk', 'apple', 'banana', 'bread', 'snack', 'lunch', 'dinner', 'breakfast', 'hungry', 'thirsty', 'eat', 'drink', 'the', 'a', 'can', 'cheese', 'cookie', 'cake', 'pizza', 'sandwich', 'egg', 'chicken', 'fish', 'carrot', 'want', 'need', 'am', 'is'],
-    'home': ['house', 'bed', 'bathroom', 'kitchen', 'TV', 'door', 'window', 'room', 'bedroom', 'toilet', 'sleep', 'rest', 'the', 'a', 'go', 'my', 'chair', 'table', 'living room', 'phone', 'computer', 'tablet', 'need', 'want'],
-    'school': ['book', 'pencil', 'paper', 'class', 'teacher', 'lunch', 'recess', 'learn', 'study', 'homework', 'read', 'write', 'the', 'a', 'my', 'can', 'pen', 'crayon', 'scissors', 'glue', 'backpack', 'test', 'need', 'want', 'finished', 'math'],
-    'places': ['park', 'store', 'shop', 'school', 'home', 'playground', 'car', 'bus', 'outside', 'inside', 'the', 'a', 'go', 'can', 'library', 'hospital', 'doctor', 'restaurant', 'train', 'airplane', 'beach', 'want', 'need'],
-    'body': ['head', 'hand', 'foot', 'arm', 'leg', 'eye', 'ear', 'nose', 'mouth', 'hurt', 'pain', 'sick', 'my', 'the', 'a', 'face', 'teeth', 'hair', 'fingers', 'feet', 'tummy', 'need'],
-    'routines': ['morning', 'afternoon', 'evening', 'night', 'breakfast', 'lunch', 'dinner', 'bedtime', 'wake up', 'sleep', 'the', 'a', 'go', 'snack time', 'bath time', 'brush teeth', 'get dressed', 'potty', 'am', 'is', 'are'],
-    'questions': ['what', 'where', 'when', 'who', 'why', 'how', 'is', 'are', 'do', 'can', 'will', 'the', 'a', 'that', 'which'],
-    'colours': ['red', 'blue', 'green', 'yellow', 'orange', 'purple', 'pink', 'black', 'white', 'brown', 'the', 'a', 'is', 'and'],
-    'numbers': ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'more', 'less', 'the', 'a', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
-    'animals': ['dog', 'cat', 'bird', 'fish', 'horse', 'cow', 'pig', 'sheep', 'rabbit', 'pet', 'the', 'a', 'my', 'chicken', 'duck', 'bear', 'lion', 'elephant', 'monkey', 'see'],
-    'clothing': ['shirt', 'pants', 'dress', 'shoes', 'socks', 'hat', 'coat', 'jacket', 'wear', 'put on', 'the', 'a', 'my', 'gloves'],
-    'weather': ['sunny', 'rainy', 'cloudy', 'windy', 'hot', 'cold', 'warm', 'cool', 'weather', 'outside', 'the', 'a', 'snowy', 'is'],
-    'time': ['now', 'later', 'today', 'tomorrow', 'yesterday', 'morning', 'afternoon', 'evening', 'night', 'time', 'the', 'a', 'is'],
-    'toys': ['toy', 'ball', 'doll', 'game', 'puzzle', 'blocks', 'play', 'fun', 'the', 'a', 'my', 'car', 'truck', 'train', 'bike', 'swing', 'slide', 'want'],
+    'core': ['I', 'you', 'he', 'she', 'we', 'they', 'want', 'need', 'like', 'help', 'more', 'go', 'stop', 'yes', 'no', 'please', 'thank you', 'can', 'use', 'borrow'],
+    'people': ['mum', 'dad', 'mom', 'mother', 'father', 'friend', 'teacher', 'family', 'brother', 'sister', 'mate', 'grandma', 'grandpa', 'he', 'she', 'they', 'boy', 'girl', 'man', 'woman', 'baby'],
+    'actions': ['eat', 'drink', 'play', 'sleep', 'walk', 'run', 'read', 'write', 'watch', 'listen', 'sit', 'stand', 'jump', 'dance', 'go', 'sing', 'draw', 'give', 'take', 'throw', 'catch', 'push', 'pull', 'wash', 'clean'],
+    'feelings': ['happy', 'sad', 'angry', 'scared', 'excited', 'tired', 'love', 'worried', 'calm', 'hurt', 'sick', 'good', 'bad', 'feel', 'surprised', 'bored', 'confused'],
+    'food': ['water', 'juice', 'milk', 'apple', 'banana', 'bread', 'snack', 'lunch', 'dinner', 'breakfast', 'hungry', 'thirsty', 'eat', 'drink', 'cheese', 'cookie', 'cake', 'pizza', 'sandwich', 'egg', 'chicken', 'fish', 'carrot'],
+    'home': ['house', 'bed', 'bathroom', 'kitchen', 'TV', 'door', 'window', 'room', 'bedroom', 'toilet', 'sleep', 'rest', 'chair', 'table', 'living room', 'phone', 'computer', 'tablet'],
+    'school': ['book', 'pencil', 'paper', 'class', 'teacher', 'lunch', 'recess', 'learn', 'study', 'homework', 'read', 'write', 'pen', 'crayon', 'scissors', 'glue', 'backpack', 'test', 'finished', 'math'],
+    'places': ['park', 'store', 'shop', 'school', 'home', 'playground', 'car', 'bus', 'outside', 'inside', 'library', 'hospital', 'doctor', 'restaurant', 'train', 'airplane', 'beach'],
+    'body': ['head', 'hand', 'foot', 'arm', 'leg', 'eye', 'ear', 'nose', 'mouth', 'hurt', 'pain', 'sick', 'face', 'teeth', 'hair', 'fingers', 'feet', 'tummy'],
+    'routines': ['morning', 'afternoon', 'evening', 'night', 'breakfast', 'lunch', 'dinner', 'bedtime', 'wake up', 'sleep', 'snack time', 'bath time', 'brush teeth', 'get dressed', 'potty'],
+    'questions': ['what', 'where', 'when', 'who', 'why', 'how', 'which'],
+    'colours': ['red', 'blue', 'green', 'yellow', 'orange', 'purple', 'pink', 'black', 'white', 'brown'],
+    'numbers': ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'more', 'less', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
+    'animals': ['dog', 'cat', 'bird', 'fish', 'horse', 'cow', 'pig', 'sheep', 'rabbit', 'pet', 'chicken', 'duck', 'bear', 'lion', 'elephant', 'monkey', 'see'],
+    'clothing': ['shirt', 'pants', 'dress', 'shoes', 'socks', 'hat', 'coat', 'jacket', 'wear', 'put on', 'gloves'],
+    'weather': ['sunny', 'rainy', 'cloudy', 'windy', 'hot', 'cold', 'warm', 'cool', 'weather', 'outside', 'snowy'],
+    'time': ['now', 'later', 'today', 'tomorrow', 'yesterday', 'morning', 'afternoon', 'evening', 'night', 'time'],
+    'toys': ['toy', 'ball', 'doll', 'game', 'puzzle', 'blocks', 'play', 'fun', 'car', 'truck', 'train', 'bike', 'swing', 'slide'],
   };
   
   const relevantKeywords = categoryKeywords[category] || [];
   console.log('📚 Relevant keywords for category:', relevantKeywords.slice(0, 10));
   
-  // If no current words, return category keywords that are in category words
+  // If no current words, return ONLY words that are EXACTLY in the category
   if (currentWords.length === 0) {
+    // STRICT: Only return words that are in both categoryWords AND relevantKeywords
     const matches = categoryWords.filter(word => 
       relevantKeywords.some(keyword => 
-        word.toLowerCase() === keyword.toLowerCase() ||
-        word.toLowerCase().includes(keyword.toLowerCase()) ||
-        keyword.toLowerCase().includes(word.toLowerCase())
+        word.toLowerCase() === keyword.toLowerCase()
       )
     ).slice(0, 8);
-    console.log('🎯 No current words, returning category matches:', matches);
+    console.log('🎯 No current words, returning STRICT category matches:', matches);
+    
+    // Cache and return
+    if (categoryCache.size > CATEGORY_CACHE_SIZE) {
+      const firstKey = categoryCache.keys().next().value;
+      categoryCache.delete(firstKey);
+    }
+    categoryCache.set(cacheKey, matches);
     return matches;
   }
   
@@ -907,24 +944,72 @@ export function getCategoryRelevantWords(
     let score = 0;
     const lowerWord = word.toLowerCase();
     
-    // Check if word is in category keywords
+    // STRICT: Check if word is EXACTLY in category keywords (no partial matches)
     const isInCategory = relevantKeywords.some(keyword => 
-      lowerWord === keyword.toLowerCase() ||
-      lowerWord.includes(keyword.toLowerCase()) ||
-      keyword.toLowerCase().includes(lowerWord)
+      lowerWord === keyword.toLowerCase()
     );
     
     if (isInCategory) {
-      score += 10; // Base score for being in category
+      score += 20; // Higher base score for being EXACTLY in category
       
       // ULTRA-ENHANCED: Deep contextual boosting based on sentence patterns
       // Example: "I want" -> boost action words like "eat", "play", "go"
       if (sentenceContext.includes('i want') || sentenceContext.includes('want to') ||
           sentenceContext.includes('he wants') || sentenceContext.includes('she wants') ||
           sentenceContext.includes('we want') || sentenceContext.includes('they want')) {
-        if (['eat', 'drink', 'play', 'sleep', 'go', 'read', 'watch', 'the', 'a', 'to', 'water'].includes(lowerWord)) {
-          score += 8;
+        if (['eat', 'drink', 'play', 'sleep', 'go', 'read', 'watch', 'water'].includes(lowerWord)) {
+          score += 15; // Higher boost for contextually relevant words
         }
+      }
+      
+      // CRITICAL FIX: Boost possessive pronouns after appropriate contexts
+      // Example: "he wants help with" -> boost "his"
+      if (sentenceContext.includes('he wants') || sentenceContext.includes('he needs') || 
+          sentenceContext.includes('he likes') || sentenceContext.includes('he has')) {
+        if (lowerWord === 'his') {
+          score += 20; // MASSIVE boost for possessive pronoun
+        }
+      }
+      
+      if (sentenceContext.includes('she wants') || sentenceContext.includes('she needs') || 
+          sentenceContext.includes('she likes') || sentenceContext.includes('she has')) {
+        if (lowerWord === 'her') {
+          score += 20; // MASSIVE boost for possessive pronoun
+        }
+      }
+      
+      if (sentenceContext.includes('i want') || sentenceContext.includes('i need') || 
+          sentenceContext.includes('i like') || sentenceContext.includes('i have')) {
+        if (lowerWord === 'my') {
+          score += 20; // MASSIVE boost for possessive pronoun
+        }
+      }
+      
+      if (sentenceContext.includes('you want') || sentenceContext.includes('you need') || 
+          sentenceContext.includes('you like') || sentenceContext.includes('you have')) {
+        if (lowerWord === 'your') {
+          score += 20; // MASSIVE boost for possessive pronoun
+        }
+      }
+      
+      if (sentenceContext.includes('we want') || sentenceContext.includes('we need') || 
+          sentenceContext.includes('we like') || sentenceContext.includes('we have')) {
+        if (lowerWord === 'our') {
+          score += 20; // MASSIVE boost for possessive pronoun
+        }
+      }
+      
+      if (sentenceContext.includes('they want') || sentenceContext.includes('they need') || 
+          sentenceContext.includes('they like') || sentenceContext.includes('they have')) {
+        if (lowerWord === 'their') {
+          score += 20; // MASSIVE boost for possessive pronoun
+        }
+      }
+      
+      // CRITICAL FIX: Boost "homework" after "help with his/her/my"
+      if ((sentenceContext.includes('help with his') || sentenceContext.includes('help with her') || 
+           sentenceContext.includes('help with my')) && lowerWord === 'homework') {
+        score += 25; // ULTRA-HIGH boost for "homework" in this context
       }
       
       // Example: "I feel" -> boost feeling words
@@ -980,10 +1065,8 @@ export function getCategoryRelevantWords(
         }
       }
       
-      // Boost connecting words (always useful)
-      if (['the', 'a', 'can', 'go', 'that', 'this', 'to', 'and', 'or', 'am', 'is', 'are'].includes(lowerWord)) {
-        score += 5;
-      }
+      // REMOVED: Don't boost generic connecting words in category suggestions
+      // They should only appear when grammatically appropriate via getContextualConnectingWords
       
       // Boost words that follow common patterns
       if (lastWord === 'to' && ['go', 'play', 'eat', 'drink', 'sleep', 'read', 'the'].includes(lowerWord)) {
@@ -1078,10 +1161,54 @@ export function getPrioritizedConnectingWords(maxWords: number = 10): string[] {
  * Get contextually appropriate connecting words based on current sentence
  * This ensures "am", "the", "is", "are" etc. are suggested at the right time
  * CRITICAL FIX: "am" after "I" gets ULTRA-HIGH priority
+ * CRITICAL FIX: Possessive pronouns after "help with", "wants", "needs", etc.
  */
 export function getContextualConnectingWords(currentWords: string[], maxWords: number = 5): string[] {
   const lastWord = currentWords.length > 0 ? currentWords[currentWords.length - 1].toLowerCase() : '';
+  const lastTwoWords = currentWords.length >= 2 ? 
+    [currentWords[currentWords.length - 2].toLowerCase(), lastWord].join(' ') : '';
+  const lastThreeWords = currentWords.length >= 3 ? 
+    [currentWords[currentWords.length - 3].toLowerCase(), currentWords[currentWords.length - 2].toLowerCase(), lastWord].join(' ') : '';
+  
   const contextualWords: { word: string; priority: number }[] = [];
+  
+  // CRITICAL FIX: Check for "help with" pattern - suggest possessive pronouns
+  if (lastTwoWords === 'help with' || lastTwoWords === 'with') {
+    // Determine which possessive pronoun based on subject
+    const sentence = currentWords.join(' ').toLowerCase();
+    if (sentence.includes('he ')) {
+      contextualWords.push({ word: 'his', priority: 500 }); // ULTRA-HIGH priority
+    } else if (sentence.includes('she ')) {
+      contextualWords.push({ word: 'her', priority: 500 }); // ULTRA-HIGH priority
+    } else if (sentence.includes('i ')) {
+      contextualWords.push({ word: 'my', priority: 500 }); // ULTRA-HIGH priority
+    } else if (sentence.includes('you ')) {
+      contextualWords.push({ word: 'your', priority: 500 }); // ULTRA-HIGH priority
+    } else if (sentence.includes('we ')) {
+      contextualWords.push({ word: 'our', priority: 500 }); // ULTRA-HIGH priority
+    } else if (sentence.includes('they ')) {
+      contextualWords.push({ word: 'their', priority: 500 }); // ULTRA-HIGH priority
+    }
+  }
+  
+  // CRITICAL FIX: Check for possessive pronoun patterns after verbs
+  const verbsBeforePossessive = ['wants', 'needs', 'likes', 'has', 'lost', 'found', 'brought', 'forgot'];
+  if (verbsBeforePossessive.includes(lastWord)) {
+    const sentence = currentWords.join(' ').toLowerCase();
+    if (sentence.includes('he ')) {
+      contextualWords.push({ word: 'his', priority: 400 });
+    } else if (sentence.includes('she ')) {
+      contextualWords.push({ word: 'her', priority: 400 });
+    } else if (sentence.includes('i ')) {
+      contextualWords.push({ word: 'my', priority: 400 });
+    } else if (sentence.includes('you ')) {
+      contextualWords.push({ word: 'your', priority: 400 });
+    } else if (sentence.includes('we ')) {
+      contextualWords.push({ word: 'our', priority: 400 });
+    } else if (sentence.includes('they ')) {
+      contextualWords.push({ word: 'their', priority: 400 });
+    }
+  }
   
   // Find connecting words that fit the current context
   prioritizedConnectingWords.forEach(cw => {

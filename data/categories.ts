@@ -9,7 +9,7 @@ export interface Category {
 export const categories: Category[] = [
   { id: 'all', label: 'All', icon: 'grid-outline', color: '#7F8C8D' },
   { id: 'keyboard', label: 'Keyboard', icon: 'keypad-outline', color: '#9B59B6' },
-  { id: 'core', label: 'Core', icon: 'star-outline', color: '#3498DB' }, // MOVED TO FIRST POSITION
+  { id: 'core', label: 'Core', icon: 'star-outline', color: '#3498DB' }, 
   { id: 'greetings', label: 'Greetings', icon: 'hand-left-outline', color: '#E74C3C' },
   { id: 'people', label: 'People', icon: 'people-outline', color: '#9B59B6' },
   { id: 'actions', label: 'Actions', icon: 'flash-outline', color: '#2ECC71' },

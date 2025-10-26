@@ -1,7 +1,7 @@
 
 /**
  * Enhanced AI Hook
- * Integrates adaptive learning, intent recognition, and personalized predictions
+ * Integrates adaptive learning, intent recognition, and personalised predictions
  */
 
 import { useCallback, useEffect, useState, useRef } from 'react';
