@@ -15,7 +15,7 @@
  * - ULTRA-ENHANCED: Grammatical context awareness for "am", "is", "are", "the", etc.
  * - ULTRA-ENHANCED: Web-based sentence completion integration (Google-style predictions)
  * - CRITICAL FIX: "am" is IMMEDIATELY recommended after "I" with ULTRA-HIGH priority
- * - CRITICAL FIX: Full sentence recommendations are now ULTRA-PROMINENT
+ * - CRITICAL FIX V2: Even smarter contextual understanding for child-friendly sentence building
  */
 
 import { detectTenseContext, getVerbFormForContext, getBaseForm } from './wordVariations';
@@ -62,40 +62,42 @@ const prioritizedInitialWords = [
   { word: 'Dad', priority: 55, context: 'Family member' },
 ];
 
-// ULTRA-ENHANCED: Prioritized connecting words (should appear frequently)
+// ULTRA-ENHANCED V2: Prioritized connecting words with SMARTER grammatical context
 // CRITICAL FIX: "am" has ULTRA-HIGH priority after "I"
 const prioritizedConnectingWords = [
   // ULTRA-HIGH priority connecting words (MASSIVELY BOOSTED)
-  { word: 'am', priority: 300, context: 'Linking verb (I am)', grammaticalContext: ['I'] },
-  { word: 'is', priority: 200, context: 'Linking verb (he/she/it is)', grammaticalContext: ['he', 'she', 'it', 'that', 'this'] },
-  { word: 'are', priority: 200, context: 'Linking verb (you/we/they are)', grammaticalContext: ['you', 'we', 'they'] },
-  { word: 'the', priority: 180, context: 'Definite article', grammaticalContext: ['want', 'need', 'have', 'see', 'like', 'love', 'in', 'on', 'at', 'with'] },
-  { word: 'a', priority: 170, context: 'Indefinite article', grammaticalContext: ['want', 'need', 'have', 'see', 'like', 'love', 'in', 'on', 'at', 'with'] },
-  { word: 'to', priority: 160, context: 'Preposition/infinitive marker', grammaticalContext: ['want', 'need', 'like', 'love', 'go', 'going', 'have'] },
-  { word: 'and', priority: 150, context: 'Conjunction', grammaticalContext: [] },
-  { word: 'can', priority: 145, context: 'Modal verb', grammaticalContext: ['I', 'you', 'we', 'he', 'she', 'they'] },
+  { word: 'am', priority: 500, context: 'Linking verb (I am)', grammaticalContext: ['I'], mustFollow: ['I'] },
+  { word: 'is', priority: 300, context: 'Linking verb (he/she/it is)', grammaticalContext: ['he', 'she', 'it', 'that', 'this'], mustFollow: ['he', 'she', 'it', 'that', 'this'] },
+  { word: 'are', priority: 300, context: 'Linking verb (you/we/they are)', grammaticalContext: ['you', 'we', 'they'], mustFollow: ['you', 'we', 'they'] },
+  { word: 'the', priority: 250, context: 'Definite article', grammaticalContext: ['want', 'need', 'have', 'see', 'like', 'love', 'in', 'on', 'at', 'with', 'help'], canFollow: ['want', 'need', 'have', 'see', 'like', 'love', 'in', 'on', 'at', 'with', 'help'] },
+  { word: 'a', priority: 240, context: 'Indefinite article', grammaticalContext: ['want', 'need', 'have', 'see', 'like', 'love', 'in', 'on', 'at', 'with'], canFollow: ['want', 'need', 'have', 'see', 'like', 'love', 'in', 'on', 'at', 'with'] },
+  { word: 'to', priority: 230, context: 'Preposition/infinitive marker', grammaticalContext: ['want', 'need', 'like', 'love', 'go', 'going', 'have'], canFollow: ['want', 'need', 'like', 'love', 'go', 'going', 'have'] },
+  { word: 'and', priority: 200, context: 'Conjunction', grammaticalContext: [] },
+  { word: 'can', priority: 195, context: 'Modal verb', grammaticalContext: ['I', 'you', 'we', 'he', 'she', 'they'], canFollow: ['I', 'you', 'we', 'he', 'she', 'they'] },
   
   // Very high priority
-  { word: 'want', priority: 140, context: 'Desire verb', grammaticalContext: ['I', 'you', 'we', 'they'] },
-  { word: 'need', priority: 140, context: 'Necessity verb', grammaticalContext: ['I', 'you', 'we', 'they'] },
-  { word: 'have', priority: 135, context: 'Possession verb', grammaticalContext: ['I', 'you', 'we', 'they'] },
-  { word: 'go', priority: 130, context: 'Movement verb', grammaticalContext: ['to', 'can', 'want', 'need'] },
-  { word: 'like', priority: 130, context: 'Preference verb', grammaticalContext: ['I', 'you', 'we', 'they'] },
-  { word: 'that', priority: 125, context: 'Demonstrative/conjunction', grammaticalContext: ['is', 'was', 'see', 'want', 'need'] },
-  { word: 'this', priority: 125, context: 'Demonstrative', grammaticalContext: ['is', 'was', 'see', 'want', 'need'] },
-  { word: 'with', priority: 120, context: 'Preposition', grammaticalContext: ['help', 'play', 'go', 'come'] },
-  { word: 'for', priority: 120, context: 'Preposition', grammaticalContext: ['time', 'wait', 'look'] },
-  { word: 'in', priority: 115, context: 'Preposition', grammaticalContext: ['am', 'is', 'are', 'go'] },
-  { word: 'on', priority: 115, context: 'Preposition', grammaticalContext: ['is', 'are', 'put', 'turn'] },
-  { word: 'at', priority: 110, context: 'Preposition', grammaticalContext: ['am', 'is', 'are', 'look'] },
-  { word: 'or', priority: 110, context: 'Conjunction', grammaticalContext: [] },
-  { word: 'but', priority: 105, context: 'Conjunction', grammaticalContext: [] },
-  { word: 'my', priority: 130, context: 'Possessive pronoun', grammaticalContext: ['I', 'want', 'need', 'have', 'lost', 'found'] },
-  { word: 'your', priority: 125, context: 'Possessive pronoun', grammaticalContext: ['you', 'want', 'need', 'have', 'lost', 'found'] },
-  { word: 'his', priority: 125, context: 'Possessive pronoun', grammaticalContext: ['he', 'wants', 'needs', 'has', 'lost', 'found'] },
-  { word: 'her', priority: 125, context: 'Possessive pronoun', grammaticalContext: ['she', 'wants', 'needs', 'has', 'lost', 'found'] },
-  { word: 'our', priority: 120, context: 'Possessive pronoun', grammaticalContext: ['we', 'want', 'need', 'have', 'lost', 'found'] },
-  { word: 'their', priority: 120, context: 'Possessive pronoun', grammaticalContext: ['they', 'want', 'need', 'have', 'lost', 'found'] },
+  { word: 'want', priority: 190, context: 'Desire verb', grammaticalContext: ['I', 'you', 'we', 'they'], canFollow: ['I', 'you', 'we', 'they'] },
+  { word: 'need', priority: 190, context: 'Necessity verb', grammaticalContext: ['I', 'you', 'we', 'they'], canFollow: ['I', 'you', 'we', 'they'] },
+  { word: 'have', priority: 185, context: 'Possession verb', grammaticalContext: ['I', 'you', 'we', 'they'], canFollow: ['I', 'you', 'we', 'they'] },
+  { word: 'go', priority: 180, context: 'Movement verb', grammaticalContext: ['to', 'can', 'want', 'need'], canFollow: ['to', 'can', 'want', 'need'] },
+  { word: 'like', priority: 180, context: 'Preference verb', grammaticalContext: ['I', 'you', 'we', 'they'], canFollow: ['I', 'you', 'we', 'they'] },
+  { word: 'that', priority: 175, context: 'Demonstrative/conjunction', grammaticalContext: ['is', 'was', 'see', 'want', 'need'], canFollow: ['is', 'was', 'see', 'want', 'need'] },
+  { word: 'this', priority: 175, context: 'Demonstrative', grammaticalContext: ['is', 'was', 'see', 'want', 'need'], canFollow: ['is', 'was', 'see', 'want', 'need'] },
+  { word: 'with', priority: 170, context: 'Preposition', grammaticalContext: ['help', 'play', 'go', 'come'], canFollow: ['help', 'play', 'go', 'come'] },
+  { word: 'for', priority: 170, context: 'Preposition', grammaticalContext: ['time', 'wait', 'look'], canFollow: ['time', 'wait', 'look'] },
+  { word: 'in', priority: 165, context: 'Preposition', grammaticalContext: ['am', 'is', 'are', 'go'], canFollow: ['am', 'is', 'are', 'go'] },
+  { word: 'on', priority: 165, context: 'Preposition', grammaticalContext: ['is', 'are', 'put', 'turn'], canFollow: ['is', 'are', 'put', 'turn'] },
+  { word: 'at', priority: 160, context: 'Preposition', grammaticalContext: ['am', 'is', 'are', 'look'], canFollow: ['am', 'is', 'are', 'look'] },
+  { word: 'or', priority: 160, context: 'Conjunction', grammaticalContext: [] },
+  { word: 'but', priority: 155, context: 'Conjunction', grammaticalContext: [] },
+  
+  // CRITICAL: Possessive pronouns with SMART context detection
+  { word: 'my', priority: 280, context: 'Possessive pronoun', grammaticalContext: ['I', 'want', 'need', 'have', 'lost', 'found'], canFollow: ['I', 'want', 'need', 'have', 'lost', 'found'], subjectRequired: 'I' },
+  { word: 'your', priority: 275, context: 'Possessive pronoun', grammaticalContext: ['you', 'want', 'need', 'have', 'lost', 'found'], canFollow: ['you', 'want', 'need', 'have', 'lost', 'found'], subjectRequired: 'you' },
+  { word: 'his', priority: 275, context: 'Possessive pronoun', grammaticalContext: ['he', 'wants', 'needs', 'has', 'lost', 'found'], canFollow: ['wants', 'needs', 'has', 'lost', 'found', 'help', 'with'], subjectRequired: 'he' },
+  { word: 'her', priority: 275, context: 'Possessive pronoun', grammaticalContext: ['she', 'wants', 'needs', 'has', 'lost', 'found'], canFollow: ['wants', 'needs', 'has', 'lost', 'found', 'help', 'with'], subjectRequired: 'she' },
+  { word: 'our', priority: 270, context: 'Possessive pronoun', grammaticalContext: ['we', 'want', 'need', 'have', 'lost', 'found'], canFollow: ['we', 'want', 'need', 'have', 'lost', 'found'], subjectRequired: 'we' },
+  { word: 'their', priority: 270, context: 'Possessive pronoun', grammaticalContext: ['they', 'want', 'need', 'have', 'lost', 'found'], canFollow: ['they', 'want', 'need', 'have', 'lost', 'found'], subjectRequired: 'they' },
 ];
 
 // Enhanced sentence templates with pronoun variations and connecting words (Australian English)
@@ -679,12 +681,22 @@ export function analyzeSentenceStructure(words: string[]): {
   hasObject: boolean;
   tense: 'past' | 'present' | 'future' | 'unknown';
   suggestedNextType: 'verb' | 'noun' | 'adjective' | 'adverb' | 'preposition' | 'unknown';
+  subject?: string;
 } {
   const lowerWords = words.map(w => w.toLowerCase());
   
   // Detect subject (I, you, he, she, it, we, they, mum, dad, my sister, my brother, or nouns)
   const subjects = ['i', 'you', 'he', 'she', 'it', 'we', 'they', 'this', 'that', 'mum', 'dad', 'my', 'the', 'a'];
   const hasSubject = lowerWords.some(w => subjects.includes(w));
+  
+  // Find the actual subject for possessive pronoun suggestions
+  let subject: string | undefined;
+  for (const word of lowerWords) {
+    if (['i', 'you', 'he', 'she', 'we', 'they'].includes(word)) {
+      subject = word;
+      break;
+    }
+  }
   
   // Detect verb (simple heuristic)
   const commonVerbs = ['am', 'is', 'are', 'was', 'were', 'be', 'been', 'have', 'has', 'had', 
@@ -712,13 +724,14 @@ export function analyzeSentenceStructure(words: string[]): {
     suggestedNextType = 'preposition'; // Might need a preposition or adjective
   }
   
-  return { hasSubject, hasVerb, hasObject, tense, suggestedNextType };
+  return { hasSubject, hasVerb, hasObject, tense, suggestedNextType, subject };
 }
 
 /**
  * Score and rank sentence suggestions
  * ULTRA-ENHANCED: Now considers priority scores, grammatical context, and sentence structure
  * CRITICAL FIX: "am" after "I" gets ULTRA-HIGH score boost
+ * CRITICAL FIX V2: Even smarter scoring based on sentence subject
  */
 export function scoreSuggestions(
   suggestions: { text: string; type: string; confidence: number }[],
@@ -729,6 +742,10 @@ export function scoreSuggestions(
     let score = suggestion.confidence;
     const suggestionLower = suggestion.text.toLowerCase();
     const lastWord = currentWords.length > 0 ? currentWords[currentWords.length - 1].toLowerCase() : '';
+    
+    // Analyze sentence structure to get subject
+    const structure = analyzeSentenceStructure(currentWords);
+    const sentenceSubject = structure.subject;
     
     // ULTRA-HIGH BOOST: Check if this is a prioritized initial word (for sentence starts)
     if (currentWords.length === 0) {
@@ -748,34 +765,54 @@ export function scoreSuggestions(
       // Base boost for connecting words
       score += connectingWord.priority * 0.6; // SIGNIFICANTLY increased boost
       
-      // ADDITIONAL CONTEXTUAL BOOST: Check if the connecting word fits grammatically
-      if (connectingWord.grammaticalContext && connectingWord.grammaticalContext.length > 0) {
-        const hasGrammaticalContext = connectingWord.grammaticalContext.some(ctx => 
-          currentWords.some(word => word.toLowerCase() === ctx.toLowerCase())
-        );
-        if (hasGrammaticalContext) {
-          score += connectingWord.priority * 0.4; // EXTRA boost for grammatically appropriate context
-        }
+      // CRITICAL FIX V2: SMART contextual boost based on mustFollow and canFollow
+      if (connectingWord.mustFollow && connectingWord.mustFollow.includes(lastWord)) {
+        score += connectingWord.priority * 0.8; // ULTRA-MASSIVE boost for must-follow words
+      } else if (connectingWord.canFollow && connectingWord.canFollow.includes(lastWord)) {
+        score += connectingWord.priority * 0.4; // EXTRA boost for can-follow words
+      }
+      
+      // CRITICAL FIX V2: SMART subject-based boost for possessive pronouns
+      if (connectingWord.subjectRequired && sentenceSubject === connectingWord.subjectRequired) {
+        score += connectingWord.priority * 0.6; // MASSIVE boost when subject matches
       }
       
       // CRITICAL FIX: ULTRA-MASSIVE BOOST for "am" after "I"
       if (suggestionLower === 'am' && lastWord === 'i') {
-        score += 300; // ULTRA-MASSIVE boost - this is VITAL!
+        score += 500; // ULTRA-MASSIVE boost - this is VITAL!
       } else if (suggestionLower === 'is' && ['he', 'she', 'it', 'that', 'this'].includes(lastWord)) {
-        score += 150; // MASSIVE boost
+        score += 250; // MASSIVE boost
       } else if (suggestionLower === 'are' && ['you', 'we', 'they'].includes(lastWord)) {
-        score += 150; // MASSIVE boost
+        score += 250; // MASSIVE boost
       }
       
       // SPECIAL BOOST: "the" and "a" after verbs
       if ((suggestionLower === 'the' || suggestionLower === 'a') && 
-          ['want', 'need', 'have', 'see', 'like', 'love', 'in', 'on', 'at', 'with'].includes(lastWord)) {
-        score += 100; // Very high boost
+          ['want', 'need', 'have', 'see', 'like', 'love', 'in', 'on', 'at', 'with', 'help'].includes(lastWord)) {
+        score += 150; // Very high boost
       }
       
       // SPECIAL BOOST: "to" after "want", "need", "like", "love", "go"
       if (suggestionLower === 'to' && ['want', 'need', 'like', 'love', 'go', 'going', 'have'].includes(lastWord)) {
-        score += 100; // Very high boost
+        score += 150; // Very high boost
+      }
+      
+      // CRITICAL FIX V2: SMART boost for possessive pronouns based on sentence subject
+      const possessiveMap: { [key: string]: string } = {
+        'i': 'my',
+        'you': 'your',
+        'he': 'his',
+        'she': 'her',
+        'we': 'our',
+        'they': 'their'
+      };
+      
+      if (sentenceSubject && possessiveMap[sentenceSubject] === suggestionLower) {
+        // Check if we're in a context where possessive makes sense
+        const possessiveContexts = ['wants', 'needs', 'likes', 'has', 'lost', 'found', 'help', 'with'];
+        if (currentWords.some(w => possessiveContexts.includes(w.toLowerCase()))) {
+          score += 200; // ULTRA-HIGH boost for contextually appropriate possessive
+        }
       }
     }
     
@@ -784,19 +821,19 @@ export function scoreSuggestions(
     score += userFreq * 0.15;
     
     // ENHANCED: Boost score based on sentence structure and grammatical completeness
-    const structure = analyzeSentenceStructure([...currentWords, suggestion.text]);
+    const suggestionStructure = analyzeSentenceStructure([...currentWords, suggestion.text]);
     
     // Boost for grammatically complete suggestions
-    if (structure.hasSubject && structure.hasVerb) {
+    if (suggestionStructure.hasSubject && suggestionStructure.hasVerb) {
       score += 0.3;
     }
     
     // Boost for suggestions that complete missing grammatical elements
     const currentStructure = analyzeSentenceStructure(currentWords);
-    if (!currentStructure.hasVerb && structure.hasVerb) {
+    if (!currentStructure.hasVerb && suggestionStructure.hasVerb) {
       score += 0.5; // High boost for adding a verb
     }
-    if (!currentStructure.hasSubject && structure.hasSubject) {
+    if (!currentStructure.hasSubject && suggestionStructure.hasSubject) {
       score += 0.4; // High boost for adding a subject
     }
     
@@ -936,6 +973,8 @@ export function getCategoryRelevantWords(
   // Analyze current sentence context
   const lastWord = currentWords[currentWords.length - 1]?.toLowerCase();
   const sentenceContext = currentWords.join(' ').toLowerCase();
+  const structure = analyzeSentenceStructure(currentWords);
+  const sentenceSubject = structure.subject;
   
   // Context-aware filtering based on sentence structure
   const contextualMatches: { word: string; score: number }[] = [];
@@ -959,6 +998,24 @@ export function getCategoryRelevantWords(
           sentenceContext.includes('we want') || sentenceContext.includes('they want')) {
         if (['eat', 'drink', 'play', 'sleep', 'go', 'read', 'watch', 'water'].includes(lowerWord)) {
           score += 15; // Higher boost for contextually relevant words
+        }
+      }
+      
+      // CRITICAL FIX V2: SMART boost for possessive pronouns based on sentence subject
+      const possessiveMap: { [key: string]: string } = {
+        'i': 'my',
+        'you': 'your',
+        'he': 'his',
+        'she': 'her',
+        'we': 'our',
+        'they': 'their'
+      };
+      
+      if (sentenceSubject && possessiveMap[sentenceSubject] === lowerWord) {
+        // Check if we're in a context where possessive makes sense
+        const possessiveContexts = ['wants', 'needs', 'likes', 'has', 'lost', 'found', 'help', 'with'];
+        if (currentWords.some(w => possessiveContexts.includes(w.toLowerCase()))) {
+          score += 25; // ULTRA-HIGH boost for contextually appropriate possessive
         }
       }
       
@@ -1065,9 +1122,6 @@ export function getCategoryRelevantWords(
         }
       }
       
-      // REMOVED: Don't boost generic connecting words in category suggestions
-      // They should only appear when grammatically appropriate via getContextualConnectingWords
-      
       // Boost words that follow common patterns
       if (lastWord === 'to' && ['go', 'play', 'eat', 'drink', 'sleep', 'read', 'the'].includes(lowerWord)) {
         score += 6;
@@ -1161,7 +1215,7 @@ export function getPrioritizedConnectingWords(maxWords: number = 10): string[] {
  * Get contextually appropriate connecting words based on current sentence
  * This ensures "am", "the", "is", "are" etc. are suggested at the right time
  * CRITICAL FIX: "am" after "I" gets ULTRA-HIGH priority
- * CRITICAL FIX: Possessive pronouns after "help with", "wants", "needs", etc.
+ * CRITICAL FIX V2: Even smarter contextual detection based on sentence subject
  */
 export function getContextualConnectingWords(currentWords: string[], maxWords: number = 5): string[] {
   const lastWord = currentWords.length > 0 ? currentWords[currentWords.length - 1].toLowerCase() : '';
@@ -1170,23 +1224,27 @@ export function getContextualConnectingWords(currentWords: string[], maxWords: n
   const lastThreeWords = currentWords.length >= 3 ? 
     [currentWords[currentWords.length - 3].toLowerCase(), currentWords[currentWords.length - 2].toLowerCase(), lastWord].join(' ') : '';
   
+  // Analyze sentence structure to get subject
+  const structure = analyzeSentenceStructure(currentWords);
+  const sentenceSubject = structure.subject;
+  
   const contextualWords: { word: string; priority: number }[] = [];
   
   // CRITICAL FIX: Check for "help with" pattern - suggest possessive pronouns
-  if (lastTwoWords === 'help with' || lastTwoWords === 'with') {
+  if (lastTwoWords === 'help with' || lastWord === 'with') {
     // Determine which possessive pronoun based on subject
     const sentence = currentWords.join(' ').toLowerCase();
-    if (sentence.includes('he ')) {
+    if (sentence.includes('he ') || sentenceSubject === 'he') {
       contextualWords.push({ word: 'his', priority: 500 }); // ULTRA-HIGH priority
-    } else if (sentence.includes('she ')) {
+    } else if (sentence.includes('she ') || sentenceSubject === 'she') {
       contextualWords.push({ word: 'her', priority: 500 }); // ULTRA-HIGH priority
-    } else if (sentence.includes('i ')) {
+    } else if (sentence.includes('i ') || sentenceSubject === 'i') {
       contextualWords.push({ word: 'my', priority: 500 }); // ULTRA-HIGH priority
-    } else if (sentence.includes('you ')) {
+    } else if (sentence.includes('you ') || sentenceSubject === 'you') {
       contextualWords.push({ word: 'your', priority: 500 }); // ULTRA-HIGH priority
-    } else if (sentence.includes('we ')) {
+    } else if (sentence.includes('we ') || sentenceSubject === 'we') {
       contextualWords.push({ word: 'our', priority: 500 }); // ULTRA-HIGH priority
-    } else if (sentence.includes('they ')) {
+    } else if (sentence.includes('they ') || sentenceSubject === 'they') {
       contextualWords.push({ word: 'their', priority: 500 }); // ULTRA-HIGH priority
     }
   }
@@ -1195,17 +1253,17 @@ export function getContextualConnectingWords(currentWords: string[], maxWords: n
   const verbsBeforePossessive = ['wants', 'needs', 'likes', 'has', 'lost', 'found', 'brought', 'forgot'];
   if (verbsBeforePossessive.includes(lastWord)) {
     const sentence = currentWords.join(' ').toLowerCase();
-    if (sentence.includes('he ')) {
+    if (sentence.includes('he ') || sentenceSubject === 'he') {
       contextualWords.push({ word: 'his', priority: 400 });
-    } else if (sentence.includes('she ')) {
+    } else if (sentence.includes('she ') || sentenceSubject === 'she') {
       contextualWords.push({ word: 'her', priority: 400 });
-    } else if (sentence.includes('i ')) {
+    } else if (sentence.includes('i ') || sentenceSubject === 'i') {
       contextualWords.push({ word: 'my', priority: 400 });
-    } else if (sentence.includes('you ')) {
+    } else if (sentence.includes('you ') || sentenceSubject === 'you') {
       contextualWords.push({ word: 'your', priority: 400 });
-    } else if (sentence.includes('we ')) {
+    } else if (sentence.includes('we ') || sentenceSubject === 'we') {
       contextualWords.push({ word: 'our', priority: 400 });
-    } else if (sentence.includes('they ')) {
+    } else if (sentence.includes('they ') || sentenceSubject === 'they') {
       contextualWords.push({ word: 'their', priority: 400 });
     }
   }
@@ -1214,28 +1272,30 @@ export function getContextualConnectingWords(currentWords: string[], maxWords: n
   prioritizedConnectingWords.forEach(cw => {
     let priority = cw.priority;
     
-    // Boost priority if grammatical context matches
-    if (cw.grammaticalContext && cw.grammaticalContext.length > 0) {
-      const hasContext = cw.grammaticalContext.some(ctx => 
-        currentWords.some(word => word.toLowerCase() === ctx.toLowerCase())
-      );
-      if (hasContext) {
-        priority += 50; // Significant boost for grammatical match
-      }
+    // CRITICAL FIX V2: SMART boost based on mustFollow and canFollow
+    if (cw.mustFollow && cw.mustFollow.includes(lastWord)) {
+      priority += 200; // ULTRA-MASSIVE boost for must-follow words
+    } else if (cw.canFollow && cw.canFollow.includes(lastWord)) {
+      priority += 100; // MASSIVE boost for can-follow words
+    }
+    
+    // CRITICAL FIX V2: SMART subject-based boost for possessive pronouns
+    if (cw.subjectRequired && sentenceSubject === cw.subjectRequired) {
+      priority += 150; // MASSIVE boost when subject matches
     }
     
     // CRITICAL FIX: ULTRA-MASSIVE boost for "am" after "I"
     if (cw.word === 'am' && lastWord === 'i') {
-      priority += 300; // ULTRA-MASSIVE boost - this is VITAL!
+      priority += 500; // ULTRA-MASSIVE boost - this is VITAL!
     } else if (cw.word === 'is' && ['he', 'she', 'it', 'that', 'this'].includes(lastWord)) {
-      priority += 150;
+      priority += 250;
     } else if (cw.word === 'are' && ['you', 'we', 'they'].includes(lastWord)) {
-      priority += 150;
+      priority += 250;
     } else if ((cw.word === 'the' || cw.word === 'a') && 
-               ['want', 'need', 'have', 'see', 'like', 'love'].includes(lastWord)) {
-      priority += 100;
+               ['want', 'need', 'have', 'see', 'like', 'love', 'help'].includes(lastWord)) {
+      priority += 150;
     } else if (cw.word === 'to' && ['want', 'need', 'like', 'love', 'go', 'have'].includes(lastWord)) {
-      priority += 100;
+      priority += 150;
     }
     
     contextualWords.push({ word: cw.word, priority });
