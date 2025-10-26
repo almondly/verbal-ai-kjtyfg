@@ -38,7 +38,7 @@ const SIMPLIFIED_VOICES: TTSVoice[] = [
 ];
 
 // FIXED: Voice characteristics with CORRECT pitch assignments
-// Girl = HIGH pitch (female), Boy = LOW pitch (male)
+// Girl = HIGH pitch (female), Boy = VERY LOW pitch (male), Neutral = balanced
 const VOICE_CHARACTERISTICS = {
   girl: {
     pitchMultiplier: 1.8,    // VERY HIGH pitch for female voice
@@ -47,13 +47,13 @@ const VOICE_CHARACTERISTICS = {
     preferredVoiceNames: ['Samantha', 'Karen', 'Victoria', 'Allison', 'Susan', 'Zoe', 'Fiona', 'female', 'woman']
   },
   boy: {
-    pitchMultiplier: 0.5,    // VERY LOW pitch for male voice
-    rateMultiplier: 0.85,    // Slower
+    pitchMultiplier: 0.3,    // ULTRA LOW pitch for deep male voice (reduced from 0.5)
+    rateMultiplier: 0.8,     // Slower and deeper
     description: 'Deep, low-pitched male voice',
     preferredVoiceNames: ['Alex', 'Daniel', 'Fred', 'Aaron', 'Arthur', 'Tom', 'Oliver', 'male', 'man']
   },
   neutral: {
-    pitchMultiplier: 1.0,    // Standard pitch
+    pitchMultiplier: 0.95,   // Slightly lower than standard for more natural sound
     rateMultiplier: 1.0,     // Standard rate
     description: 'Clear, balanced neutral voice',
     preferredVoiceNames: ['Siri', 'Default', 'System', 'en-US-language']
@@ -238,7 +238,7 @@ export function useTTSSettings() {
       };
 
       // Clamp values to safe ranges
-      options.pitch = Math.max(0.5, Math.min(2.0, options.pitch!));
+      options.pitch = Math.max(0.3, Math.min(2.0, options.pitch!));
       options.rate = Math.max(0.5, Math.min(2.0, options.rate!));
 
       // Map our simplified voice types to actual system voices
@@ -283,7 +283,7 @@ export function useTTSSettings() {
       };
 
       // Clamp values to safe ranges
-      options.pitch = Math.max(0.5, Math.min(2.0, options.pitch!));
+      options.pitch = Math.max(0.3, Math.min(2.0, options.pitch!));
       options.rate = Math.max(0.5, Math.min(2.0, options.rate!));
 
       // Map our simplified voice types to actual system voices

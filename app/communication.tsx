@@ -34,11 +34,11 @@ export default function CommunicationScreen() {
     })();
   }, []);
 
-  // Idle detection - navigate to home after 15 seconds
+  // Idle detection - navigate to home after 60 seconds (increased from 15)
   const { resetTimer } = useIdleDetection({
-    timeout: 15000, // 15 seconds
+    timeout: 60000, // 60 seconds
     onIdle: () => {
-      console.log('User idle for 15 seconds, navigating to home screen');
+      console.log('User idle for 60 seconds, navigating to home screen');
       router.push('/main-menu');
     },
   });
