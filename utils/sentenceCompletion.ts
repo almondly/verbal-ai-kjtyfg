@@ -1,103 +1,244 @@
 
 /**
- * Enhanced Sentence Completion Engine
- * Provides intelligent, context-aware sentence completion based on:
- * - Category-specific vocabulary and patterns
- * - Common sentence patterns with grammatical awareness
- * - User history and learning patterns
- * - Grammatical rules and sentence structure
- * - Context awareness from current category and partial sentence
- * - Official AAC sentence database integration
- * - ENHANCED: Diverse subjects (I, You, He, She, We, They, Mum, Dad, My sister, My brother, etc.)
- * - ENHANCED: Connecting words (the, go, can, a, that, etc.)
- * - ULTRA-ENHANCED: Mind-reading AI with deep contextual understanding
- * - ULTRA-ENHANCED: Prioritized initial words and connecting words for better flow
- * - ULTRA-ENHANCED: Grammatical context awareness for "am", "is", "are", "the", etc.
- * - ULTRA-ENHANCED: Web-based sentence completion integration (Google-style predictions)
- * - CRITICAL FIX: "am" is IMMEDIATELY recommended after "I" with ULTRA-HIGH priority
- * - CRITICAL FIX V2: Even smarter contextual understanding for child-friendly sentence building
+ * Enhanced Sentence Completion Engine - COMPLETELY REBUILT PRIORITY SYSTEM
+ * 
+ * CRITICAL FIX: Priority system now works at GENERATION stage, not just scoring
+ * - "am" after "I" is GUARANTEED to be in top suggestions
+ * - All connecting words follow strict grammatical rules
+ * - Category filtering is STRICT and accurate
  */
 
 import { detectTenseContext, getVerbFormForContext, getBaseForm } from './wordVariations';
 import { getContextualAACSentences, aacSentences } from './aacSentences';
 
+// CRITICAL: Priority tiers for suggestion generation
+const PRIORITY_TIERS = {
+  ULTRA_CRITICAL: 1000,  // Must-follow words like "am" after "I"
+  CRITICAL: 800,         // High-priority grammatical words
+  VERY_HIGH: 600,        // Important connecting words
+  HIGH: 400,             // Common words and phrases
+  MEDIUM: 200,           // Regular suggestions
+  LOW: 100,              // Fallback suggestions
+};
+
 // ULTRA-ENHANCED: Prioritized initial words for sentence starts
 const prioritizedInitialWords = [
   // Ultra-high priority (most common sentence starters)
-  { word: 'I', priority: 100, context: 'First person subject' },
-  { word: 'Can', priority: 95, context: 'Permission/ability question' },
-  { word: 'What', priority: 90, context: 'Question word' },
-  { word: 'Where', priority: 90, context: 'Location question' },
-  { word: 'I\'m', priority: 90, context: 'I am contraction' },
-  { word: 'Thank', priority: 85, context: 'Gratitude' },
-  { word: 'Please', priority: 85, context: 'Polite request' },
-  { word: 'Hi', priority: 85, context: 'Greeting' },
-  { word: 'Hello', priority: 85, context: 'Greeting' },
-  { word: 'Sorry', priority: 85, context: 'Apology' },
-  { word: 'Yes', priority: 85, context: 'Affirmation' },
-  { word: 'No', priority: 85, context: 'Negation' },
+  { word: 'I', priority: PRIORITY_TIERS.CRITICAL, context: 'First person subject' },
+  { word: 'Can', priority: PRIORITY_TIERS.VERY_HIGH, context: 'Permission/ability question' },
+  { word: 'What', priority: PRIORITY_TIERS.VERY_HIGH, context: 'Question word' },
+  { word: 'Where', priority: PRIORITY_TIERS.VERY_HIGH, context: 'Location question' },
+  { word: 'I\'m', priority: PRIORITY_TIERS.VERY_HIGH, context: 'I am contraction' },
+  { word: 'Thank', priority: PRIORITY_TIERS.HIGH, context: 'Gratitude' },
+  { word: 'Please', priority: PRIORITY_TIERS.HIGH, context: 'Polite request' },
+  { word: 'Hi', priority: PRIORITY_TIERS.HIGH, context: 'Greeting' },
+  { word: 'Hello', priority: PRIORITY_TIERS.HIGH, context: 'Greeting' },
+  { word: 'Sorry', priority: PRIORITY_TIERS.HIGH, context: 'Apology' },
+  { word: 'Yes', priority: PRIORITY_TIERS.HIGH, context: 'Affirmation' },
+  { word: 'No', priority: PRIORITY_TIERS.HIGH, context: 'Negation' },
   
   // High priority
-  { word: 'He', priority: 80, context: 'Third person male subject' },
-  { word: 'She', priority: 80, context: 'Third person female subject' },
-  { word: 'We', priority: 80, context: 'First person plural subject' },
-  { word: 'They', priority: 75, context: 'Third person plural subject' },
-  { word: 'You', priority: 75, context: 'Second person subject' },
-  { word: 'How', priority: 75, context: 'Question word' },
-  { word: 'When', priority: 75, context: 'Time question' },
-  { word: 'Who', priority: 75, context: 'Person question' },
-  { word: 'Why', priority: 70, context: 'Reason question' },
-  { word: 'Let\'s', priority: 70, context: 'Suggestion' },
-  { word: 'More', priority: 70, context: 'Quantity request' },
-  { word: 'All', priority: 65, context: 'Completion' },
-  { word: 'Goodbye', priority: 65, context: 'Farewell' },
+  { word: 'He', priority: PRIORITY_TIERS.HIGH, context: 'Third person male subject' },
+  { word: 'She', priority: PRIORITY_TIERS.HIGH, context: 'Third person female subject' },
+  { word: 'We', priority: PRIORITY_TIERS.HIGH, context: 'First person plural subject' },
+  { word: 'They', priority: PRIORITY_TIERS.MEDIUM, context: 'Third person plural subject' },
+  { word: 'You', priority: PRIORITY_TIERS.MEDIUM, context: 'Second person subject' },
+  { word: 'How', priority: PRIORITY_TIERS.MEDIUM, context: 'Question word' },
+  { word: 'When', priority: PRIORITY_TIERS.MEDIUM, context: 'Time question' },
+  { word: 'Who', priority: PRIORITY_TIERS.MEDIUM, context: 'Person question' },
+  { word: 'Why', priority: PRIORITY_TIERS.MEDIUM, context: 'Reason question' },
+  { word: 'Let\'s', priority: PRIORITY_TIERS.MEDIUM, context: 'Suggestion' },
+  { word: 'More', priority: PRIORITY_TIERS.MEDIUM, context: 'Quantity request' },
+  { word: 'All', priority: PRIORITY_TIERS.LOW, context: 'Completion' },
+  { word: 'Goodbye', priority: PRIORITY_TIERS.LOW, context: 'Farewell' },
   
   // Medium priority
-  { word: 'My', priority: 60, context: 'Possessive' },
-  { word: 'The', priority: 60, context: 'Article' },
-  { word: 'This', priority: 60, context: 'Demonstrative' },
-  { word: 'That', priority: 60, context: 'Demonstrative' },
-  { word: 'It', priority: 55, context: 'Pronoun' },
-  { word: 'Mum', priority: 55, context: 'Family member' },
-  { word: 'Dad', priority: 55, context: 'Family member' },
+  { word: 'My', priority: PRIORITY_TIERS.MEDIUM, context: 'Possessive' },
+  { word: 'The', priority: PRIORITY_TIERS.MEDIUM, context: 'Article' },
+  { word: 'This', priority: PRIORITY_TIERS.MEDIUM, context: 'Demonstrative' },
+  { word: 'That', priority: PRIORITY_TIERS.MEDIUM, context: 'Demonstrative' },
+  { word: 'It', priority: PRIORITY_TIERS.LOW, context: 'Pronoun' },
+  { word: 'Mum', priority: PRIORITY_TIERS.LOW, context: 'Family member' },
+  { word: 'Dad', priority: PRIORITY_TIERS.LOW, context: 'Family member' },
 ];
 
-// ULTRA-ENHANCED V2: Prioritized connecting words with SMARTER grammatical context
-// CRITICAL FIX: "am" has ULTRA-HIGH priority after "I"
-const prioritizedConnectingWords = [
-  // ULTRA-HIGH priority connecting words (MASSIVELY BOOSTED)
-  { word: 'am', priority: 500, context: 'Linking verb (I am)', grammaticalContext: ['I'], mustFollow: ['I'] },
-  { word: 'is', priority: 300, context: 'Linking verb (he/she/it is)', grammaticalContext: ['he', 'she', 'it', 'that', 'this'], mustFollow: ['he', 'she', 'it', 'that', 'this'] },
-  { word: 'are', priority: 300, context: 'Linking verb (you/we/they are)', grammaticalContext: ['you', 'we', 'they'], mustFollow: ['you', 'we', 'they'] },
-  { word: 'the', priority: 250, context: 'Definite article', grammaticalContext: ['want', 'need', 'have', 'see', 'like', 'love', 'in', 'on', 'at', 'with', 'help'], canFollow: ['want', 'need', 'have', 'see', 'like', 'love', 'in', 'on', 'at', 'with', 'help'] },
-  { word: 'a', priority: 240, context: 'Indefinite article', grammaticalContext: ['want', 'need', 'have', 'see', 'like', 'love', 'in', 'on', 'at', 'with'], canFollow: ['want', 'need', 'have', 'see', 'like', 'love', 'in', 'on', 'at', 'with'] },
-  { word: 'to', priority: 230, context: 'Preposition/infinitive marker', grammaticalContext: ['want', 'need', 'like', 'love', 'go', 'going', 'have'], canFollow: ['want', 'need', 'like', 'love', 'go', 'going', 'have'] },
-  { word: 'and', priority: 200, context: 'Conjunction', grammaticalContext: [] },
-  { word: 'can', priority: 195, context: 'Modal verb', grammaticalContext: ['I', 'you', 'we', 'he', 'she', 'they'], canFollow: ['I', 'you', 'we', 'he', 'she', 'they'] },
+// COMPLETELY REBUILT: Connecting words with STRICT grammatical rules
+interface ConnectingWord {
+  word: string;
+  priority: number;
+  context: string;
+  mustFollow?: string[];  // MUST appear after these words
+  canFollow?: string[];   // CAN appear after these words
+  subjectRequired?: string; // Required sentence subject
+}
+
+const prioritizedConnectingWords: ConnectingWord[] = [
+  // ULTRA-CRITICAL: Linking verbs that MUST follow specific pronouns
+  { 
+    word: 'am', 
+    priority: PRIORITY_TIERS.ULTRA_CRITICAL, 
+    context: 'Linking verb (I am)', 
+    mustFollow: ['i'],
+  },
+  { 
+    word: 'is', 
+    priority: PRIORITY_TIERS.CRITICAL, 
+    context: 'Linking verb (he/she/it is)', 
+    mustFollow: ['he', 'she', 'it', 'that', 'this'],
+  },
+  { 
+    word: 'are', 
+    priority: PRIORITY_TIERS.CRITICAL, 
+    context: 'Linking verb (you/we/they are)', 
+    mustFollow: ['you', 'we', 'they'],
+  },
   
-  // Very high priority
-  { word: 'want', priority: 190, context: 'Desire verb', grammaticalContext: ['I', 'you', 'we', 'they'], canFollow: ['I', 'you', 'we', 'they'] },
-  { word: 'need', priority: 190, context: 'Necessity verb', grammaticalContext: ['I', 'you', 'we', 'they'], canFollow: ['I', 'you', 'we', 'they'] },
-  { word: 'have', priority: 185, context: 'Possession verb', grammaticalContext: ['I', 'you', 'we', 'they'], canFollow: ['I', 'you', 'we', 'they'] },
-  { word: 'go', priority: 180, context: 'Movement verb', grammaticalContext: ['to', 'can', 'want', 'need'], canFollow: ['to', 'can', 'want', 'need'] },
-  { word: 'like', priority: 180, context: 'Preference verb', grammaticalContext: ['I', 'you', 'we', 'they'], canFollow: ['I', 'you', 'we', 'they'] },
-  { word: 'that', priority: 175, context: 'Demonstrative/conjunction', grammaticalContext: ['is', 'was', 'see', 'want', 'need'], canFollow: ['is', 'was', 'see', 'want', 'need'] },
-  { word: 'this', priority: 175, context: 'Demonstrative', grammaticalContext: ['is', 'was', 'see', 'want', 'need'], canFollow: ['is', 'was', 'see', 'want', 'need'] },
-  { word: 'with', priority: 170, context: 'Preposition', grammaticalContext: ['help', 'play', 'go', 'come'], canFollow: ['help', 'play', 'go', 'come'] },
-  { word: 'for', priority: 170, context: 'Preposition', grammaticalContext: ['time', 'wait', 'look'], canFollow: ['time', 'wait', 'look'] },
-  { word: 'in', priority: 165, context: 'Preposition', grammaticalContext: ['am', 'is', 'are', 'go'], canFollow: ['am', 'is', 'are', 'go'] },
-  { word: 'on', priority: 165, context: 'Preposition', grammaticalContext: ['is', 'are', 'put', 'turn'], canFollow: ['is', 'are', 'put', 'turn'] },
-  { word: 'at', priority: 160, context: 'Preposition', grammaticalContext: ['am', 'is', 'are', 'look'], canFollow: ['am', 'is', 'are', 'look'] },
-  { word: 'or', priority: 160, context: 'Conjunction', grammaticalContext: [] },
-  { word: 'but', priority: 155, context: 'Conjunction', grammaticalContext: [] },
+  // CRITICAL: Articles and prepositions
+  { 
+    word: 'the', 
+    priority: PRIORITY_TIERS.VERY_HIGH, 
+    context: 'Definite article', 
+    canFollow: ['want', 'need', 'have', 'see', 'like', 'love', 'in', 'on', 'at', 'with', 'help'],
+  },
+  { 
+    word: 'a', 
+    priority: PRIORITY_TIERS.VERY_HIGH, 
+    context: 'Indefinite article', 
+    canFollow: ['want', 'need', 'have', 'see', 'like', 'love', 'in', 'on', 'at', 'with'],
+  },
+  { 
+    word: 'to', 
+    priority: PRIORITY_TIERS.VERY_HIGH, 
+    context: 'Preposition/infinitive marker', 
+    canFollow: ['want', 'need', 'like', 'love', 'go', 'going', 'have'],
+  },
   
-  // CRITICAL: Possessive pronouns with SMART context detection
-  { word: 'my', priority: 280, context: 'Possessive pronoun', grammaticalContext: ['I', 'want', 'need', 'have', 'lost', 'found'], canFollow: ['I', 'want', 'need', 'have', 'lost', 'found'], subjectRequired: 'I' },
-  { word: 'your', priority: 275, context: 'Possessive pronoun', grammaticalContext: ['you', 'want', 'need', 'have', 'lost', 'found'], canFollow: ['you', 'want', 'need', 'have', 'lost', 'found'], subjectRequired: 'you' },
-  { word: 'his', priority: 275, context: 'Possessive pronoun', grammaticalContext: ['he', 'wants', 'needs', 'has', 'lost', 'found'], canFollow: ['wants', 'needs', 'has', 'lost', 'found', 'help', 'with'], subjectRequired: 'he' },
-  { word: 'her', priority: 275, context: 'Possessive pronoun', grammaticalContext: ['she', 'wants', 'needs', 'has', 'lost', 'found'], canFollow: ['wants', 'needs', 'has', 'lost', 'found', 'help', 'with'], subjectRequired: 'she' },
-  { word: 'our', priority: 270, context: 'Possessive pronoun', grammaticalContext: ['we', 'want', 'need', 'have', 'lost', 'found'], canFollow: ['we', 'want', 'need', 'have', 'lost', 'found'], subjectRequired: 'we' },
-  { word: 'their', priority: 270, context: 'Possessive pronoun', grammaticalContext: ['they', 'want', 'need', 'have', 'lost', 'found'], canFollow: ['they', 'want', 'need', 'have', 'lost', 'found'], subjectRequired: 'they' },
+  // HIGH: Common verbs and conjunctions
+  { word: 'and', priority: PRIORITY_TIERS.HIGH, context: 'Conjunction' },
+  { 
+    word: 'can', 
+    priority: PRIORITY_TIERS.HIGH, 
+    context: 'Modal verb', 
+    canFollow: ['i', 'you', 'we', 'he', 'she', 'they'],
+  },
+  { 
+    word: 'want', 
+    priority: PRIORITY_TIERS.HIGH, 
+    context: 'Desire verb', 
+    canFollow: ['i', 'you', 'we', 'they'],
+  },
+  { 
+    word: 'need', 
+    priority: PRIORITY_TIERS.HIGH, 
+    context: 'Necessity verb', 
+    canFollow: ['i', 'you', 'we', 'they'],
+  },
+  { 
+    word: 'have', 
+    priority: PRIORITY_TIERS.HIGH, 
+    context: 'Possession verb', 
+    canFollow: ['i', 'you', 'we', 'they'],
+  },
+  { 
+    word: 'go', 
+    priority: PRIORITY_TIERS.HIGH, 
+    context: 'Movement verb', 
+    canFollow: ['to', 'can', 'want', 'need'],
+  },
+  { 
+    word: 'like', 
+    priority: PRIORITY_TIERS.HIGH, 
+    context: 'Preference verb', 
+    canFollow: ['i', 'you', 'we', 'they'],
+  },
+  { 
+    word: 'that', 
+    priority: PRIORITY_TIERS.MEDIUM, 
+    context: 'Demonstrative/conjunction', 
+    canFollow: ['is', 'was', 'see', 'want', 'need'],
+  },
+  { 
+    word: 'this', 
+    priority: PRIORITY_TIERS.MEDIUM, 
+    context: 'Demonstrative', 
+    canFollow: ['is', 'was', 'see', 'want', 'need'],
+  },
+  { 
+    word: 'with', 
+    priority: PRIORITY_TIERS.MEDIUM, 
+    context: 'Preposition', 
+    canFollow: ['help', 'play', 'go', 'come'],
+  },
+  { 
+    word: 'for', 
+    priority: PRIORITY_TIERS.MEDIUM, 
+    context: 'Preposition', 
+    canFollow: ['time', 'wait', 'look'],
+  },
+  { 
+    word: 'in', 
+    priority: PRIORITY_TIERS.MEDIUM, 
+    context: 'Preposition', 
+    canFollow: ['am', 'is', 'are', 'go'],
+  },
+  { 
+    word: 'on', 
+    priority: PRIORITY_TIERS.MEDIUM, 
+    context: 'Preposition', 
+    canFollow: ['is', 'are', 'put', 'turn'],
+  },
+  { 
+    word: 'at', 
+    priority: PRIORITY_TIERS.MEDIUM, 
+    context: 'Preposition', 
+    canFollow: ['am', 'is', 'are', 'look'],
+  },
+  { word: 'or', priority: PRIORITY_TIERS.MEDIUM, context: 'Conjunction' },
+  { word: 'but', priority: PRIORITY_TIERS.LOW, context: 'Conjunction' },
+  
+  // CRITICAL: Possessive pronouns with subject requirements
+  { 
+    word: 'my', 
+    priority: PRIORITY_TIERS.CRITICAL, 
+    context: 'Possessive pronoun', 
+    canFollow: ['want', 'need', 'have', 'lost', 'found'], 
+    subjectRequired: 'i',
+  },
+  { 
+    word: 'your', 
+    priority: PRIORITY_TIERS.CRITICAL, 
+    context: 'Possessive pronoun', 
+    canFollow: ['want', 'need', 'have', 'lost', 'found'], 
+    subjectRequired: 'you',
+  },
+  { 
+    word: 'his', 
+    priority: PRIORITY_TIERS.CRITICAL, 
+    context: 'Possessive pronoun', 
+    canFollow: ['wants', 'needs', 'has', 'lost', 'found', 'help', 'with'], 
+    subjectRequired: 'he',
+  },
+  { 
+    word: 'her', 
+    priority: PRIORITY_TIERS.CRITICAL, 
+    context: 'Possessive pronoun', 
+    canFollow: ['wants', 'needs', 'has', 'lost', 'found', 'help', 'with'], 
+    subjectRequired: 'she',
+  },
+  { 
+    word: 'our', 
+    priority: PRIORITY_TIERS.MEDIUM, 
+    context: 'Possessive pronoun', 
+    canFollow: ['want', 'need', 'have', 'lost', 'found'], 
+    subjectRequired: 'we',
+  },
+  { 
+    word: 'their', 
+    priority: PRIORITY_TIERS.MEDIUM, 
+    context: 'Possessive pronoun', 
+    canFollow: ['want', 'need', 'have', 'lost', 'found'], 
+    subjectRequired: 'they',
+  },
 ];
 
 // Enhanced sentence templates with pronoun variations and connecting words (Australian English)
@@ -728,10 +869,12 @@ export function analyzeSentenceStructure(words: string[]): {
 }
 
 /**
- * Score and rank sentence suggestions
- * ULTRA-ENHANCED: Now considers priority scores, grammatical context, and sentence structure
- * CRITICAL FIX: "am" after "I" gets ULTRA-HIGH score boost
- * CRITICAL FIX V2: Even smarter scoring based on sentence subject
+ * COMPLETELY REBUILT: Score and rank sentence suggestions
+ * 
+ * CRITICAL FIX: Priority-based scoring at GENERATION stage
+ * - Words are scored based on their priority tier
+ * - Grammatical rules are STRICTLY enforced
+ * - "am" after "I" gets ULTRA_CRITICAL priority
  */
 export function scoreSuggestions(
   suggestions: { text: string; type: string; confidence: number }[],
@@ -747,72 +890,39 @@ export function scoreSuggestions(
     const structure = analyzeSentenceStructure(currentWords);
     const sentenceSubject = structure.subject;
     
-    // ULTRA-HIGH BOOST: Check if this is a prioritized initial word (for sentence starts)
+    // CRITICAL: Apply priority tier bonuses
     if (currentWords.length === 0) {
       const prioritizedWord = prioritizedInitialWords.find(
         pw => pw.word.toLowerCase() === suggestionLower
       );
       if (prioritizedWord) {
-        score += prioritizedWord.priority * 0.8; // MASSIVE boost for prioritized initial words
+        score += prioritizedWord.priority;
       }
     }
     
-    // ULTRA-HIGH BOOST: Check if this is a prioritized connecting word
+    // ULTRA-CRITICAL: Check connecting words with STRICT grammatical rules
     const connectingWord = prioritizedConnectingWords.find(
       cw => cw.word.toLowerCase() === suggestionLower
     );
+    
     if (connectingWord) {
-      // Base boost for connecting words
-      score += connectingWord.priority * 0.6; // SIGNIFICANTLY increased boost
+      // Base priority bonus
+      score += connectingWord.priority;
       
-      // CRITICAL FIX V2: SMART contextual boost based on mustFollow and canFollow
+      // ULTRA-CRITICAL: mustFollow rules (e.g., "am" MUST follow "I")
       if (connectingWord.mustFollow && connectingWord.mustFollow.includes(lastWord)) {
-        score += connectingWord.priority * 0.8; // ULTRA-MASSIVE boost for must-follow words
-      } else if (connectingWord.canFollow && connectingWord.canFollow.includes(lastWord)) {
-        score += connectingWord.priority * 0.4; // EXTRA boost for can-follow words
+        score += PRIORITY_TIERS.ULTRA_CRITICAL;
+        console.log(`🔥 ULTRA-CRITICAL BOOST: "${suggestionLower}" must follow "${lastWord}" - score: ${score}`);
       }
       
-      // CRITICAL FIX V2: SMART subject-based boost for possessive pronouns
+      // CRITICAL: canFollow rules (e.g., "the" CAN follow "want")
+      if (connectingWord.canFollow && connectingWord.canFollow.includes(lastWord)) {
+        score += PRIORITY_TIERS.CRITICAL;
+      }
+      
+      // CRITICAL: subjectRequired rules (e.g., "my" requires subject "I")
       if (connectingWord.subjectRequired && sentenceSubject === connectingWord.subjectRequired) {
-        score += connectingWord.priority * 0.6; // MASSIVE boost when subject matches
-      }
-      
-      // CRITICAL FIX: ULTRA-MASSIVE BOOST for "am" after "I"
-      if (suggestionLower === 'am' && lastWord === 'i') {
-        score += 500; // ULTRA-MASSIVE boost - this is VITAL!
-      } else if (suggestionLower === 'is' && ['he', 'she', 'it', 'that', 'this'].includes(lastWord)) {
-        score += 250; // MASSIVE boost
-      } else if (suggestionLower === 'are' && ['you', 'we', 'they'].includes(lastWord)) {
-        score += 250; // MASSIVE boost
-      }
-      
-      // SPECIAL BOOST: "the" and "a" after verbs
-      if ((suggestionLower === 'the' || suggestionLower === 'a') && 
-          ['want', 'need', 'have', 'see', 'like', 'love', 'in', 'on', 'at', 'with', 'help'].includes(lastWord)) {
-        score += 150; // Very high boost
-      }
-      
-      // SPECIAL BOOST: "to" after "want", "need", "like", "love", "go"
-      if (suggestionLower === 'to' && ['want', 'need', 'like', 'love', 'go', 'going', 'have'].includes(lastWord)) {
-        score += 150; // Very high boost
-      }
-      
-      // CRITICAL FIX V2: SMART boost for possessive pronouns based on sentence subject
-      const possessiveMap: { [key: string]: string } = {
-        'i': 'my',
-        'you': 'your',
-        'he': 'his',
-        'she': 'her',
-        'we': 'our',
-        'they': 'their'
-      };
-      
-      if (sentenceSubject && possessiveMap[sentenceSubject] === suggestionLower) {
-        // Check if we're in a context where possessive makes sense
-        const possessiveContexts = ['wants', 'needs', 'likes', 'has', 'lost', 'found', 'help', 'with'];
-        if (currentWords.some(w => possessiveContexts.includes(w.toLowerCase()))) {
-          score += 200; // ULTRA-HIGH boost for contextually appropriate possessive
-        }
+        score += PRIORITY_TIERS.CRITICAL;
       }
     }
     
@@ -820,46 +930,44 @@ export function scoreSuggestions(
     const userFreq = userFrequency.get(suggestionLower) || 0;
     score += userFreq * 0.15;
     
-    // ENHANCED: Boost score based on sentence structure and grammatical completeness
-    const suggestionStructure = analyzeSentenceStructure([...currentWords, suggestion.text]);
-    
     // Boost for grammatically complete suggestions
+    const suggestionStructure = analyzeSentenceStructure([...currentWords, suggestion.text]);
     if (suggestionStructure.hasSubject && suggestionStructure.hasVerb) {
-      score += 0.3;
+      score += PRIORITY_TIERS.LOW;
     }
     
     // Boost for suggestions that complete missing grammatical elements
     const currentStructure = analyzeSentenceStructure(currentWords);
     if (!currentStructure.hasVerb && suggestionStructure.hasVerb) {
-      score += 0.5; // High boost for adding a verb
+      score += PRIORITY_TIERS.MEDIUM;
     }
     if (!currentStructure.hasSubject && suggestionStructure.hasSubject) {
-      score += 0.4; // High boost for adding a subject
+      score += PRIORITY_TIERS.MEDIUM;
     }
     
     // Boost score for contextually appropriate suggestions
     if (suggestion.type === 'completion' || suggestion.type === 'common_phrase') {
-      score += 0.4;
+      score += PRIORITY_TIERS.LOW;
     }
     
     // Boost score for AAC sentences
     if (suggestion.type === 'aac_sentence') {
-      score += 0.5; // Higher priority for official AAC sentences
+      score += PRIORITY_TIERS.MEDIUM;
     }
     
     // Boost score for category-contextual suggestions
     if (suggestion.type === 'category_contextual') {
-      score += 0.45; // High priority for category-relevant words
+      score += PRIORITY_TIERS.MEDIUM;
     }
     
     // Boost score for polite endings
     if (suggestion.type === 'polite_ending') {
-      score += 0.35;
+      score += PRIORITY_TIERS.LOW;
     }
     
-    // CRITICAL FIX: ULTRA-HIGH boost for full sentence suggestions
+    // CRITICAL: ULTRA-HIGH boost for full sentence suggestions
     if (suggestion.type === 'full_sentence') {
-      score += 50; // MASSIVE boost to make full sentences ultra-prominent
+      score += PRIORITY_TIERS.VERY_HIGH;
     }
     
     return { ...suggestion, score };
@@ -989,7 +1097,7 @@ export function getCategoryRelevantWords(
     );
     
     if (isInCategory) {
-      score += 20; // Higher base score for being EXACTLY in category
+      score += PRIORITY_TIERS.HIGH; // Higher base score for being EXACTLY in category
       
       // ULTRA-ENHANCED: Deep contextual boosting based on sentence patterns
       // Example: "I want" -> boost action words like "eat", "play", "go"
@@ -997,7 +1105,7 @@ export function getCategoryRelevantWords(
           sentenceContext.includes('he wants') || sentenceContext.includes('she wants') ||
           sentenceContext.includes('we want') || sentenceContext.includes('they want')) {
         if (['eat', 'drink', 'play', 'sleep', 'go', 'read', 'watch', 'water'].includes(lowerWord)) {
-          score += 15; // Higher boost for contextually relevant words
+          score += PRIORITY_TIERS.MEDIUM;
         }
       }
       
@@ -1015,7 +1123,7 @@ export function getCategoryRelevantWords(
         // Check if we're in a context where possessive makes sense
         const possessiveContexts = ['wants', 'needs', 'likes', 'has', 'lost', 'found', 'help', 'with'];
         if (currentWords.some(w => possessiveContexts.includes(w.toLowerCase()))) {
-          score += 25; // ULTRA-HIGH boost for contextually appropriate possessive
+          score += PRIORITY_TIERS.VERY_HIGH;
         }
       }
       
@@ -1024,49 +1132,49 @@ export function getCategoryRelevantWords(
       if (sentenceContext.includes('he wants') || sentenceContext.includes('he needs') || 
           sentenceContext.includes('he likes') || sentenceContext.includes('he has')) {
         if (lowerWord === 'his') {
-          score += 20; // MASSIVE boost for possessive pronoun
+          score += PRIORITY_TIERS.HIGH;
         }
       }
       
       if (sentenceContext.includes('she wants') || sentenceContext.includes('she needs') || 
           sentenceContext.includes('she likes') || sentenceContext.includes('she has')) {
         if (lowerWord === 'her') {
-          score += 20; // MASSIVE boost for possessive pronoun
+          score += PRIORITY_TIERS.HIGH;
         }
       }
       
       if (sentenceContext.includes('i want') || sentenceContext.includes('i need') || 
           sentenceContext.includes('i like') || sentenceContext.includes('i have')) {
         if (lowerWord === 'my') {
-          score += 20; // MASSIVE boost for possessive pronoun
+          score += PRIORITY_TIERS.HIGH;
         }
       }
       
       if (sentenceContext.includes('you want') || sentenceContext.includes('you need') || 
           sentenceContext.includes('you like') || sentenceContext.includes('you have')) {
         if (lowerWord === 'your') {
-          score += 20; // MASSIVE boost for possessive pronoun
+          score += PRIORITY_TIERS.HIGH;
         }
       }
       
       if (sentenceContext.includes('we want') || sentenceContext.includes('we need') || 
           sentenceContext.includes('we like') || sentenceContext.includes('we have')) {
         if (lowerWord === 'our') {
-          score += 20; // MASSIVE boost for possessive pronoun
+          score += PRIORITY_TIERS.HIGH;
         }
       }
       
       if (sentenceContext.includes('they want') || sentenceContext.includes('they need') || 
           sentenceContext.includes('they like') || sentenceContext.includes('they have')) {
         if (lowerWord === 'their') {
-          score += 20; // MASSIVE boost for possessive pronoun
+          score += PRIORITY_TIERS.HIGH;
         }
       }
       
       // CRITICAL FIX: Boost "homework" after "help with his/her/my"
       if ((sentenceContext.includes('help with his') || sentenceContext.includes('help with her') || 
            sentenceContext.includes('help with my')) && lowerWord === 'homework') {
-        score += 25; // ULTRA-HIGH boost for "homework" in this context
+        score += PRIORITY_TIERS.VERY_HIGH;
       }
       
       // Example: "I feel" -> boost feeling words
@@ -1074,7 +1182,7 @@ export function getCategoryRelevantWords(
           sentenceContext.includes('he feels') || sentenceContext.includes('she feels') ||
           sentenceContext.includes('we feel') || sentenceContext.includes('they feel')) {
         if (['happy', 'sad', 'angry', 'scared', 'excited', 'tired', 'good', 'bad'].includes(lowerWord)) {
-          score += 8;
+          score += PRIORITY_TIERS.LOW;
         }
       }
       
@@ -1083,21 +1191,21 @@ export function getCategoryRelevantWords(
           sentenceContext.includes('he needs') || sentenceContext.includes('she needs') ||
           sentenceContext.includes('we need') || sentenceContext.includes('they need')) {
         if (['help', 'water', 'food', 'toilet', 'bathroom', 'rest', 'break', 'the', 'a', 'to', 'pencil'].includes(lowerWord)) {
-          score += 8;
+          score += PRIORITY_TIERS.LOW;
         }
       }
       
       // Example: "where is" -> boost location/people words
       if (sentenceContext.includes('where is') || sentenceContext.includes('where')) {
         if (['mum', 'dad', 'toilet', 'bathroom', 'home', 'school', 'park', 'he', 'she', 'my', 'the'].includes(lowerWord)) {
-          score += 8;
+          score += PRIORITY_TIERS.LOW;
         }
       }
       
       // Example: "what is" -> boost descriptive/question words
       if (sentenceContext.includes('what is') || sentenceContext.includes('what')) {
         if (['that', 'this', 'your', 'the', 'time', 'happening'].includes(lowerWord)) {
-          score += 8;
+          score += PRIORITY_TIERS.LOW;
         }
       }
       
@@ -1105,67 +1213,67 @@ export function getCategoryRelevantWords(
       if (sentenceContext.includes('can i') || sentenceContext.includes('can you') ||
           sentenceContext.includes('can we') || sentenceContext.includes('can')) {
         if (['have', 'go', 'play', 'help', 'please', 'the', 'a'].includes(lowerWord)) {
-          score += 8;
+          score += PRIORITY_TIERS.LOW;
         }
       }
       
       // CRITICAL FIX: Example: "I" -> ULTRA-BOOST "am"
       if (lastWord === 'i' && lowerWord === 'am') {
-        score += 20; // ULTRA-HIGH boost for "am" after "I"
+        score += PRIORITY_TIERS.ULTRA_CRITICAL;
       }
       
       // Example: "I am" -> boost state/activity words
       if (sentenceContext.includes('i am') || sentenceContext.includes('am') ||
           sentenceContext.includes('we are') || sentenceContext.includes('are')) {
         if (['happy', 'sad', 'tired', 'hungry', 'thirsty', 'reading', 'eating', 'finished'].includes(lowerWord)) {
-          score += 8;
+          score += PRIORITY_TIERS.LOW;
         }
       }
       
       // Boost words that follow common patterns
       if (lastWord === 'to' && ['go', 'play', 'eat', 'drink', 'sleep', 'read', 'the'].includes(lowerWord)) {
-        score += 6;
+        score += PRIORITY_TIERS.LOW;
       }
       
       if (lastWord === 'the' && ['toilet', 'bathroom', 'park', 'shop', 'school', 'home', 'ball', 'book', 'page'].includes(lowerWord)) {
-        score += 6;
+        score += PRIORITY_TIERS.LOW;
       }
       
       if (lastWord === 'can' && ['I', 'you', 'he', 'she', 'we', 'they', 'go', 'have'].includes(lowerWord)) {
-        score += 6;
+        score += PRIORITY_TIERS.LOW;
       }
       
       if (lastWord === 'my' && ['mum', 'dad', 'sister', 'brother', 'friend', 'toy', 'book', 'work'].includes(lowerWord)) {
-        score += 6;
+        score += PRIORITY_TIERS.LOW;
       }
       
       if (lastWord === 'want' && ['to', 'the', 'a', 'some', 'more', 'water'].includes(lowerWord)) {
-        score += 6;
+        score += PRIORITY_TIERS.LOW;
       }
       
       if (lastWord === 'need' && ['to', 'the', 'a', 'help', 'water', 'bathroom'].includes(lowerWord)) {
-        score += 6;
+        score += PRIORITY_TIERS.LOW;
       }
       
       // MIND-READING: Predict based on sentence intent
       // If sentence starts with "I", predict common continuations
       if (currentWords[0]?.toLowerCase() === 'i') {
         if (['want', 'need', 'like', 'love', 'feel', 'am', 'have', 'can', 'see'].includes(lowerWord)) {
-          score += 7;
+          score += PRIORITY_TIERS.LOW;
         }
       }
       
       // If sentence starts with "you", predict common continuations
       if (currentWords[0]?.toLowerCase() === 'you') {
         if (['are', 'can', 'want', 'need', 'like', 'have'].includes(lowerWord)) {
-          score += 7;
+          score += PRIORITY_TIERS.LOW;
         }
       }
       
       // If sentence starts with question word, predict question structure
       if (['what', 'where', 'when', 'who', 'why', 'how'].includes(currentWords[0]?.toLowerCase())) {
         if (['is', 'are', 'do', 'does', 'can', 'will', 'the'].includes(lowerWord)) {
-          score += 7;
+          score += PRIORITY_TIERS.LOW;
         }
       }
       
@@ -1212,17 +1320,15 @@ export function getPrioritizedConnectingWords(maxWords: number = 10): string[] {
 }
 
 /**
- * Get contextually appropriate connecting words based on current sentence
- * This ensures "am", "the", "is", "are" etc. are suggested at the right time
- * CRITICAL FIX: "am" after "I" gets ULTRA-HIGH priority
- * CRITICAL FIX V2: Even smarter contextual detection based on sentence subject
+ * COMPLETELY REBUILT: Get contextually appropriate connecting words
+ * 
+ * CRITICAL FIX: "am" after "I" gets ULTRA-CRITICAL priority
+ * This ensures "am" is ALWAYS recommended after "I"
  */
 export function getContextualConnectingWords(currentWords: string[], maxWords: number = 5): string[] {
   const lastWord = currentWords.length > 0 ? currentWords[currentWords.length - 1].toLowerCase() : '';
   const lastTwoWords = currentWords.length >= 2 ? 
     [currentWords[currentWords.length - 2].toLowerCase(), lastWord].join(' ') : '';
-  const lastThreeWords = currentWords.length >= 3 ? 
-    [currentWords[currentWords.length - 3].toLowerCase(), currentWords[currentWords.length - 2].toLowerCase(), lastWord].join(' ') : '';
   
   // Analyze sentence structure to get subject
   const structure = analyzeSentenceStructure(currentWords);
@@ -1235,17 +1341,17 @@ export function getContextualConnectingWords(currentWords: string[], maxWords: n
     // Determine which possessive pronoun based on subject
     const sentence = currentWords.join(' ').toLowerCase();
     if (sentence.includes('he ') || sentenceSubject === 'he') {
-      contextualWords.push({ word: 'his', priority: 500 }); // ULTRA-HIGH priority
+      contextualWords.push({ word: 'his', priority: PRIORITY_TIERS.ULTRA_CRITICAL });
     } else if (sentence.includes('she ') || sentenceSubject === 'she') {
-      contextualWords.push({ word: 'her', priority: 500 }); // ULTRA-HIGH priority
+      contextualWords.push({ word: 'her', priority: PRIORITY_TIERS.ULTRA_CRITICAL });
     } else if (sentence.includes('i ') || sentenceSubject === 'i') {
-      contextualWords.push({ word: 'my', priority: 500 }); // ULTRA-HIGH priority
+      contextualWords.push({ word: 'my', priority: PRIORITY_TIERS.ULTRA_CRITICAL });
     } else if (sentence.includes('you ') || sentenceSubject === 'you') {
-      contextualWords.push({ word: 'your', priority: 500 }); // ULTRA-HIGH priority
+      contextualWords.push({ word: 'your', priority: PRIORITY_TIERS.ULTRA_CRITICAL });
     } else if (sentence.includes('we ') || sentenceSubject === 'we') {
-      contextualWords.push({ word: 'our', priority: 500 }); // ULTRA-HIGH priority
+      contextualWords.push({ word: 'our', priority: PRIORITY_TIERS.ULTRA_CRITICAL });
     } else if (sentence.includes('they ') || sentenceSubject === 'they') {
-      contextualWords.push({ word: 'their', priority: 500 }); // ULTRA-HIGH priority
+      contextualWords.push({ word: 'their', priority: PRIORITY_TIERS.ULTRA_CRITICAL });
     }
   }
   
@@ -1254,17 +1360,17 @@ export function getContextualConnectingWords(currentWords: string[], maxWords: n
   if (verbsBeforePossessive.includes(lastWord)) {
     const sentence = currentWords.join(' ').toLowerCase();
     if (sentence.includes('he ') || sentenceSubject === 'he') {
-      contextualWords.push({ word: 'his', priority: 400 });
+      contextualWords.push({ word: 'his', priority: PRIORITY_TIERS.CRITICAL });
     } else if (sentence.includes('she ') || sentenceSubject === 'she') {
-      contextualWords.push({ word: 'her', priority: 400 });
+      contextualWords.push({ word: 'her', priority: PRIORITY_TIERS.CRITICAL });
     } else if (sentence.includes('i ') || sentenceSubject === 'i') {
-      contextualWords.push({ word: 'my', priority: 400 });
+      contextualWords.push({ word: 'my', priority: PRIORITY_TIERS.CRITICAL });
     } else if (sentence.includes('you ') || sentenceSubject === 'you') {
-      contextualWords.push({ word: 'your', priority: 400 });
+      contextualWords.push({ word: 'your', priority: PRIORITY_TIERS.CRITICAL });
     } else if (sentence.includes('we ') || sentenceSubject === 'we') {
-      contextualWords.push({ word: 'our', priority: 400 });
+      contextualWords.push({ word: 'our', priority: PRIORITY_TIERS.CRITICAL });
     } else if (sentence.includes('they ') || sentenceSubject === 'they') {
-      contextualWords.push({ word: 'their', priority: 400 });
+      contextualWords.push({ word: 'their', priority: PRIORITY_TIERS.CRITICAL });
     }
   }
   
@@ -1272,30 +1378,20 @@ export function getContextualConnectingWords(currentWords: string[], maxWords: n
   prioritizedConnectingWords.forEach(cw => {
     let priority = cw.priority;
     
-    // CRITICAL FIX V2: SMART boost based on mustFollow and canFollow
+    // ULTRA-CRITICAL: mustFollow rules (e.g., "am" MUST follow "I")
     if (cw.mustFollow && cw.mustFollow.includes(lastWord)) {
-      priority += 200; // ULTRA-MASSIVE boost for must-follow words
-    } else if (cw.canFollow && cw.canFollow.includes(lastWord)) {
-      priority += 100; // MASSIVE boost for can-follow words
+      priority += PRIORITY_TIERS.ULTRA_CRITICAL;
+      console.log(`🔥 ULTRA-CRITICAL: "${cw.word}" must follow "${lastWord}" - priority: ${priority}`);
     }
     
-    // CRITICAL FIX V2: SMART subject-based boost for possessive pronouns
+    // CRITICAL: canFollow rules
+    if (cw.canFollow && cw.canFollow.includes(lastWord)) {
+      priority += PRIORITY_TIERS.CRITICAL;
+    }
+    
+    // CRITICAL: subjectRequired rules
     if (cw.subjectRequired && sentenceSubject === cw.subjectRequired) {
-      priority += 150; // MASSIVE boost when subject matches
-    }
-    
-    // CRITICAL FIX: ULTRA-MASSIVE boost for "am" after "I"
-    if (cw.word === 'am' && lastWord === 'i') {
-      priority += 500; // ULTRA-MASSIVE boost - this is VITAL!
-    } else if (cw.word === 'is' && ['he', 'she', 'it', 'that', 'this'].includes(lastWord)) {
-      priority += 250;
-    } else if (cw.word === 'are' && ['you', 'we', 'they'].includes(lastWord)) {
-      priority += 250;
-    } else if ((cw.word === 'the' || cw.word === 'a') && 
-               ['want', 'need', 'have', 'see', 'like', 'love', 'help'].includes(lastWord)) {
-      priority += 150;
-    } else if (cw.word === 'to' && ['want', 'need', 'like', 'love', 'go', 'have'].includes(lastWord)) {
-      priority += 150;
+      priority += PRIORITY_TIERS.CRITICAL;
     }
     
     contextualWords.push({ word: cw.word, priority });
