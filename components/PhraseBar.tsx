@@ -43,7 +43,7 @@ export default function PhraseBar({
               activeOpacity={0.85}
               disabled={sentence.length === 0}
             >
-              <Icon name="backspace-outline" size={24} color="#000000" />
+              <Icon name="backspace-outline" size={24} color={colors.text} />
             </TouchableOpacity>
           )}
           {onReplay && (
@@ -53,7 +53,7 @@ export default function PhraseBar({
               activeOpacity={0.85}
               disabled={!hasLastSpoken}
             >
-              <Icon name="play-outline" size={24} color="#000000" />
+              <Icon name="play-outline" size={24} color={colors.text} />
             </TouchableOpacity>
           )}
           <TouchableOpacity 
@@ -61,14 +61,14 @@ export default function PhraseBar({
             onPress={onSpeak} 
             activeOpacity={0.85}
           >
-            <Icon name="volume-high-outline" size={30} color="#000000" />
+            <Icon name="volume-high-outline" size={30} color={colors.white} />
           </TouchableOpacity>
           <TouchableOpacity 
             style={[styles.actionBtn, styles.clearBtn]} 
             onPress={onClear} 
             activeOpacity={0.85}
           >
-            <Icon name="close-outline" size={30} color="#000000" />
+            <Icon name="close-outline" size={30} color={colors.white} />
           </TouchableOpacity>
         </View>
       </View>
@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     boxShadow: '0px 2px 6px rgba(0,0,0,0.15)',
     borderWidth: 2,
-    borderColor: colors.borderLight,
+    borderColor: colors.border,
     flexDirection: 'row',
     alignItems: 'center',
     minHeight: 80,
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
   },
   text: {
     fontFamily: 'Montserrat_700Bold',
-    color: '#000000',
+    color: colors.text,
     fontSize: 18,
     lineHeight: 24,
     flexWrap: 'wrap',
@@ -132,11 +132,11 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   speakBtn: {
-    backgroundColor: colors.primary,
-    borderColor: colors.border,
+    backgroundColor: '#4CAF50',
+    borderColor: '#4CAF50',
   },
   clearBtn: {
-    backgroundColor: colors.danger,
-    borderColor: colors.border,
+    backgroundColor: '#F44336',
+    borderColor: '#F44336',
   },
 });

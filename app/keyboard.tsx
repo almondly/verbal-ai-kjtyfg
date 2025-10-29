@@ -1,6 +1,6 @@
 
-import { useCallback, useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Platform, ScrollView, PanResponder } from 'react-native';
+import { useCallback, useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Platform, ScrollView } from 'react-native';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { commonStyles, colors } from '../styles/commonStyles';
 import CategoryBar from '../components/CategoryBar';
@@ -13,7 +13,6 @@ import { useAdvancedAI } from '../hooks/useAdvancedAI';
 import { useTTSSettings } from '../hooks/useTTSSettings';
 import Icon from '../components/Icon';
 import { useRouter } from 'expo-router';
-import { useIdleDetection } from '../hooks/useIdleDetection';
 
 export default function KeyboardScreen() {
   const router = useRouter();
@@ -25,30 +24,6 @@ export default function KeyboardScreen() {
       }
     })();
   }, []);
-
-  // Idle detection - navigate to home after 30 seconds
-  const { resetTimer } = useIdleDetection({
-    timeout: 30000, // 30 seconds
-    onIdle: () => {
-      console.log('User idle for 30 seconds, navigating to home screen');
-      router.push('/main-menu');
-    },
-  });
-
-  // Create a PanResponder to capture ALL touch events on the screen, including scrolling
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => {
-        resetTimer();
-        return false; // Don't capture the event, just reset timer
-      },
-      onMoveShouldSetPanResponder: () => {
-        resetTimer(); // Reset timer on scroll/drag movements
-        return false; // Don't capture the event, just reset timer
-      },
-      onPanResponderTerminationRequest: () => true,
-    })
-  ).current;
 
   const [typedText, setTypedText] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -105,25 +80,22 @@ export default function KeyboardScreen() {
   }, [typedText, getAdvancedSuggestions, getTimeBasedSuggestions, selectedCategory]);
 
   const handleDeleteLastWord = useCallback(() => {
-    resetTimer();
     setTypedText(prev => {
       const words = prev.trim().split(/\s+/);
       if (words.length === 0 || (words.length === 1 && !words[0])) return '';
       words.pop();
       return words.join(' ');
     });
-  }, [resetTimer]);
+  }, []);
 
   const handleReplayLastSentence = useCallback(async () => {
-    resetTimer();
     if (!lastSpokenText.trim()) return;
     
     const normalized = normalizeForTTS(lastSpokenText);
     await speak(normalized);
-  }, [lastSpokenText, speak, resetTimer]);
+  }, [lastSpokenText, speak]);
 
   const handleSpeak = useCallback(async () => {
-    resetTimer();
     if (!typedText.trim()) return;
     
     const normalized = normalizeForTTS(typedText);
@@ -132,7 +104,7 @@ export default function KeyboardScreen() {
     setLastSpokenText(typedText);
     
     await recordUserInput(typedText, selectedCategory !== 'all' ? selectedCategory : undefined);
-  }, [typedText, speak, recordUserInput, selectedCategory, resetTimer]);
+  }, [typedText, speak, recordUserInput, selectedCategory]);
 
   const normalizeForTTS = (text: string): string => {
     return text
@@ -149,17 +121,14 @@ export default function KeyboardScreen() {
   };
 
   const handleBackToMenu = useCallback(() => {
-    resetTimer();
     router.push('/main-menu');
-  }, [router, resetTimer]);
+  }, [router]);
 
   const handleOpenSettings = useCallback(() => {
-    resetTimer();
     router.push('/settings');
-  }, [router, resetTimer]);
+  }, [router]);
 
   const handleSuggestionPress = useCallback((text: string, isFullSentence: boolean) => {
-    resetTimer();
     if (isFullSentence) {
       setTypedText(text);
     } else {
@@ -168,29 +137,23 @@ export default function KeyboardScreen() {
         return trimmed ? `${trimmed} ${text}` : text;
       });
     }
-  }, [resetTimer]);
+  }, []);
 
   const handleTextChange = useCallback((text: string) => {
-    resetTimer();
     setTypedText(text);
-  }, [resetTimer]);
+  }, []);
 
   const handleClearText = useCallback(() => {
-    resetTimer();
     setTypedText('');
-  }, [resetTimer]);
+  }, []);
 
   const handleCategorySelect = useCallback((categoryId: string) => {
-    resetTimer();
     setSelectedCategory(categoryId);
-  }, [resetTimer]);
+  }, []);
 
   return (
     <LandscapeGuard>
-      <View 
-        style={[commonStyles.container, styles.container]}
-        {...panResponder.panHandlers}
-      >
+      <View style={[commonStyles.container, styles.container]}>
         {/* Top Bar with Back, Emotion, and Settings */}
         <View style={styles.topBar}>
           <TouchableOpacity 
@@ -225,8 +188,6 @@ export default function KeyboardScreen() {
             placeholderTextColor={colors.textSecondary}
             multiline
             autoFocus
-            onTouchStart={resetTimer}
-            onFocus={resetTimer}
           />
           <View style={styles.inputActions}>
             <View style={styles.leftActions}>
@@ -274,8 +235,6 @@ export default function KeyboardScreen() {
         {/* AI Suggestions */}
         <ScrollView 
           style={styles.suggestionsContainer}
-          onScroll={resetTimer}
-          scrollEventThrottle={16}
           showsVerticalScrollIndicator={false}
         >
           {advancedSuggestions.length > 0 ? (
@@ -283,7 +242,6 @@ export default function KeyboardScreen() {
               suggestions={advancedSuggestions}
               onPressSuggestion={handleSuggestionPress}
               onRemoveWord={(word) => {
-                resetTimer();
                 setTypedText(prev => {
                   const words = prev.trim().split(/\s+/);
                   const index = words.findIndex(w => w.toLowerCase() === word.toLowerCase());
@@ -309,8 +267,6 @@ export default function KeyboardScreen() {
         <ScrollView 
           style={styles.categoryBarContainer}
           horizontal
-          onScroll={resetTimer}
-          scrollEventThrottle={16}
           showsHorizontalScrollIndicator={false}
         >
           <CategoryBar
@@ -335,8 +291,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     backgroundColor: colors.backgroundAlt,
-    borderBottomWidth: 2,
-    borderBottomColor: colors.borderLight,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
   },
   backButton: {
     flexDirection: 'row',
@@ -346,8 +302,8 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     backgroundColor: colors.background,
     borderRadius: 10,
-    borderWidth: 2,
-    borderColor: colors.borderLight,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   backButtonText: {
     fontSize: 15,
@@ -363,21 +319,21 @@ const styles = StyleSheet.create({
     padding: 8,
     backgroundColor: colors.background,
     borderRadius: 10,
-    borderWidth: 2,
-    borderColor: colors.borderLight,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   inputContainer: {
     paddingHorizontal: 16,
     paddingVertical: 12,
     backgroundColor: colors.backgroundAlt,
-    borderBottomWidth: 2,
-    borderBottomColor: colors.borderLight,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
   },
   textInput: {
     backgroundColor: colors.background,
     borderRadius: 12,
-    borderWidth: 2,
-    borderColor: colors.borderLight,
+    borderWidth: 1,
+    borderColor: colors.border,
     padding: 16,
     fontSize: 18,
     fontFamily: 'Montserrat_500Medium',
@@ -408,8 +364,8 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     backgroundColor: colors.background,
     borderRadius: 10,
-    borderWidth: 2,
-    borderColor: colors.borderLight,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   deleteWordButtonText: {
     fontSize: 13,
@@ -424,8 +380,8 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     backgroundColor: colors.background,
     borderRadius: 10,
-    borderWidth: 2,
-    borderColor: colors.borderLight,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   replayButtonText: {
     fontSize: 13,
@@ -443,8 +399,8 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     backgroundColor: colors.background,
     borderRadius: 10,
-    borderWidth: 2,
-    borderColor: colors.borderLight,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   clearButtonText: {
     fontSize: 15,
@@ -457,10 +413,10 @@ const styles = StyleSheet.create({
     gap: 8 as any,
     paddingHorizontal: 24,
     paddingVertical: 12,
-    backgroundColor: colors.primary,
+    backgroundColor: '#4CAF50',
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: colors.primary,
+    borderColor: '#4CAF50',
   },
   speakButtonDisabled: {
     backgroundColor: colors.textSecondary,
@@ -476,8 +432,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     backgroundColor: colors.backgroundAlt,
-    borderBottomWidth: 2,
-    borderBottomColor: colors.borderLight,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
     minHeight: 100,
     maxHeight: 120,
   },

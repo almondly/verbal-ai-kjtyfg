@@ -88,8 +88,8 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     backgroundColor: colors.backgroundAlt,
     borderRadius: 12,
-    borderWidth: 2,
-    borderColor: colors.borderLight,
+    borderWidth: 1,
+    borderColor: colors.border,
     boxShadow: '0px 2px 6px rgba(0,0,0,0.12)',
   },
   row: {

@@ -1,6 +1,6 @@
 
 import { useCallback, useMemo, useState, useEffect, useRef } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Platform, PanResponder } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { commonStyles, colors } from '../styles/commonStyles';
 import { Tile } from '../types';
@@ -21,7 +21,6 @@ import CommunicationGrid from '../components/CommunicationGrid';
 import { useAdvancedAI } from '../hooks/useAdvancedAI';
 import { useTTSSettings } from '../hooks/useTTSSettings';
 import { useRouter } from 'expo-router';
-import { useIdleDetection } from '../hooks/useIdleDetection';
 
 export default function CommunicationScreen() {
   const router = useRouter();
@@ -33,30 +32,6 @@ export default function CommunicationScreen() {
       }
     })();
   }, []);
-
-  // Idle detection - navigate to home after 30 seconds
-  const { resetTimer } = useIdleDetection({
-    timeout: 30000, // 30 seconds
-    onIdle: () => {
-      console.log('User idle for 30 seconds, navigating to home screen');
-      router.push('/main-menu');
-    },
-  });
-
-  // Create a PanResponder to capture ALL touch events on the screen, including scrolling
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => {
-        resetTimer();
-        return false; // Don't capture the event, just reset timer
-      },
-      onMoveShouldSetPanResponder: () => {
-        resetTimer(); // Reset timer on scroll/drag movements
-        return false; // Don't capture the event, just reset timer
-      },
-      onPanResponderTerminationRequest: () => true,
-    })
-  ).current;
 
   const { getAdvancedSuggestions, getTimeBasedSuggestions, recordUserInput } = useAdvancedAI();
   const { currentEmotion, setCurrentEmotion } = useEmotionSettings();
@@ -148,56 +123,47 @@ export default function CommunicationScreen() {
   }, [sentence, tiles, getAdvancedSuggestions, getTimeBasedSuggestions, selectedCategory]);
 
   const handleTilePress = useCallback((tile: Tile) => {
-    resetTimer();
     setSentence(prev => [...prev, tile]);
-  }, [resetTimer]);
+  }, []);
 
   const handleTileLongPress = useCallback((tile: Tile) => {
-    resetTimer();
     if (tile.id.startsWith('custom-')) {
       removeTile(tile.id);
     }
-  }, [removeTile, resetTimer]);
+  }, [removeTile]);
 
   const handleTileEdit = useCallback((tile: Tile) => {
-    resetTimer();
     setEditingTile(tile);
-  }, [resetTimer]);
+  }, []);
 
   const handleSaveEdit = useCallback((updatedTile: Tile) => {
-    resetTimer();
     updateTile(updatedTile);
     setEditingTile(null);
-  }, [updateTile, resetTimer]);
+  }, [updateTile]);
 
   const handleRemoveFromSentence = useCallback((index: number) => {
-    resetTimer();
     setSentence(prev => prev.filter((_, i) => i !== index));
-  }, [resetTimer]);
+  }, []);
 
   const handleClearSentence = useCallback(() => {
-    resetTimer();
     setSentence([]);
-  }, [resetTimer]);
+  }, []);
 
   const handleDeleteLastWord = useCallback(() => {
-    resetTimer();
     setSentence(prev => {
       if (prev.length === 0) return prev;
       return prev.slice(0, -1);
     });
-  }, [resetTimer]);
+  }, []);
 
   const handleReplayLastSentence = useCallback(async () => {
-    resetTimer();
     if (!lastSpokenText.trim()) return;
     
     const normalized = normalizeForTTS(lastSpokenText);
     await speak(normalized);
-  }, [lastSpokenText, speak, resetTimer]);
+  }, [lastSpokenText, speak]);
 
   const handleSpeak = useCallback(async () => {
-    resetTimer();
     const text = sentence.map(t => t.text).join(' ');
     if (!text.trim()) return;
     
@@ -210,7 +176,7 @@ export default function CommunicationScreen() {
     await recordUserInput(text, categoryForAI);
     
     setSentence([]);
-  }, [sentence, speak, recordUserInput, selectedCategory, resetTimer]);
+  }, [sentence, speak, recordUserInput, selectedCategory]);
 
   const normalizeForTTS = (text: string): string => {
     return text
@@ -227,17 +193,14 @@ export default function CommunicationScreen() {
   };
 
   const handleBackToMenu = useCallback(() => {
-    resetTimer();
     router.push('/main-menu');
-  }, [router, resetTimer]);
+  }, [router]);
 
   const handleOpenSettings = useCallback(() => {
-    resetTimer();
     router.push('/settings');
-  }, [router, resetTimer]);
+  }, [router]);
 
   const handleSuggestionPress = useCallback((text: string, isFullSentence: boolean) => {
-    resetTimer();
     if (isFullSentence) {
       const words = text.split(' ');
       const newSentence = words.map((word, index) => ({
@@ -256,29 +219,23 @@ export default function CommunicationScreen() {
       };
       handleTilePress(tile);
     }
-  }, [handleTilePress, resetTimer]);
+  }, [handleTilePress]);
 
   const handleCategorySelect = useCallback((categoryId: string) => {
-    resetTimer();
     setSelectedCategory(categoryId);
-  }, [resetTimer]);
+  }, []);
 
   const handleSettingsOpen = useCallback(() => {
-    resetTimer();
     setSettingsOpen(true);
-  }, [resetTimer]);
+  }, []);
 
   const handleSettingsClose = useCallback(() => {
-    resetTimer();
     setSettingsOpen(false);
-  }, [resetTimer]);
+  }, []);
 
   return (
     <LandscapeGuard>
-      <View 
-        style={[commonStyles.container, styles.container]}
-        {...panResponder.panHandlers}
-      >
+      <View style={[commonStyles.container, styles.container]}>
         {/* Top Bar with Back, Emotion, and Settings */}
         <View style={styles.topBar}>
           <TouchableOpacity 
@@ -319,8 +276,6 @@ export default function CommunicationScreen() {
         {/* AI Sentence Predictor / Recommendations */}
         <ScrollView 
           style={styles.predictorContainer}
-          onScroll={resetTimer}
-          scrollEventThrottle={16}
           showsVerticalScrollIndicator={false}
         >
           {advancedSuggestions.length > 0 ? (
@@ -328,7 +283,6 @@ export default function CommunicationScreen() {
               suggestions={advancedSuggestions}
               onPressSuggestion={handleSuggestionPress}
               onRemoveWord={(word) => {
-                resetTimer();
                 setSentence(prev => {
                   const index = prev.findIndex(t => t.text.toLowerCase() === word.toLowerCase());
                   if (index !== -1) {
@@ -352,8 +306,6 @@ export default function CommunicationScreen() {
         <ScrollView 
           style={styles.categoryBarContainer}
           horizontal
-          onScroll={resetTimer}
-          scrollEventThrottle={16}
           showsHorizontalScrollIndicator={false}
         >
           <CategoryBar
@@ -367,8 +319,6 @@ export default function CommunicationScreen() {
         <View style={styles.gridContainer}>
           <ScrollView
             style={styles.gridScrollView}
-            onScroll={resetTimer}
-            scrollEventThrottle={16}
             showsVerticalScrollIndicator={false}
           >
             <CommunicationGrid
@@ -402,7 +352,6 @@ export default function CommunicationScreen() {
             tile={editingTile}
             onSave={handleSaveEdit}
             onClose={() => {
-              resetTimer();
               setEditingTile(null);
             }}
           />
@@ -423,8 +372,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     backgroundColor: colors.backgroundAlt,
-    borderBottomWidth: 2,
-    borderBottomColor: colors.borderLight,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
   },
   backButton: {
     flexDirection: 'row',
@@ -434,8 +383,8 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     backgroundColor: colors.background,
     borderRadius: 10,
-    borderWidth: 2,
-    borderColor: colors.borderLight,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   backButtonText: {
     fontSize: 15,
@@ -451,8 +400,8 @@ const styles = StyleSheet.create({
     padding: 8,
     backgroundColor: colors.background,
     borderRadius: 10,
-    borderWidth: 2,
-    borderColor: colors.borderLight,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   phraseBarContainer: {
     paddingHorizontal: 16,
@@ -463,9 +412,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     backgroundColor: colors.backgroundAlt,
-    borderTopWidth: 2,
-    borderBottomWidth: 2,
-    borderColor: colors.borderLight,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: colors.border,
     minHeight: 100,
     maxHeight: 120,
   },

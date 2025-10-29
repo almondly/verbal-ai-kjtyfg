@@ -42,11 +42,13 @@ export default function SuggestionsRow({ suggestions, onPressSuggestion, style }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.backgroundAlt,
+    backgroundColor: colors.surface,
     borderRadius: 12,
     paddingVertical: 8,
     paddingHorizontal: 8,
     boxShadow: '0px 2px 6px rgba(0,0,0,0.06)',
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   row: {
     alignItems: 'center',
@@ -54,7 +56,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   suggestion: {
-    backgroundColor: colors.primary,
+    backgroundColor: '#2196F3',
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -64,23 +66,25 @@ const styles = StyleSheet.create({
     boxShadow: '0px 2px 4px rgba(0,0,0,0.08)',
   },
   text: {
-    color: '#000000',
+    color: colors.white,
     fontFamily: 'Montserrat_600SemiBold',
     fontSize: 13,
     lineHeight: 16,
     textAlign: 'center',
   },
   emptyContainer: {
-    backgroundColor: colors.backgroundAlt,
+    backgroundColor: colors.surface,
     borderRadius: 12,
     paddingVertical: 12,
     paddingHorizontal: 16,
     alignItems: 'center',
     justifyContent: 'center',
     boxShadow: '0px 2px 6px rgba(0,0,0,0.06)',
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   emptyText: {
-    color: '#000000',
+    color: colors.textSecondary,
     fontFamily: 'Montserrat_400Regular',
     fontSize: 12,
     textAlign: 'center',

@@ -17,18 +17,19 @@ export const colors = {
   
   // Background colors - WHITE backgrounds restored
   background: '#FFFFFF',     // White background
-  backgroundAlt: '#2faad6',  // Cyan blue for colored sections (CategoryBar, PhraseBar)
-  surface: '#fb8d98',        // Pink surface for suggestions
+  backgroundAlt: '#F5F5F5',  // Light gray for phrase bar and suggestions (ORIGINAL COLOR)
+  surface: '#FFFFFF',        // White surface for suggestions (ORIGINAL COLOR)
   
   // Text colors - ONLY BLACK
   text: '#000000',           // Black text ONLY
-  textSecondary: '#000000',  // Black text ONLY
-  textLight: '#000000',      // Black text ONLY (no white!)
+  textSecondary: '#666666',  // Dark gray for secondary text
+  textLight: '#999999',      // Light gray for hints
+  white: '#FFFFFF',          // White for buttons
   
-  // Border and UI elements - using the 5 colors
-  border: '#2faad6',         // Cyan blue
-  borderDark: '#f35e69',     // Coral red
-  borderLight: '#8fd2b0',    // Mint green
+  // Border and UI elements - using the 5 colors for tiles/categories
+  border: '#E0E0E0',         // Light gray border (ORIGINAL COLOR)
+  borderDark: '#CCCCCC',     // Darker gray border (ORIGINAL COLOR)
+  borderLight: '#F0F0F0',    // Very light gray border (ORIGINAL COLOR)
   
   // Status colors - using the 5 colors
   success: '#8fd2b0',        // Mint green
@@ -37,7 +38,7 @@ export const colors = {
   error: '#f35e69',          // Coral red
   info: '#2faad6',           // Cyan blue
   
-  // AAC Category colors - ONLY using the 5 colors
+  // AAC Category colors - ONLY using the 5 colors for tiles and category bar
   categoryCore: '#2faad6',      // Cyan blue - Core vocabulary
   categoryPeople: '#fb8d98',    // Pink - People
   categoryActions: '#8fd2b0',   // Mint green - Actions/Verbs

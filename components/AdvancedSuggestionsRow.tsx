@@ -40,9 +40,9 @@ const getTypeIcon = (type: string) => {
 };
 
 const getConfidenceColor = (confidence: number) => {
-  if (confidence >= 0.8) return colors.success;
-  if (confidence >= 0.6) return colors.warning;
-  return colors.error;
+  if (confidence >= 0.8) return '#4CAF50';
+  if (confidence >= 0.6) return '#FF9800';
+  return '#F44336';
 };
 
 export default function AdvancedSuggestionsRow({ 
@@ -110,16 +110,12 @@ export default function AdvancedSuggestionsRow({
                 <Icon
                   name={getTypeIcon(suggestion.type)}
                   size={14}
-                  color="#000000"
+                  color={colors.textSecondary}
                   style={styles.typeIcon}
                 />
                 <Text style={[
                   styles.confidenceText,
-                  isGrammarCorrection && styles.grammarCorrectionConfidence,
-                  isFullSentence && styles.fullSentenceConfidence,
-                  isTenseVariation && styles.tenseVariationConfidence,
-                  isCategoryContextual && styles.categoryContextualConfidence,
-                  isPoliteEnding && styles.politeEndingConfidence
+                  { color: getConfidenceColor(suggestion.confidence) }
                 ]}>
                   {Math.round(suggestion.confidence * 100)}%
                 </Text>
@@ -183,6 +179,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingVertical: 6,
     paddingHorizontal: 6,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   tenseSwitcher: {
     marginBottom: 6,
@@ -196,42 +194,44 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   suggestion: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: 10,
     paddingHorizontal: 10,
     paddingVertical: 8,
     borderLeftWidth: 3,
+    borderWidth: 1,
+    borderColor: colors.border,
     boxShadow: '0px 2px 4px rgba(0,0,0,0.08)',
     minWidth: 90,
     maxWidth: 140,
   },
   grammarCorrectionSuggestion: {
-    backgroundColor: '#FFFFFF',
-    borderLeftColor: '#8fd2b0',
+    backgroundColor: '#E8F5E9',
+    borderLeftColor: '#4CAF50',
     borderLeftWidth: 4,
     minWidth: 140,
     maxWidth: 200,
   },
   fullSentenceSuggestion: {
-    backgroundColor: '#FFFFFF',
-    borderLeftColor: colors.primary,
+    backgroundColor: '#E3F2FD',
+    borderLeftColor: '#2196F3',
     borderLeftWidth: 4,
     minWidth: 140,
     maxWidth: 200,
   },
   tenseVariationSuggestion: {
-    backgroundColor: '#FFFFFF',
-    borderLeftColor: colors.warning,
+    backgroundColor: '#FFF3E0',
+    borderLeftColor: '#FF9800',
     borderLeftWidth: 3,
   },
   categoryContextualSuggestion: {
-    backgroundColor: '#FFFFFF',
-    borderLeftColor: '#8fd2b0',
+    backgroundColor: '#F3E5F5',
+    borderLeftColor: '#9C27B0',
     borderLeftWidth: 3,
   },
   politeEndingSuggestion: {
-    backgroundColor: '#FFFFFF',
-    borderLeftColor: '#f9d809',
+    backgroundColor: '#FFF9C4',
+    borderLeftColor: '#FBC02D',
     borderLeftWidth: 3,
   },
   suggestionHeader: {
@@ -245,51 +245,35 @@ const styles = StyleSheet.create({
   },
   confidenceText: {
     fontSize: 9,
-    color: '#000000',
     fontFamily: 'Montserrat_600SemiBold',
-  },
-  grammarCorrectionConfidence: {
-    color: '#000000',
-  },
-  fullSentenceConfidence: {
-    color: '#000000',
-  },
-  tenseVariationConfidence: {
-    color: '#000000',
-  },
-  categoryContextualConfidence: {
-    color: '#000000',
-  },
-  politeEndingConfidence: {
-    color: '#000000',
   },
   suggestionText: {
     fontSize: 12,
     fontFamily: 'Montserrat_600SemiBold',
-    color: '#000000',
+    color: colors.text,
     lineHeight: 16,
   },
   grammarCorrectionText: {
     fontSize: 11,
     lineHeight: 15,
-    color: '#000000',
+    color: colors.text,
   },
   fullSentenceText: {
     fontSize: 11,
     lineHeight: 15,
-    color: '#000000',
+    color: colors.text,
   },
   tenseVariationText: {
     fontSize: 12,
-    color: '#000000',
+    color: colors.text,
   },
   categoryContextualText: {
     fontSize: 12,
-    color: '#000000',
+    color: colors.text,
   },
   politeEndingText: {
     fontSize: 12,
-    color: '#000000',
+    color: colors.text,
   },
   labelBadge: {
     marginTop: 4,
@@ -298,42 +282,42 @@ const styles = StyleSheet.create({
   grammarLabel: {
     fontSize: 8,
     fontFamily: 'Montserrat_600SemiBold',
-    color: '#000000',
+    color: '#2E7D32',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   fullSentenceLabel: {
     fontSize: 8,
     fontFamily: 'Montserrat_600SemiBold',
-    color: '#000000',
+    color: '#1565C0',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   tenseLabel: {
     fontSize: 8,
     fontFamily: 'Montserrat_600SemiBold',
-    color: '#000000',
+    color: '#E65100',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   categoryLabel: {
     fontSize: 8,
     fontFamily: 'Montserrat_600SemiBold',
-    color: '#000000',
+    color: '#6A1B9A',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   politeLabel: {
     fontSize: 8,
     fontFamily: 'Montserrat_600SemiBold',
-    color: '#000000',
+    color: '#F57F17',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   hintText: {
     fontSize: 10,
     fontFamily: 'Montserrat_400Regular',
-    color: '#000000',
+    color: colors.textSecondary,
     textAlign: 'center',
     marginTop: 6,
     fontStyle: 'italic',
