@@ -8,7 +8,6 @@ import { useEffect, useState } from 'react';
 import { setupErrorLogging } from '../utils/errorLogger';
 import { useFonts, Montserrat_400Regular, Montserrat_600SemiBold, Montserrat_700Bold } from '@expo-google-fonts/montserrat';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import LandscapeGuard from '../components/LandscapeGuard';
 import * as ScreenOrientation from 'expo-screen-orientation';
 
 const STORAGE_KEY = 'emulated_device';
@@ -71,33 +70,31 @@ function RootLayoutInner() {
   console.log('Fonts loaded, rendering app');
 
   return (
-    <LandscapeGuard>
-      <SafeAreaView
-        style={[
-          commonStyles.wrapper,
-          {
-            paddingTop: insetsToUse.top,
-            paddingBottom: insetsToUse.bottom,
-            paddingLeft: insetsToUse.left,
-            paddingRight: insetsToUse.right,
-          },
-        ]}
+    <SafeAreaView
+      style={[
+        commonStyles.wrapper,
+        {
+          paddingTop: insetsToUse.top,
+          paddingBottom: insetsToUse.bottom,
+          paddingLeft: insetsToUse.left,
+          paddingRight: insetsToUse.right,
+        },
+      ]}
+    >
+      <StatusBar style="dark" />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          animation: 'default',
+        }}
       >
-        <StatusBar style="dark" />
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            animation: 'default',
-          }}
-        >
-          <Stack.Screen name="index" />
-          <Stack.Screen name="main-menu" />
-          <Stack.Screen name="communication" />
-          <Stack.Screen name="keyboard" />
-          <Stack.Screen name="settings" />
-        </Stack>
-      </SafeAreaView>
-    </LandscapeGuard>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="main-menu" />
+        <Stack.Screen name="communication" />
+        <Stack.Screen name="keyboard" />
+        <Stack.Screen name="settings" />
+      </Stack>
+    </SafeAreaView>
   );
 }
 

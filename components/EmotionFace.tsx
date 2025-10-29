@@ -17,21 +17,33 @@ const EMOTION_IMAGES: Record<string, any> = {
 
 // EmotionFace component now uses the provided emotion images
 export default function EmotionFace({ emotion, size = 100 }: Props) {
-  const normalizedEmotion = emotion.toLowerCase();
+  const normalizedEmotion = emotion?.toLowerCase() || 'happy';
+  
+  console.log('EmotionFace rendering:', { emotion, normalizedEmotion, size });
+  
   const imageSource = EMOTION_IMAGES[normalizedEmotion];
 
   // If we have an image for this emotion, use it
   if (imageSource) {
+    console.log('Using image for emotion:', normalizedEmotion);
     return (
       <View style={[styles.container, { width: size, height: size }]}>
         <Image
           source={imageSource}
           style={[styles.image, { width: size, height: size }]}
           resizeMode="contain"
+          onError={(error) => {
+            console.log('Error loading emotion image:', error);
+          }}
+          onLoad={() => {
+            console.log('Emotion image loaded successfully:', normalizedEmotion);
+          }}
         />
       </View>
     );
   }
+
+  console.log('Using fallback rendering for emotion:', normalizedEmotion);
 
   // Fallback to programmatic rendering for other emotions
   const getFaceStyle = () => {

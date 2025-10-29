@@ -7,7 +7,6 @@ import CategoryBar from '../components/CategoryBar';
 import { categories } from '../data/categories';
 import EmotionFace from '../components/EmotionFace';
 import { useEmotionSettings } from '../hooks/useEmotionSettings';
-import LandscapeGuard from '../components/LandscapeGuard';
 import AdvancedSuggestionsRow from '../components/AdvancedSuggestionsRow';
 import { useAdvancedAI } from '../hooks/useAdvancedAI';
 import { useTTSSettings } from '../hooks/useTTSSettings';
@@ -18,6 +17,7 @@ export default function KeyboardScreen() {
   const router = useRouter();
 
   useEffect(() => {
+    console.log('Keyboard screen mounted');
     (async () => {
       if (Platform.OS !== 'web') {
         await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
@@ -28,7 +28,7 @@ export default function KeyboardScreen() {
   const [typedText, setTypedText] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const { getAdvancedSuggestions, getTimeBasedSuggestions, recordUserInput } = useAdvancedAI();
-  const { currentEmotion } = useEmotionSettings();
+  const { settings: emotionSettings } = useEmotionSettings();
   const { speak } = useTTSSettings();
   const [advancedSuggestions, setAdvancedSuggestions] = useState<any[]>([]);
   const [lastSpokenText, setLastSpokenText] = useState<string>('');
@@ -152,127 +152,125 @@ export default function KeyboardScreen() {
   }, []);
 
   return (
-    <LandscapeGuard>
-      <View style={[commonStyles.container, styles.container]}>
-        {/* Top Bar with Back, Emotion, and Settings */}
-        <View style={styles.topBar}>
-          <TouchableOpacity 
-            style={styles.backButton} 
-            onPress={handleBackToMenu}
-            activeOpacity={0.8}
-          >
-            <Icon name="arrow-back-outline" size={24} color={colors.text} />
-            <Text style={styles.backButtonText}>Menu</Text>
-          </TouchableOpacity>
-
-          <View style={styles.emotionContainer}>
-            <EmotionFace emotion={currentEmotion} size={50} />
-          </View>
-
-          <TouchableOpacity 
-            style={styles.settingsButton} 
-            onPress={handleOpenSettings}
-            activeOpacity={0.8}
-          >
-            <Icon name="settings-outline" size={28} color={colors.text} />
-          </TouchableOpacity>
-        </View>
-
-        {/* Text Input Area */}
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.textInput}
-            value={typedText}
-            onChangeText={handleTextChange}
-            placeholder="Type your message here..."
-            placeholderTextColor={colors.textSecondary}
-            multiline
-            autoFocus
-          />
-          <View style={styles.inputActions}>
-            <View style={styles.leftActions}>
-              <TouchableOpacity 
-                style={[styles.deleteWordButton, !typedText.trim() && styles.buttonDisabled]} 
-                onPress={handleDeleteLastWord}
-                disabled={!typedText.trim()}
-                activeOpacity={0.8}
-              >
-                <Icon name="backspace-outline" size={22} color={colors.text} />
-                <Text style={styles.deleteWordButtonText}>Delete Word</Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={[styles.replayButton, !lastSpokenText && styles.buttonDisabled]} 
-                onPress={handleReplayLastSentence}
-                disabled={!lastSpokenText}
-                activeOpacity={0.8}
-              >
-                <Icon name="play-outline" size={22} color={colors.text} />
-                <Text style={styles.replayButtonText}>Replay</Text>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.rightActions}>
-              <TouchableOpacity 
-                style={styles.clearButton} 
-                onPress={handleClearText}
-                activeOpacity={0.8}
-              >
-                <Icon name="close-circle-outline" size={24} color={colors.textSecondary} />
-                <Text style={styles.clearButtonText}>Clear</Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={[styles.speakButton, !typedText.trim() && styles.speakButtonDisabled]} 
-                onPress={handleSpeak}
-                disabled={!typedText.trim()}
-                activeOpacity={0.8}
-              >
-                <Icon name="volume-high-outline" size={28} color={colors.white} />
-                <Text style={styles.speakButtonText}>Speak</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-
-        {/* AI Suggestions */}
-        <ScrollView 
-          style={styles.suggestionsContainer}
-          showsVerticalScrollIndicator={false}
+    <View style={[commonStyles.container, styles.container]}>
+      {/* Top Bar with Back, Emotion, and Settings */}
+      <View style={styles.topBar}>
+        <TouchableOpacity 
+          style={styles.backButton} 
+          onPress={handleBackToMenu}
+          activeOpacity={0.8}
         >
-          {advancedSuggestions.length > 0 ? (
-            <AdvancedSuggestionsRow
-              suggestions={advancedSuggestions}
-              onPressSuggestion={handleSuggestionPress}
-              onRemoveWord={(word) => {
-                setTypedText(prev => {
-                  const words = prev.trim().split(/\s+/);
-                  const index = words.findIndex(w => w.toLowerCase() === word.toLowerCase());
-                  if (index !== -1) {
-                    words.splice(index, 1);
-                    return words.join(' ');
-                  }
-                  return prev;
-                });
-              }}
-              style={styles.suggestions}
-            />
-          ) : (
-            <View style={styles.emptySuggestionsContainer}>
-              <Text style={styles.emptySuggestionsText}>
-                Start typing to see AI predictions
-              </Text>
-            </View>
-          )}
-        </ScrollView>
+          <Icon name="arrow-back-outline" size={24} color={colors.text} />
+          <Text style={styles.backButtonText}>Menu</Text>
+        </TouchableOpacity>
 
-        {/* Category Bar - FIXED: Added proper positioning */}
-        <View style={styles.categoryBarContainer}>
-          <CategoryBar
-            categories={categories}
-            selectedId={selectedCategory}
-            onSelect={handleCategorySelect}
-          />
+        <View style={styles.emotionContainer}>
+          <EmotionFace emotion={emotionSettings.selectedEmotion} size={50} />
+        </View>
+
+        <TouchableOpacity 
+          style={styles.settingsButton} 
+          onPress={handleOpenSettings}
+          activeOpacity={0.8}
+        >
+          <Icon name="settings-outline" size={28} color={colors.text} />
+        </TouchableOpacity>
+      </View>
+
+      {/* Text Input Area */}
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.textInput}
+          value={typedText}
+          onChangeText={handleTextChange}
+          placeholder="Type your message here..."
+          placeholderTextColor={colors.textSecondary}
+          multiline
+          autoFocus
+        />
+        <View style={styles.inputActions}>
+          <View style={styles.leftActions}>
+            <TouchableOpacity 
+              style={[styles.deleteWordButton, !typedText.trim() && styles.buttonDisabled]} 
+              onPress={handleDeleteLastWord}
+              disabled={!typedText.trim()}
+              activeOpacity={0.8}
+            >
+              <Icon name="backspace-outline" size={22} color={colors.text} />
+              <Text style={styles.deleteWordButtonText}>Delete Word</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.replayButton, !lastSpokenText && styles.buttonDisabled]} 
+              onPress={handleReplayLastSentence}
+              disabled={!lastSpokenText}
+              activeOpacity={0.8}
+            >
+              <Icon name="play-outline" size={22} color={colors.text} />
+              <Text style={styles.replayButtonText}>Replay</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.rightActions}>
+            <TouchableOpacity 
+              style={styles.clearButton} 
+              onPress={handleClearText}
+              activeOpacity={0.8}
+            >
+              <Icon name="close-circle-outline" size={24} color={colors.textSecondary} />
+              <Text style={styles.clearButtonText}>Clear</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.speakButton, !typedText.trim() && styles.speakButtonDisabled]} 
+              onPress={handleSpeak}
+              disabled={!typedText.trim()}
+              activeOpacity={0.8}
+            >
+              <Icon name="volume-high-outline" size={28} color={colors.white} />
+              <Text style={styles.speakButtonText}>Speak</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
-    </LandscapeGuard>
+
+      {/* AI Suggestions */}
+      <ScrollView 
+        style={styles.suggestionsContainer}
+        showsVerticalScrollIndicator={false}
+      >
+        {advancedSuggestions.length > 0 ? (
+          <AdvancedSuggestionsRow
+            suggestions={advancedSuggestions}
+            onPressSuggestion={handleSuggestionPress}
+            onRemoveWord={(word) => {
+              setTypedText(prev => {
+                const words = prev.trim().split(/\s+/);
+                const index = words.findIndex(w => w.toLowerCase() === word.toLowerCase());
+                if (index !== -1) {
+                  words.splice(index, 1);
+                  return words.join(' ');
+                }
+                return prev;
+              });
+            }}
+            style={styles.suggestions}
+          />
+        ) : (
+          <View style={styles.emptySuggestionsContainer}>
+            <Text style={styles.emptySuggestionsText}>
+              Start typing to see AI predictions
+            </Text>
+          </View>
+        )}
+      </ScrollView>
+
+      {/* Category Bar - FIXED: Added proper positioning */}
+      <View style={styles.categoryBarContainer}>
+        <CategoryBar
+          categories={categories}
+          selectedId={selectedCategory}
+          onSelect={handleCategorySelect}
+        />
+      </View>
+    </View>
   );
 }
 

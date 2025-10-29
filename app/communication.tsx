@@ -15,7 +15,6 @@ import { categories } from '../data/categories';
 import { useLibrary } from '../hooks/useLibrary';
 import { useAI } from '../hooks/useAI';
 import { useEmotionSettings } from '../hooks/useEmotionSettings';
-import LandscapeGuard from '../components/LandscapeGuard';
 import AdvancedSuggestionsRow from '../components/AdvancedSuggestionsRow';
 import CommunicationGrid from '../components/CommunicationGrid';
 import { useAdvancedAI } from '../hooks/useAdvancedAI';
@@ -26,6 +25,7 @@ export default function CommunicationScreen() {
   const router = useRouter();
 
   useEffect(() => {
+    console.log('Communication screen mounted');
     (async () => {
       if (Platform.OS !== 'web') {
         await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
@@ -34,7 +34,7 @@ export default function CommunicationScreen() {
   }, []);
 
   const { getAdvancedSuggestions, getTimeBasedSuggestions, recordUserInput } = useAdvancedAI();
-  const { currentEmotion, setCurrentEmotion } = useEmotionSettings();
+  const { settings: emotionSettings } = useEmotionSettings();
   const [sentence, setSentence] = useState<Tile[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('core');
   const { tiles, addTile, updateTile, removeTile, resetTiles } = useLibrary();
@@ -234,126 +234,126 @@ export default function CommunicationScreen() {
   }, []);
 
   return (
-    <LandscapeGuard>
-      <View style={[commonStyles.container, styles.container]}>
-        {/* Top Bar with Back, Emotion, and Settings */}
-        <View style={styles.topBar}>
-          <TouchableOpacity 
-            style={styles.backButton} 
-            onPress={handleBackToMenu}
-            activeOpacity={0.8}
-          >
-            <Icon name="arrow-back-outline" size={24} color={colors.text} />
-            <Text style={styles.backButtonText}>Menu</Text>
-          </TouchableOpacity>
+    <View style={[commonStyles.container, styles.container]}>
+      {/* Top Bar with Back, Emotion, and Settings */}
+      <View style={styles.topBar}>
+        <TouchableOpacity 
+          style={styles.backButton} 
+          onPress={handleBackToMenu}
+          activeOpacity={0.8}
+        >
+          <Icon name="arrow-back-outline" size={24} color={colors.text} />
+          <Text style={styles.backButtonText}>Menu</Text>
+        </TouchableOpacity>
 
-          <View style={styles.emotionContainer}>
-            <EmotionFace emotion={currentEmotion} size={80} />
-          </View>
-
-          <TouchableOpacity 
-            style={styles.settingsButton} 
-            onPress={handleOpenSettings}
-            activeOpacity={0.8}
-          >
-            <Icon name="settings-outline" size={28} color={colors.text} />
-          </TouchableOpacity>
+        <View style={styles.emotionContainer}>
+          <EmotionFace emotion={emotionSettings.selectedEmotion} size={80} />
         </View>
 
-        {/* Phrase Bar */}
-        <View style={styles.phraseBarContainer}>
-          <PhraseBar
-            sentence={sentence}
-            onRemove={handleRemoveFromSentence}
-            onClear={handleClearSentence}
-            onSpeak={handleSpeak}
-            onDeleteWord={handleDeleteLastWord}
-            onReplay={handleReplayLastSentence}
-            hasLastSpoken={!!lastSpokenText}
+        <TouchableOpacity 
+          style={styles.settingsButton} 
+          onPress={handleOpenSettings}
+          activeOpacity={0.8}
+        >
+          <Icon name="settings-outline" size={28} color={colors.text} />
+        </TouchableOpacity>
+      </View>
+
+      {/* Phrase Bar */}
+      <View style={styles.phraseBarContainer}>
+        <PhraseBar
+          sentence={sentence}
+          onRemove={handleRemoveFromSentence}
+          onClear={handleClearSentence}
+          onSpeak={handleSpeak}
+          onDeleteWord={handleDeleteLastWord}
+          onReplay={handleReplayLastSentence}
+          hasLastSpoken={!!lastSpokenText}
+        />
+      </View>
+
+      {/* AI Sentence Predictor / Recommendations */}
+      <ScrollView 
+        style={styles.predictorContainer}
+        showsVerticalScrollIndicator={false}
+      >
+        {advancedSuggestions.length > 0 ? (
+          <AdvancedSuggestionsRow
+            suggestions={advancedSuggestions}
+            onPressSuggestion={handleSuggestionPress}
+            onRemoveWord={(word) => {
+              setSentence(prev => {
+                const index = prev.findIndex(t => t.text.toLowerCase() === word.toLowerCase());
+                if (index !== -1) {
+                  return prev.filter((_, i) => i !== index);
+                }
+                return prev;
+              });
+            }}
+            style={styles.suggestions}
           />
-        </View>
+        ) : (
+          <View style={styles.emptyPredictorContainer}>
+            <Text style={styles.emptyPredictorText}>
+              Start building a sentence to see AI predictions
+            </Text>
+          </View>
+        )}
+      </ScrollView>
 
-        {/* AI Sentence Predictor / Recommendations */}
-        <ScrollView 
-          style={styles.predictorContainer}
+      {/* Category Bar - FIXED: Added proper positioning */}
+      <View style={styles.categoryBarContainer}>
+        <CategoryBar
+          categories={categories}
+          selectedId={selectedCategory}
+          onSelect={handleCategorySelect}
+        />
+      </View>
+
+      {/* Tiles Grid */}
+      <View style={styles.gridContainer}>
+        <ScrollView
+          style={styles.gridScrollView}
           showsVerticalScrollIndicator={false}
         >
-          {advancedSuggestions.length > 0 ? (
-            <AdvancedSuggestionsRow
-              suggestions={advancedSuggestions}
-              onPressSuggestion={handleSuggestionPress}
-              onRemoveWord={(word) => {
-                setSentence(prev => {
-                  const index = prev.findIndex(t => t.text.toLowerCase() === word.toLowerCase());
-                  if (index !== -1) {
-                    return prev.filter((_, i) => i !== index);
-                  }
-                  return prev;
-                });
-              }}
-              style={styles.suggestions}
-            />
-          ) : (
-            <View style={styles.emptyPredictorContainer}>
-              <Text style={styles.emptyPredictorText}>
-                Start building a sentence to see AI predictions
-              </Text>
-            </View>
-          )}
+          <CommunicationGrid
+            tiles={filteredTiles}
+            onTilePress={handleTilePress}
+            onTileLongPress={handleTileLongPress}
+            onTileEdit={handleTileEdit}
+            onAddTile={handleSettingsOpen}
+            selectedCategory={selectedCategory}
+          />
         </ScrollView>
-
-        {/* Category Bar - FIXED: Added proper positioning */}
-        <View style={styles.categoryBarContainer}>
-          <CategoryBar
-            categories={categories}
-            selectedId={selectedCategory}
-            onSelect={handleCategorySelect}
-          />
-        </View>
-
-        {/* Tiles Grid */}
-        <View style={styles.gridContainer}>
-          <ScrollView
-            style={styles.gridScrollView}
-            showsVerticalScrollIndicator={false}
-          >
-            <CommunicationGrid
-              tiles={filteredTiles}
-              onTilePress={handleTilePress}
-              onTileLongPress={handleTileLongPress}
-              onTileEdit={handleTileEdit}
-              onAddTile={handleSettingsOpen}
-              selectedCategory={selectedCategory}
-            />
-          </ScrollView>
-        </View>
-
-        {/* Settings Sheet */}
-        <TabbedSettingsSheet
-          open={settingsOpen}
-          onClose={handleSettingsClose}
-          onResetLearning={resetLearning}
-          onResetTiles={resetTiles}
-          mode="add"
-          onAddTile={addTile}
-          defaultCategoryId={selectedCategory !== 'all' && selectedCategory !== 'keyboard' ? selectedCategory : undefined}
-          currentEmotion={currentEmotion}
-          onEmotionChange={setCurrentEmotion}
-        />
-
-        {/* Tile Editor */}
-        {editingTile && (
-          <TileEditor
-            visible={!!editingTile}
-            tile={editingTile}
-            onSave={handleSaveEdit}
-            onClose={() => {
-              setEditingTile(null);
-            }}
-          />
-        )}
       </View>
-    </LandscapeGuard>
+
+      {/* Settings Sheet */}
+      <TabbedSettingsSheet
+        open={settingsOpen}
+        onClose={handleSettingsClose}
+        onResetLearning={resetLearning}
+        onResetTiles={resetTiles}
+        mode="add"
+        onAddTile={addTile}
+        defaultCategoryId={selectedCategory !== 'all' && selectedCategory !== 'keyboard' ? selectedCategory : undefined}
+        currentEmotion={emotionSettings.selectedEmotion}
+        onEmotionChange={(emotion) => {
+          // Update emotion through settings
+        }}
+      />
+
+      {/* Tile Editor */}
+      {editingTile && (
+        <TileEditor
+          visible={!!editingTile}
+          tile={editingTile}
+          onSave={handleSaveEdit}
+          onClose={() => {
+            setEditingTile(null);
+          }}
+        />
+      )}
+    </View>
   );
 }
 

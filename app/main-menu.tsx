@@ -1,25 +1,23 @@
 
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, useWindowDimensions, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, useWindowDimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import Icon from '../components/Icon';
 import EmotionFace from '../components/EmotionFace';
-import LandscapeGuard from '../components/LandscapeGuard';
 import { colors, commonStyles } from '../styles/commonStyles';
 import { useEmotionSettings } from '../hooks/useEmotionSettings';
 
-// Admin-controlled branding images
-// To add your own images, place PNG files in assets/images/branding/ folder
-// and update the paths below
-const ADMIN_LOGO = require('../assets/images/natively-dark.png');
-
 export default function MainMenu() {
   const router = useRouter();
-  const { settings } = useEmotionSettings();
+  const { settings, isLoading } = useEmotionSettings();
   const { width, height } = useWindowDimensions();
 
   useEffect(() => {
+    console.log('Main menu mounted');
+    console.log('Current emotion:', settings.selectedEmotion);
+    console.log('Window dimensions:', { width, height });
+    
     // Lock orientation on native platforms only
     if (Platform.OS !== 'web') {
       try {
@@ -44,50 +42,60 @@ export default function MainMenu() {
   // Calculate face size - make it MUCH larger (70% of screen height)
   const faceSize = Math.min(width * 0.5, height * 0.7);
 
+  // Show loading state
+  if (isLoading) {
+    console.log('Loading emotion settings...');
+    return (
+      <View style={[commonStyles.container, styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Text style={styles.title}>Loading...</Text>
+      </View>
+    );
+  }
+
+  console.log('Rendering main menu with emotion:', settings.selectedEmotion);
+
   return (
-    <LandscapeGuard>
-      <View style={[commonStyles.container, styles.container]}>
-        {/* Header - much smaller */}
-        <View style={styles.header}>
-          <Text style={styles.title}>COMpanion</Text>
+    <View style={[commonStyles.container, styles.container]}>
+      {/* Header - much smaller */}
+      <View style={styles.header}>
+        <Text style={styles.title}>COMpanion</Text>
+      </View>
+
+      {/* Main Content */}
+      <View style={styles.content}>
+        {/* Emotion Display - MUCH LARGER */}
+        <View style={styles.emotionSection}>
+          <View style={styles.emotionContainer}>
+            {/* Display selected emotion face */}
+            <EmotionFace 
+              emotion={settings.selectedEmotion} 
+              size={faceSize * 0.8}
+            />
+          </View>
         </View>
 
-        {/* Main Content */}
-        <View style={styles.content}>
-          {/* Emotion Display - MUCH LARGER */}
-          <View style={styles.emotionSection}>
-            <View style={styles.emotionContainer}>
-              {/* Display selected emotion face */}
-              <EmotionFace 
-                emotion={settings.selectedEmotion} 
-                size={faceSize * 0.8}
-              />
-            </View>
-          </View>
+        {/* Action Buttons - Much Smaller */}
+        <View style={styles.buttonSection}>
+          <TouchableOpacity 
+            style={[styles.actionButton, styles.primaryButton]} 
+            onPress={handleStartCommunication}
+            activeOpacity={0.9}
+          >
+            <Icon name="grid-outline" size={20} color="#000000" />
+            <Text style={styles.actionButtonText}>Start</Text>
+          </TouchableOpacity>
 
-          {/* Action Buttons - Much Smaller */}
-          <View style={styles.buttonSection}>
-            <TouchableOpacity 
-              style={[styles.actionButton, styles.primaryButton]} 
-              onPress={handleStartCommunication}
-              activeOpacity={0.9}
-            >
-              <Icon name="grid-outline" size={20} color="#000000" />
-              <Text style={styles.actionButtonText}>Start</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={styles.settingsButton} 
-              onPress={handleOpenSettings}
-              activeOpacity={0.9}
-            >
-              <Icon name="settings-outline" size={14} color="#000000" />
-              <Text style={styles.settingsButtonText}>Settings</Text>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity 
+            style={styles.settingsButton} 
+            onPress={handleOpenSettings}
+            activeOpacity={0.9}
+          >
+            <Icon name="settings-outline" size={14} color="#000000" />
+            <Text style={styles.settingsButtonText}>Settings</Text>
+          </TouchableOpacity>
         </View>
       </View>
-    </LandscapeGuard>
+    </View>
   );
 }
 
