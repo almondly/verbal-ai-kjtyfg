@@ -43,7 +43,7 @@ export default function PhraseBar({
               activeOpacity={0.85}
               disabled={sentence.length === 0}
             >
-              <Icon name="backspace-outline" size={24} color={colors.text} />
+              <Icon name="backspace-outline" size={24} color="#000000" />
             </TouchableOpacity>
           )}
           {onReplay && (
@@ -53,7 +53,7 @@ export default function PhraseBar({
               activeOpacity={0.85}
               disabled={!hasLastSpoken}
             >
-              <Icon name="play-outline" size={24} color={colors.text} />
+              <Icon name="play-outline" size={24} color="#000000" />
             </TouchableOpacity>
           )}
           <TouchableOpacity 
@@ -61,14 +61,14 @@ export default function PhraseBar({
             onPress={onSpeak} 
             activeOpacity={0.85}
           >
-            <Icon name="volume-high-outline" size={30} color="#FFFFFF" />
+            <Icon name="volume-high-outline" size={30} color="#000000" />
           </TouchableOpacity>
           <TouchableOpacity 
             style={[styles.actionBtn, styles.clearBtn]} 
             onPress={onClear} 
             activeOpacity={0.85}
           >
-            <Icon name="close-outline" size={30} color="#FFFFFF" />
+            <Icon name="close-outline" size={30} color="#000000" />
           </TouchableOpacity>
         </View>
       </View>
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
   },
   text: {
     fontFamily: 'Montserrat_700Bold',
-    color: colors.text,
+    color: '#000000',
     fontSize: 18,
     lineHeight: 24,
     flexWrap: 'wrap',

@@ -117,7 +117,7 @@ export default function TileEditor({ visible, tile, onSave, onClose }: Props) {
           <View style={styles.header}>
             <Text style={styles.title}>Edit Tile</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeBtn} activeOpacity={0.8}>
-              <Icon name="close-outline" size={28} color={colors.text} />
+              <Icon name="close-outline" size={28} color="#000000" />
             </TouchableOpacity>
           </View>
 
@@ -148,7 +148,7 @@ export default function TileEditor({ visible, tile, onSave, onClose }: Props) {
                       onPress={() => setSelectedCategory(c.id)}
                       activeOpacity={0.9}
                     >
-                      <Icon name={c.icon as any} size={18} color={colors.text} />
+                      <Icon name={c.icon as any} size={18} color="#000000" />
                       <Text style={styles.catChipText}>{c.label}</Text>
                     </TouchableOpacity>
                   );
@@ -159,10 +159,10 @@ export default function TileEditor({ visible, tile, onSave, onClose }: Props) {
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Color</Text>
               <View style={styles.colorsRow}>
-                {['#FFFFFF', '#FEF3C7', '#DBEAFE', '#DCFCE7', '#FDE68A', '#FECACA', '#E9D5FF', '#FED7AA'].map((c) => (
+                {['#2faad6', '#f35e69', '#8fd2b0', '#fb8d98', '#f9d809'].map((c) => (
                   <TouchableOpacity
                     key={c}
-                    style={[styles.colorDot, { backgroundColor: c, borderColor: c === '#FFFFFF' ? '#E5E7EB' : c }]}
+                    style={[styles.colorDot, { backgroundColor: c, borderColor: c }]}
                     onPress={() => setColor(c)}
                   >
                     {color === c ? <View style={styles.colorDotInner} /> : null}
@@ -180,7 +180,7 @@ export default function TileEditor({ visible, tile, onSave, onClose }: Props) {
               {/* Image URL Input - PROMINENT */}
               <View style={styles.urlInputContainer}>
                 <View style={styles.urlInputHeader}>
-                  <Icon name="link-outline" size={20} color={colors.primary} />
+                  <Icon name="link-outline" size={20} color="#000000" />
                   <Text style={styles.urlInputLabel}>Image URL (Direct Edit)</Text>
                 </View>
                 <TextInput
@@ -220,7 +220,7 @@ export default function TileEditor({ visible, tile, onSave, onClose }: Props) {
                   onPress={() => setShowPictogramSelector(true)} 
                   activeOpacity={0.9}
                 >
-                  <Icon name="images-outline" size={20} color={colors.primary} />
+                  <Icon name="images-outline" size={20} color="#000000" />
                   <Text style={styles.imageOptionText}>Browse Pictograms</Text>
                 </TouchableOpacity>
                 
@@ -229,7 +229,7 @@ export default function TileEditor({ visible, tile, onSave, onClose }: Props) {
                   onPress={pickImage} 
                   activeOpacity={0.9}
                 >
-                  <Icon name="image-outline" size={20} color={colors.primary} />
+                  <Icon name="image-outline" size={20} color="#000000" />
                   <Text style={styles.imageOptionText}>Pick from Gallery</Text>
                 </TouchableOpacity>
               </View>
@@ -273,7 +273,7 @@ export default function TileEditor({ visible, tile, onSave, onClose }: Props) {
               onPress={handleSave}
               activeOpacity={0.9}
             >
-              <Icon name="save-outline" size={20} color="#FFFFFF" />
+              <Icon name="save-outline" size={20} color="#000000" />
               <Text style={styles.saveBtnText}>Save Changes</Text>
             </TouchableOpacity>
           </View>
@@ -314,7 +314,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontFamily: 'Montserrat_700Bold',
-    color: colors.text,
+    color: '#000000',
   },
   closeBtn: {
     backgroundColor: '#F3F4F6',
@@ -331,13 +331,13 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontFamily: 'Montserrat_600SemiBold',
-    color: colors.text,
+    color: '#000000',
     marginBottom: 12,
   },
   helperText: {
     fontSize: 13,
     fontFamily: 'Montserrat_400Regular',
-    color: colors.textSecondary,
+    color: '#000000',
     marginBottom: 16,
     fontStyle: 'italic',
   },
@@ -348,7 +348,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     paddingHorizontal: 16,
     paddingVertical: 16,
-    color: colors.text,
+    color: '#000000',
     fontSize: 16,
     fontFamily: 'Montserrat_400Regular',
   },
@@ -366,7 +366,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   catChipText: {
-    color: colors.text,
+    color: '#000000',
     fontFamily: 'Montserrat_600SemiBold',
     fontSize: 14,
   },
@@ -390,7 +390,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#111827',
   },
   urlInputContainer: {
-    backgroundColor: '#EEF2FF',
+    backgroundColor: colors.primary + '20',
     borderRadius: 16,
     padding: 16,
     borderWidth: 2,
@@ -406,7 +406,7 @@ const styles = StyleSheet.create({
   urlInputLabel: {
     fontSize: 16,
     fontFamily: 'Montserrat_700Bold',
-    color: colors.primary,
+    color: '#000000',
   },
   urlInput: {
     backgroundColor: colors.background,
@@ -415,7 +415,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    color: colors.text,
+    color: '#000000',
     fontSize: 14,
     fontFamily: 'Montserrat_400Regular',
     minHeight: 60,
@@ -429,7 +429,7 @@ const styles = StyleSheet.create({
   urlInfoText: {
     fontSize: 13,
     fontFamily: 'Montserrat_600SemiBold',
-    color: colors.success,
+    color: '#000000',
   },
   divider: {
     flexDirection: 'row',
@@ -444,7 +444,7 @@ const styles = StyleSheet.create({
   dividerText: {
     fontSize: 12,
     fontFamily: 'Montserrat_600SemiBold',
-    color: colors.textSecondary,
+    color: '#000000',
     marginHorizontal: 12,
   },
   imageOptionsRow: {
@@ -467,7 +467,7 @@ const styles = StyleSheet.create({
   imageOptionText: {
     fontSize: 13,
     fontFamily: 'Montserrat_600SemiBold',
-    color: colors.text,
+    color: '#000000',
   },
   imagePreviewContainer: {
     marginTop: 8,
@@ -475,7 +475,7 @@ const styles = StyleSheet.create({
   previewLabel: {
     fontSize: 14,
     fontFamily: 'Montserrat_600SemiBold',
-    color: colors.text,
+    color: '#000000',
     marginBottom: 12,
   },
   previewWrapper: {
@@ -521,7 +521,7 @@ const styles = StyleSheet.create({
   cancelBtnText: {
     fontSize: 16,
     fontFamily: 'Montserrat_600SemiBold',
-    color: colors.text,
+    color: '#000000',
   },
   saveBtn: {
     backgroundColor: colors.primary,
@@ -529,6 +529,6 @@ const styles = StyleSheet.create({
   saveBtnText: {
     fontSize: 16,
     fontFamily: 'Montserrat_600SemiBold',
-    color: '#FFFFFF',
+    color: '#000000',
   },
 });

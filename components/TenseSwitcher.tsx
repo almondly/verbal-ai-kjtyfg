@@ -31,7 +31,7 @@ export default function TenseSwitcher({ word, onSelectTense, style }: Props) {
   return (
     <View style={[styles.container, style]}>
       <View style={styles.header}>
-        <Icon name="time-outline" size={16} color={colors.primary} />
+        <Icon name="time-outline" size={16} color="#000000" />
         <Text style={styles.headerText}>Change Tense</Text>
       </View>
       <ScrollView
@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: 13,
     fontFamily: 'Montserrat_600SemiBold',
-    color: colors.text,
+    color: '#000000',
   },
   tenseRow: {
     flexDirection: 'row',
@@ -106,19 +106,19 @@ const styles = StyleSheet.create({
   tenseLabel: {
     fontSize: 11,
     fontFamily: 'Montserrat_500Medium',
-    color: colors.textSecondary,
+    color: '#000000',
     marginBottom: 4,
     textTransform: 'uppercase',
   },
   tenseLabelActive: {
-    color: colors.primary,
+    color: '#000000',
   },
   tenseWord: {
     fontSize: 14,
     fontFamily: 'Montserrat_700Bold',
-    color: colors.text,
+    color: '#000000',
   },
   tenseWordActive: {
-    color: colors.primary,
+    color: '#000000',
   },
 });

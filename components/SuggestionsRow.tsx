@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
     boxShadow: '0px 2px 4px rgba(0,0,0,0.08)',
   },
   text: {
-    color: '#FFFFFF',
+    color: '#000000',
     fontFamily: 'Montserrat_600SemiBold',
     fontSize: 13,
     lineHeight: 16,
@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
     boxShadow: '0px 2px 6px rgba(0,0,0,0.06)',
   },
   emptyText: {
-    color: colors.textSecondary,
+    color: '#000000',
     fontFamily: 'Montserrat_400Regular',
     fontSize: 12,
     textAlign: 'center',

@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   buttonText: {
-    color: '#fff',
+    color: '#000000',
     fontSize: 16,
     fontFamily: 'Montserrat_600SemiBold',
     textAlign: 'center',

@@ -61,12 +61,12 @@ export default function CategoryBar({ categories, selectedId, onSelect, style }:
                 <Icon 
                   name={cat.icon as any} 
                   size={28} 
-                  color={colors.textLight} 
+                  color="#000000" 
                 />
                 <Text style={[
                   styles.chipText, 
                   { 
-                    color: colors.textLight,
+                    color: '#000000',
                     fontFamily: active ? 'Montserrat_700Bold' : 'Montserrat_600SemiBold'
                   }
                 ]}>

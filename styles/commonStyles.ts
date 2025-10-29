@@ -1,54 +1,61 @@
 
 import { StyleSheet } from 'react-native';
 
-// Vibrant AAC color palette - bold, bright, and full of personality!
+// Restricted 5-color palette - ONLY these colors allowed!
 export const colors = {
-  // Primary vibrant colors
-  primary: '#FF6B35',        // Vibrant orange
-  secondary: '#9B59B6',      // Rich purple
-  accent: '#2ECC71',         // Bright green
+  // The 5 approved colors
+  color1: '#2faad6',  // Cyan blue
+  color2: '#f35e69',  // Coral red
+  color3: '#8fd2b0',  // Mint green
+  color4: '#fb8d98',  // Pink
+  color5: '#f9d809',  // Bright yellow
   
-  // Background colors - clean but warm
-  background: '#FFFFFF',
-  backgroundAlt: '#F8F9FA',
-  surface: '#FFFFFF',
+  // Primary colors mapped to the 5-color palette
+  primary: '#2faad6',        // Cyan blue
+  secondary: '#f35e69',      // Coral red
+  accent: '#8fd2b0',         // Mint green
   
-  // Text colors - high contrast
-  text: '#2C3E50',           // Dark blue-gray for readability
-  textSecondary: '#7F8C8D',  // Medium gray
-  textLight: '#FFFFFF',      // White text
+  // Background colors - using the 5 colors
+  background: '#8fd2b0',     // Mint green background
+  backgroundAlt: '#2faad6',  // Cyan blue alt
+  surface: '#fb8d98',        // Pink surface
   
-  // Border and UI elements
-  border: '#BDC3C7',         // Light gray
-  borderDark: '#34495E',     // Dark blue-gray
-  borderLight: '#ECF0F1',    // Very light gray
+  // Text colors - ONLY BLACK
+  text: '#000000',           // Black text ONLY
+  textSecondary: '#000000',  // Black text ONLY
+  textLight: '#000000',      // Black text ONLY (no white!)
   
-  // Status colors - vibrant!
-  success: '#27AE60',        // Bright green
-  warning: '#F39C12',        // Bright orange
-  danger: '#E74C3C',         // Bright red
-  error: '#E74C3C',
-  info: '#3498DB',           // Bright blue
+  // Border and UI elements - using the 5 colors
+  border: '#2faad6',         // Cyan blue
+  borderDark: '#f35e69',     // Coral red
+  borderLight: '#8fd2b0',    // Mint green
   
-  // AAC Category colors - VIBRANT and BOLD!
-  categoryCore: '#3498DB',      // Bright blue - Core vocabulary
-  categoryPeople: '#9B59B6',    // Rich purple - People
-  categoryActions: '#2ECC71',   // Bright green - Actions/Verbs
-  categoryFeelings: '#F1C40F',  // Bright yellow - Emotions
-  categoryFood: '#E67E22',      // Bright orange - Food
-  categoryHome: '#5DADE2',      // Sky blue - Home
-  categorySchool: '#52BE80',    // Fresh green - School
-  categoryBody: '#F8B739',      // Golden yellow - Body
-  categoryPlaces: '#AF7AC5',    // Lavender - Places
-  categoryRoutines: '#EC7063',  // Coral - Routines
-  categoryQuestions: '#F4D03F', // Gold - Questions
-  categoryColours: '#48C9B0',   // Turquoise - Colors
-  categoryNumbers: '#5DADE2',   // Sky blue - Numbers
-  categoryAnimals: '#EB984E',   // Peach - Animals
-  categoryClothing: '#BB8FCE',  // Light purple - Clothing
-  categoryWeather: '#85C1E2',   // Light blue - Weather
-  categoryTime: '#F1948A',      // Pink - Time
-  categoryToys: '#F8B4D9',      // Light pink - Toys
+  // Status colors - using the 5 colors
+  success: '#8fd2b0',        // Mint green
+  warning: '#f9d809',        // Bright yellow
+  danger: '#f35e69',         // Coral red
+  error: '#f35e69',          // Coral red
+  info: '#2faad6',           // Cyan blue
+  
+  // AAC Category colors - ONLY using the 5 colors
+  categoryCore: '#2faad6',      // Cyan blue - Core vocabulary
+  categoryPeople: '#fb8d98',    // Pink - People
+  categoryActions: '#8fd2b0',   // Mint green - Actions/Verbs
+  categoryFeelings: '#f9d809',  // Bright yellow - Emotions
+  categoryFood: '#f35e69',      // Coral red - Food
+  categoryHome: '#2faad6',      // Cyan blue - Home
+  categorySchool: '#8fd2b0',    // Mint green - School
+  categoryBody: '#f9d809',      // Bright yellow - Body
+  categoryPlaces: '#fb8d98',    // Pink - Places
+  categoryRoutines: '#f35e69',  // Coral red - Routines
+  categoryQuestions: '#f9d809', // Bright yellow - Questions
+  categoryColours: '#2faad6',   // Cyan blue - Colors
+  categoryNumbers: '#8fd2b0',   // Mint green - Numbers
+  categoryAnimals: '#fb8d98',   // Pink - Animals
+  categoryClothing: '#f35e69',  // Coral red - Clothing
+  categoryWeather: '#2faad6',   // Cyan blue - Weather
+  categoryTime: '#f9d809',      // Bright yellow - Time
+  categoryToys: '#fb8d98',      // Pink - Toys
 };
 
 export const commonStyles = StyleSheet.create({

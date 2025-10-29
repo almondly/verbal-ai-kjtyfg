@@ -110,14 +110,7 @@ export default function AdvancedSuggestionsRow({
                 <Icon
                   name={getTypeIcon(suggestion.type)}
                   size={14}
-                  color={
-                    isGrammarCorrection ? '#10B981' :
-                    isFullSentence ? colors.primary : 
-                    isTenseVariation ? colors.warning : 
-                    isCategoryContextual ? '#10B981' :
-                    isPoliteEnding ? '#F59E0B' :
-                    colors.textSecondary
-                  }
+                  color="#000000"
                   style={styles.typeIcon}
                 />
                 <Text style={[
@@ -213,32 +206,32 @@ const styles = StyleSheet.create({
     maxWidth: 140,
   },
   grammarCorrectionSuggestion: {
-    backgroundColor: '#ECFDF5',
-    borderLeftColor: '#10B981',
+    backgroundColor: '#8fd2b0',
+    borderLeftColor: '#8fd2b0',
     borderLeftWidth: 4,
     minWidth: 140,
     maxWidth: 200,
   },
   fullSentenceSuggestion: {
-    backgroundColor: '#EEF2FF',
+    backgroundColor: '#2faad6',
     borderLeftColor: colors.primary,
     borderLeftWidth: 4,
     minWidth: 140,
     maxWidth: 200,
   },
   tenseVariationSuggestion: {
-    backgroundColor: '#FFF7ED',
+    backgroundColor: '#f9d809',
     borderLeftColor: colors.warning,
     borderLeftWidth: 3,
   },
   categoryContextualSuggestion: {
-    backgroundColor: '#ECFDF5',
-    borderLeftColor: '#10B981',
+    backgroundColor: '#8fd2b0',
+    borderLeftColor: '#8fd2b0',
     borderLeftWidth: 3,
   },
   politeEndingSuggestion: {
-    backgroundColor: '#FEF3C7',
-    borderLeftColor: '#F59E0B',
+    backgroundColor: '#f9d809',
+    borderLeftColor: '#f9d809',
     borderLeftWidth: 3,
   },
   suggestionHeader: {
@@ -252,51 +245,51 @@ const styles = StyleSheet.create({
   },
   confidenceText: {
     fontSize: 9,
-    color: colors.textSecondary,
+    color: '#000000',
     fontFamily: 'Montserrat_600SemiBold',
   },
   grammarCorrectionConfidence: {
-    color: '#10B981',
+    color: '#000000',
   },
   fullSentenceConfidence: {
-    color: colors.primary,
+    color: '#000000',
   },
   tenseVariationConfidence: {
-    color: colors.warning,
+    color: '#000000',
   },
   categoryContextualConfidence: {
-    color: '#10B981',
+    color: '#000000',
   },
   politeEndingConfidence: {
-    color: '#F59E0B',
+    color: '#000000',
   },
   suggestionText: {
     fontSize: 12,
     fontFamily: 'Montserrat_600SemiBold',
-    color: colors.text,
+    color: '#000000',
     lineHeight: 16,
   },
   grammarCorrectionText: {
     fontSize: 11,
     lineHeight: 15,
-    color: '#10B981',
+    color: '#000000',
   },
   fullSentenceText: {
     fontSize: 11,
     lineHeight: 15,
-    color: colors.primary,
+    color: '#000000',
   },
   tenseVariationText: {
     fontSize: 12,
-    color: colors.warning,
+    color: '#000000',
   },
   categoryContextualText: {
     fontSize: 12,
-    color: '#10B981',
+    color: '#000000',
   },
   politeEndingText: {
     fontSize: 12,
-    color: '#F59E0B',
+    color: '#000000',
   },
   labelBadge: {
     marginTop: 4,
@@ -305,42 +298,42 @@ const styles = StyleSheet.create({
   grammarLabel: {
     fontSize: 8,
     fontFamily: 'Montserrat_600SemiBold',
-    color: '#10B981',
+    color: '#000000',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   fullSentenceLabel: {
     fontSize: 8,
     fontFamily: 'Montserrat_600SemiBold',
-    color: colors.primary,
+    color: '#000000',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   tenseLabel: {
     fontSize: 8,
     fontFamily: 'Montserrat_600SemiBold',
-    color: colors.warning,
+    color: '#000000',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   categoryLabel: {
     fontSize: 8,
     fontFamily: 'Montserrat_600SemiBold',
-    color: '#10B981',
+    color: '#000000',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   politeLabel: {
     fontSize: 8,
     fontFamily: 'Montserrat_600SemiBold',
-    color: '#F59E0B',
+    color: '#000000',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   hintText: {
     fontSize: 10,
     fontFamily: 'Montserrat_400Regular',
-    color: colors.textSecondary,
+    color: '#000000',
     textAlign: 'center',
     marginTop: 6,
     fontStyle: 'italic',

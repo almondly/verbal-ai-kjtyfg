@@ -73,7 +73,7 @@ export default function MainMenu() {
               onPress={handleStartCommunication}
               activeOpacity={0.9}
             >
-              <Icon name="grid-outline" size={20} color="#FFFFFF" />
+              <Icon name="grid-outline" size={20} color="#000000" />
               <Text style={styles.actionButtonText}>Start</Text>
             </TouchableOpacity>
 
@@ -82,7 +82,7 @@ export default function MainMenu() {
               onPress={handleOpenSettings}
               activeOpacity={0.9}
             >
-              <Icon name="settings-outline" size={14} color={colors.primary} />
+              <Icon name="settings-outline" size={14} color="#000000" />
               <Text style={styles.settingsButtonText}>Settings</Text>
             </TouchableOpacity>
           </View>
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontFamily: 'Montserrat_700Bold',
-    color: colors.primary,
+    color: '#000000',
     textAlign: 'center',
   },
   content: {
@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
   actionButtonText: {
     fontSize: 14,
     fontFamily: 'Montserrat_700Bold',
-    color: '#FFFFFF',
+    color: '#000000',
     textAlign: 'center',
   },
   settingsButton: {
@@ -167,6 +167,6 @@ const styles = StyleSheet.create({
   settingsButtonText: {
     fontSize: 11,
     fontFamily: 'Montserrat_700Bold',
-    color: colors.primary,
+    color: '#000000',
   },
 });

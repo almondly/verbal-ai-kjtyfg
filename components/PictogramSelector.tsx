@@ -101,7 +101,7 @@ export default function PictogramSelector({ word, onSelect, onClose }: Props) {
       <View style={styles.header}>
         <Text style={styles.title}>Select Pictogram for &quot;{word}&quot;</Text>
         <TouchableOpacity onPress={onClose} style={styles.closeBtn} activeOpacity={0.8}>
-          <Icon name="close-outline" size={28} color={colors.text} />
+          <Icon name="close-outline" size={28} color="#000000" />
         </TouchableOpacity>
       </View>
 
@@ -121,7 +121,7 @@ export default function PictogramSelector({ word, onSelect, onClose }: Props) {
           onPress={handleSearch}
           activeOpacity={0.8}
         >
-          <Icon name="search-outline" size={24} color="#FFFFFF" />
+          <Icon name="search-outline" size={24} color="#000000" />
         </TouchableOpacity>
       </View>
 
@@ -180,7 +180,7 @@ export default function PictogramSelector({ word, onSelect, onClose }: Props) {
 
       {!loading && !error && pictograms.length === 0 && (
         <View style={styles.emptyContainer}>
-          <Icon name="images-outline" size={64} color={colors.textSecondary} />
+          <Icon name="images-outline" size={64} color="#000000" />
           <Text style={styles.emptyText}>No pictograms found</Text>
           <Text style={styles.emptySubtext}>Try a different search term</Text>
         </View>
@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontFamily: 'Montserrat_700Bold',
-    color: colors.text,
+    color: '#000000',
     flex: 1,
   },
   closeBtn: {
@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     paddingHorizontal: 16,
     paddingVertical: 14,
-    color: colors.text,
+    color: '#000000',
     fontSize: 16,
     fontFamily: 'Montserrat_400Regular',
   },
@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
   variantLabel: {
     fontSize: 14,
     fontFamily: 'Montserrat_600SemiBold',
-    color: colors.text,
+    color: '#000000',
     marginBottom: 8,
   },
   variantButtons: {
@@ -301,15 +301,15 @@ const styles = StyleSheet.create({
   variantBtnText: {
     fontSize: 13,
     fontFamily: 'Montserrat_600SemiBold',
-    color: colors.textSecondary,
+    color: '#000000',
   },
   variantBtnTextActive: {
-    color: colors.primary,
+    color: '#000000',
   },
   helperText: {
     fontSize: 12,
     fontFamily: 'Montserrat_400Regular',
-    color: colors.textSecondary,
+    color: '#000000',
     marginBottom: 16,
     fontStyle: 'italic',
   },
@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: 16,
     fontFamily: 'Montserrat_600SemiBold',
-    color: colors.textSecondary,
+    color: '#000000',
   },
   errorContainer: {
     flex: 1,
@@ -347,7 +347,7 @@ const styles = StyleSheet.create({
   retryBtnText: {
     fontSize: 16,
     fontFamily: 'Montserrat_600SemiBold',
-    color: '#FFFFFF',
+    color: '#000000',
   },
   emptyContainer: {
     flex: 1,
@@ -358,12 +358,12 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 18,
     fontFamily: 'Montserrat_600SemiBold',
-    color: colors.text,
+    color: '#000000',
   },
   emptySubtext: {
     fontSize: 14,
     fontFamily: 'Montserrat_400Regular',
-    color: colors.textSecondary,
+    color: '#000000',
   },
   resultsContainer: {
     flex: 1,
@@ -404,7 +404,7 @@ const styles = StyleSheet.create({
   pictogramKeywords: {
     fontSize: 12,
     fontFamily: 'Montserrat_600SemiBold',
-    color: colors.text,
+    color: '#000000',
     textAlign: 'center',
   },
 });
