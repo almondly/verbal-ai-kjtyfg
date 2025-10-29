@@ -54,14 +54,13 @@ export default function MainMenu() {
 
         {/* Main Content */}
         <View style={styles.content}>
-          {/* Logo / Emotion Display - MUCH LARGER */}
+          {/* Emotion Display - MUCH LARGER */}
           <View style={styles.emotionSection}>
             <View style={styles.emotionContainer}>
-              {/* Display admin-controlled logo image */}
-              <Image 
-                source={ADMIN_LOGO} 
-                style={[styles.logoImage, { width: faceSize * 0.8, height: faceSize * 0.8 }]}
-                resizeMode="contain"
+              {/* Display selected emotion face */}
+              <EmotionFace 
+                emotion={settings.selectedEmotion} 
+                size={faceSize * 0.8}
               />
             </View>
           </View>
