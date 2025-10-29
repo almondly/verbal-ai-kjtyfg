@@ -263,18 +263,14 @@ export default function KeyboardScreen() {
           )}
         </ScrollView>
 
-        {/* Category Bar */}
-        <ScrollView 
-          style={styles.categoryBarContainer}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-        >
+        {/* Category Bar - FIXED: Added proper positioning */}
+        <View style={styles.categoryBarContainer}>
           <CategoryBar
             categories={categories}
             selectedId={selectedCategory}
             onSelect={handleCategorySelect}
           />
-        </ScrollView>
+        </View>
       </View>
     </LandscapeGuard>
   );
@@ -293,6 +289,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.backgroundAlt,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
+    zIndex: 10,
+    elevation: 10,
   },
   backButton: {
     flexDirection: 'row',
@@ -328,6 +326,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.backgroundAlt,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
+    zIndex: 9,
+    elevation: 9,
   },
   textInput: {
     backgroundColor: colors.background,
@@ -436,6 +436,8 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.border,
     minHeight: 100,
     maxHeight: 120,
+    zIndex: 8,
+    elevation: 8,
   },
   suggestions: {
     flex: 1,
@@ -455,6 +457,7 @@ const styles = StyleSheet.create({
   categoryBarContainer: {
     paddingHorizontal: 16,
     paddingVertical: 12,
-    maxHeight: 60,
+    zIndex: 7,
+    elevation: 7,
   },
 });

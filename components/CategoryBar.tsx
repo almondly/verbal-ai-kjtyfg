@@ -91,6 +91,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     boxShadow: '0px 2px 6px rgba(0,0,0,0.12)',
+    zIndex: 100,
+    elevation: 100,
   },
   row: {
     alignItems: 'center',

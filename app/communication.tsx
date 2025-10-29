@@ -302,18 +302,14 @@ export default function CommunicationScreen() {
           )}
         </ScrollView>
 
-        {/* Category Bar */}
-        <ScrollView 
-          style={styles.categoryBarContainer}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-        >
+        {/* Category Bar - FIXED: Added proper positioning */}
+        <View style={styles.categoryBarContainer}>
           <CategoryBar
             categories={categories}
             selectedId={selectedCategory}
             onSelect={handleCategorySelect}
           />
-        </ScrollView>
+        </View>
 
         {/* Tiles Grid */}
         <View style={styles.gridContainer}>
@@ -374,6 +370,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.backgroundAlt,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
+    zIndex: 10,
+    elevation: 10,
   },
   backButton: {
     flexDirection: 'row',
@@ -407,6 +405,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 12,
     paddingBottom: 8,
+    zIndex: 9,
+    elevation: 9,
   },
   predictorContainer: {
     paddingHorizontal: 16,
@@ -417,6 +417,8 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     minHeight: 100,
     maxHeight: 120,
+    zIndex: 8,
+    elevation: 8,
   },
   suggestions: {
     flex: 1,
@@ -436,12 +438,15 @@ const styles = StyleSheet.create({
   categoryBarContainer: {
     paddingHorizontal: 16,
     paddingVertical: 8,
-    maxHeight: 60,
+    zIndex: 7,
+    elevation: 7,
   },
   gridContainer: {
     flex: 1,
     paddingHorizontal: 16,
     paddingTop: 8,
+    zIndex: 1,
+    elevation: 1,
   },
   gridScrollView: {
     flex: 1,

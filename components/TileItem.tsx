@@ -47,11 +47,17 @@ const TileItem = memo(function TileItem({
   // Get the category color for this tile
   const getCategoryColor = () => {
     if (isAdd) return colors.borderLight;
-    if (tile.color) return tile.color;
+    
+    // First check if tile has a category and find matching category color
     if (tile.category) {
       const category = categories.find(cat => cat.id === tile.category);
       if (category) return category.color;
     }
+    
+    // Fallback to tile's own color if set
+    if (tile.color) return tile.color;
+    
+    // Final fallback
     return colors.primary;
   };
 
@@ -90,9 +96,9 @@ const TileItem = memo(function TileItem({
         style={[
           styles.tile, 
           { 
-            backgroundColor: '#FFFFFF',
+            backgroundColor: tileColor,
             borderColor: tileColor,
-            borderWidth: 40,
+            borderWidth: 4,
           }
         ]}
       >
@@ -124,12 +130,12 @@ const TileItem = memo(function TileItem({
               }}
             />
           ) : shouldShowIcon ? (
-            <Icon name="add-circle" size={80} color={tileColor} />
+            <Icon name="add-circle" size={80} color={colors.text} />
           ) : null}
         </View>
         <View style={styles.textContainer}>
           <Text 
-            style={[styles.text, { fontSize, color: colors.text }]} 
+            style={[styles.text, { fontSize, color: '#000000' }]} 
             numberOfLines={2} 
             ellipsizeMode="tail"
           >
