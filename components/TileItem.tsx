@@ -57,11 +57,11 @@ const TileItem = memo(function TileItem({
 
   // FIXED: Reduced font size for better fit
   const getResponsiveFontSize = () => {
-    if (width >= 1400) return 32;
-    if (width >= 1200) return 30;
-    if (width >= 1000) return 28;
-    if (width >= 820) return 24;
-    if (width >= 680) return 22;
+    if (width >= 1400) return 30;
+    if (width >= 1200) return 28;
+    if (width >= 1000) return 26;
+    if (width >= 820) return 22;
+    if (width >= 680) return 20;
     return 14;
   };
 
@@ -101,7 +101,6 @@ const TileItem = memo(function TileItem({
             <Image
               source={{ 
                 uri: tile.image,
-                // PERFORMANCE: Reduce image quality for faster loading
                 cache: 'force-cache',
               }}
               style={styles.pictogramImage}
@@ -110,14 +109,11 @@ const TileItem = memo(function TileItem({
                 console.log('Failed to load ARASAAC pictogram for tile:', tile.text, tile.image, error.nativeEvent.error);
                 setPictogramError(true);
               }}
-              // PERFORMANCE: Reduce quality to 0.6 (60%) for faster loading
-              defaultSource={require('../assets/images/natively-dark.png')}
             />
           ) : hasCustomImage ? (
             <Image
               source={{ 
                 uri: tile.imageUrl || tile.imageUri,
-                // PERFORMANCE: Reduce image quality for faster loading
                 cache: 'force-cache',
               }}
               style={styles.customImage}
@@ -126,8 +122,6 @@ const TileItem = memo(function TileItem({
                 console.log('Failed to load custom image for tile:', tile.text, tile.imageUrl || tile.imageUri, error.nativeEvent.error);
                 setCustomImageError(true);
               }}
-              // PERFORMANCE: Reduce quality to 0.6 (60%) for faster loading
-              defaultSource={require('../assets/images/natively-dark.png')}
             />
           ) : shouldShowIcon ? (
             <Icon name="add-circle" size={80} color={tileColor} />
@@ -190,7 +184,7 @@ const styles = StyleSheet.create({
   text: {
     fontFamily: 'Montserrat_700Bold',
     textAlign: 'center',
-    lineHeight: 26,
+    lineHeight: 24,
     paddingHorizontal: 2,
   },
 });

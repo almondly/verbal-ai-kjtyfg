@@ -28,14 +28,14 @@ export default function KeyboardScreen() {
 
   // Idle detection - navigate to home after 30 seconds
   const { resetTimer } = useIdleDetection({
-    timeout: 30000, // 30 seconds (changed from 60 seconds)
+    timeout: 30000, // 30 seconds
     onIdle: () => {
       console.log('User idle for 30 seconds, navigating to home screen');
       router.push('/main-menu');
     },
   });
 
-  // Create a PanResponder to capture ALL touch events on the screen
+  // Create a PanResponder to capture ALL touch events on the screen, including scrolling
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => {
@@ -43,7 +43,7 @@ export default function KeyboardScreen() {
         return false; // Don't capture the event, just reset timer
       },
       onMoveShouldSetPanResponder: () => {
-        resetTimer();
+        resetTimer(); // Reset timer on scroll/drag movements
         return false; // Don't capture the event, just reset timer
       },
       onPanResponderTerminationRequest: () => true,
@@ -61,16 +61,14 @@ export default function KeyboardScreen() {
   useEffect(() => {
     (async () => {
       if (!typedText.trim()) {
-        // Show initial suggestions when no text is typed
         const timeBased = await getTimeBasedSuggestions();
         const initialSuggestions = timeBased.slice(0, 10).map((phrase, index) => ({
-          text: phrase.split(' ')[0], // Get first word of common phrases
+          text: phrase.split(' ')[0],
           confidence: Math.max(0.6, 0.8 - index * 0.05),
           type: 'temporal' as const,
           context: 'Common starter word'
         }));
         
-        // Add some common starter words if we don't have enough
         const commonStarters = ['I', 'you', 'want', 'need', 'can', 'what', 'where', 'help', 'please', 'like'];
         commonStarters.forEach((word, index) => {
           if (!initialSuggestions.some(s => s.text.toLowerCase() === word.toLowerCase())) {
@@ -107,7 +105,7 @@ export default function KeyboardScreen() {
   }, [typedText, getAdvancedSuggestions, getTimeBasedSuggestions, selectedCategory]);
 
   const handleDeleteLastWord = useCallback(() => {
-    resetTimer(); // Reset idle timer on user activity
+    resetTimer();
     setTypedText(prev => {
       const words = prev.trim().split(/\s+/);
       if (words.length === 0 || (words.length === 1 && !words[0])) return '';
@@ -117,7 +115,7 @@ export default function KeyboardScreen() {
   }, [resetTimer]);
 
   const handleReplayLastSentence = useCallback(async () => {
-    resetTimer(); // Reset idle timer on user activity
+    resetTimer();
     if (!lastSpokenText.trim()) return;
     
     const normalized = normalizeForTTS(lastSpokenText);
@@ -125,16 +123,14 @@ export default function KeyboardScreen() {
   }, [lastSpokenText, speak, resetTimer]);
 
   const handleSpeak = useCallback(async () => {
-    resetTimer(); // Reset idle timer on user activity
+    resetTimer();
     if (!typedText.trim()) return;
     
     const normalized = normalizeForTTS(typedText);
     await speak(normalized);
     
-    // Store the last spoken text for replay
     setLastSpokenText(typedText);
     
-    // Record the sentence for AI learning
     await recordUserInput(typedText, selectedCategory !== 'all' ? selectedCategory : undefined);
   }, [typedText, speak, recordUserInput, selectedCategory, resetTimer]);
 
@@ -153,23 +149,20 @@ export default function KeyboardScreen() {
   };
 
   const handleBackToMenu = useCallback(() => {
-    resetTimer(); // Reset idle timer on user activity
+    resetTimer();
     router.push('/main-menu');
   }, [router, resetTimer]);
 
   const handleOpenSettings = useCallback(() => {
-    resetTimer(); // Reset idle timer on user activity
+    resetTimer();
     router.push('/settings');
   }, [router, resetTimer]);
 
-  // Handle suggestion press with full sentence replacement logic
   const handleSuggestionPress = useCallback((text: string, isFullSentence: boolean) => {
-    resetTimer(); // Reset idle timer on user activity
+    resetTimer();
     if (isFullSentence) {
-      // Replace entire text with the full sentence
       setTypedText(text);
     } else {
-      // Add word to existing text
       setTypedText(prev => {
         const trimmed = prev.trim();
         return trimmed ? `${trimmed} ${text}` : text;
@@ -178,17 +171,17 @@ export default function KeyboardScreen() {
   }, [resetTimer]);
 
   const handleTextChange = useCallback((text: string) => {
-    resetTimer(); // Reset idle timer on EVERY keystroke/text change
+    resetTimer();
     setTypedText(text);
   }, [resetTimer]);
 
   const handleClearText = useCallback(() => {
-    resetTimer(); // Reset idle timer on user activity
+    resetTimer();
     setTypedText('');
   }, [resetTimer]);
 
   const handleCategorySelect = useCallback((categoryId: string) => {
-    resetTimer(); // Reset idle timer on user activity
+    resetTimer();
     setSelectedCategory(categoryId);
   }, [resetTimer]);
 
@@ -279,14 +272,18 @@ export default function KeyboardScreen() {
         </View>
 
         {/* AI Suggestions */}
-        <View style={styles.suggestionsContainer}>
+        <ScrollView 
+          style={styles.suggestionsContainer}
+          onScroll={resetTimer}
+          scrollEventThrottle={16}
+          showsVerticalScrollIndicator={false}
+        >
           {advancedSuggestions.length > 0 ? (
             <AdvancedSuggestionsRow
               suggestions={advancedSuggestions}
               onPressSuggestion={handleSuggestionPress}
               onRemoveWord={(word) => {
-                resetTimer(); // Reset idle timer on user activity
-                // Remove the word from the typed text when tense is changed
+                resetTimer();
                 setTypedText(prev => {
                   const words = prev.trim().split(/\s+/);
                   const index = words.findIndex(w => w.toLowerCase() === word.toLowerCase());
@@ -306,16 +303,22 @@ export default function KeyboardScreen() {
               </Text>
             </View>
           )}
-        </View>
+        </ScrollView>
 
         {/* Category Bar */}
-        <View style={styles.categoryBarContainer}>
+        <ScrollView 
+          style={styles.categoryBarContainer}
+          horizontal
+          onScroll={resetTimer}
+          scrollEventThrottle={16}
+          showsHorizontalScrollIndicator={false}
+        >
           <CategoryBar
             categories={categories}
             selectedId={selectedCategory}
             onSelect={handleCategorySelect}
           />
-        </View>
+        </ScrollView>
       </View>
     </LandscapeGuard>
   );
@@ -496,5 +499,6 @@ const styles = StyleSheet.create({
   categoryBarContainer: {
     paddingHorizontal: 16,
     paddingVertical: 12,
+    maxHeight: 60,
   },
 });

@@ -1,6 +1,6 @@
 
 import { memo, useCallback } from 'react';
-import { View, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { Tile } from '../types';
 import TileItem from './TileItem';
 
@@ -21,103 +21,73 @@ const CommunicationGrid = memo(function CommunicationGrid({
   onAddTile,
   selectedCategory,
 }: Props) {
+  const handleTilePress = useCallback((tile: Tile) => {
+    onTilePress(tile);
+  }, [onTilePress]);
+
   const handleTileLongPress = useCallback((tile: Tile) => {
-    if (tile.id.startsWith('custom-')) {
-      Alert.alert(
-        'Tile Options',
-        'What would you like to do with this tile?',
-        [
-          {
-            text: 'Edit',
-            onPress: () => onTileEdit?.(tile),
-          },
-          {
-            text: 'Delete',
-            onPress: () => onTileLongPress?.(tile),
-            style: 'destructive',
-          },
-          {
-            text: 'Cancel',
-            style: 'cancel',
-          },
-        ]
-      );
-    } else {
-      // For default tiles, allow editing to add pictograms
-      Alert.alert(
-        'Edit Tile',
-        'Would you like to customize this tile?',
-        [
-          {
-            text: 'Edit',
-            onPress: () => onTileEdit?.(tile),
-          },
-          {
-            text: 'Cancel',
-            style: 'cancel',
-          },
-        ]
-      );
+    if (onTileLongPress) {
+      onTileLongPress(tile);
     }
-  }, [onTileLongPress, onTileEdit]);
+  }, [onTileLongPress]);
 
-  // PERFORMANCE: Add "Add Tile" button to the data array
-  const dataWithAddButton = selectedCategory && selectedCategory !== 'all' && onAddTile
-    ? [...tiles, {
-        id: 'add-tile',
-        text: 'Add Tile',
-        color: '#E5E7EB',
-      } as Tile]
-    : tiles;
-
-  // PERFORMANCE: Use FlatList for better performance with many tiles
-  const renderItem = useCallback(({ item }: { item: Tile }) => {
-    if (item.id === 'add-tile') {
-      return (
-        <TileItem
-          tile={item}
-          onPress={onAddTile!}
-          isAdd
-          itemPercent={20}
-        />
-      );
+  const handleTileEdit = useCallback((tile: Tile) => {
+    if (onTileEdit) {
+      onTileEdit(tile);
     }
-    
-    return (
-      <TileItem
-        key={item.id}
-        tile={item}
-        onPress={() => onTilePress(item)}
-        onLongPress={() => handleTileLongPress(item)}
-        itemPercent={20}
-      />
-    );
-  }, [onTilePress, handleTileLongPress, onAddTile]);
+  }, [onTileEdit]);
 
-  const keyExtractor = useCallback((item: Tile) => item.id, []);
+  const handleAddTile = useCallback(() => {
+    if (onAddTile) {
+      onAddTile();
+    }
+  }, [onAddTile]);
+
+  // Add tile for adding new tiles (only show in specific categories, not 'all' or 'keyboard')
+  const showAddTile = selectedCategory && selectedCategory !== 'all' && selectedCategory !== 'keyboard';
+  const addTile: Tile = {
+    id: 'add-tile',
+    text: 'Add Tile',
+    color: '#E0E0E0',
+    category: selectedCategory || 'core',
+  };
+
+  const allTiles = showAddTile ? [...tiles, addTile] : tiles;
 
   return (
-    <FlatList
-      data={dataWithAddButton}
-      renderItem={renderItem}
-      keyExtractor={keyExtractor}
-      numColumns={5}
+    <ScrollView 
       style={styles.container}
-      contentContainerStyle={styles.content}
+      contentContainerStyle={styles.contentContainer}
       showsVerticalScrollIndicator={false}
-      // PERFORMANCE: Optimize rendering
-      removeClippedSubviews={true}
-      maxToRenderPerBatch={10}
-      updateCellsBatchingPeriod={50}
-      initialNumToRender={15}
-      windowSize={5}
-      // PERFORMANCE: Use getItemLayout for better scrolling performance
-      getItemLayout={(data, index) => ({
-        length: 120, // Approximate item height
-        offset: 120 * Math.floor(index / 5),
-        index,
-      })}
-    />
+      onScroll={() => {
+        // This will be handled by the parent's PanResponder
+        // The parent component should pass resetTimer as a prop if needed
+      }}
+      scrollEventThrottle={16}
+    >
+      <View style={styles.grid}>
+        {allTiles.map((tile) => (
+          <TileItem
+            key={tile.id}
+            tile={tile}
+            onPress={() => {
+              if (tile.id === 'add-tile') {
+                handleAddTile();
+              } else {
+                handleTilePress(tile);
+              }
+            }}
+            onLongPress={() => {
+              if (tile.id !== 'add-tile') {
+                handleTileEdit(tile);
+              }
+            }}
+            isAdd={tile.id === 'add-tile'}
+            itemPercent={20}
+          />
+        ))}
+      </View>
+    </ScrollView>
   );
 });
 
@@ -127,8 +97,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  content: {
-    paddingBottom: 30,
-    paddingTop: 8,
+  contentContainer: {
+    paddingBottom: 20,
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
   },
 });

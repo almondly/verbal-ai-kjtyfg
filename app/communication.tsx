@@ -36,14 +36,14 @@ export default function CommunicationScreen() {
 
   // Idle detection - navigate to home after 30 seconds
   const { resetTimer } = useIdleDetection({
-    timeout: 30000, // 30 seconds (changed from 60 seconds)
+    timeout: 30000, // 30 seconds
     onIdle: () => {
       console.log('User idle for 30 seconds, navigating to home screen');
       router.push('/main-menu');
     },
   });
 
-  // Create a PanResponder to capture ALL touch events on the screen
+  // Create a PanResponder to capture ALL touch events on the screen, including scrolling
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => {
@@ -51,7 +51,7 @@ export default function CommunicationScreen() {
         return false; // Don't capture the event, just reset timer
       },
       onMoveShouldSetPanResponder: () => {
-        resetTimer();
+        resetTimer(); // Reset timer on scroll/drag movements
         return false; // Don't capture the event, just reset timer
       },
       onPanResponderTerminationRequest: () => true,
@@ -61,7 +61,7 @@ export default function CommunicationScreen() {
   const { getAdvancedSuggestions, getTimeBasedSuggestions, recordUserInput } = useAdvancedAI();
   const { currentEmotion, setCurrentEmotion } = useEmotionSettings();
   const [sentence, setSentence] = useState<Tile[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState('core'); // CHANGED: Default to 'core' instead of 'all'
+  const [selectedCategory, setSelectedCategory] = useState('core');
   const { tiles, addTile, updateTile, removeTile, resetTiles } = useLibrary();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [advancedSuggestions, setAdvancedSuggestions] = useState<any[]>([]);
@@ -73,14 +73,13 @@ export default function CommunicationScreen() {
   useEffect(() => {
     if (selectedCategory === 'keyboard') {
       router.push('/keyboard');
-      // Reset to 'core' after navigation so when user comes back it's on core
       setSelectedCategory('core');
     }
   }, [selectedCategory, router]);
 
   const filteredTiles = useMemo(() => {
     if (selectedCategory === 'all') return tiles;
-    if (selectedCategory === 'keyboard') return []; // No tiles for keyboard category
+    if (selectedCategory === 'keyboard') return [];
     return tiles.filter(t => t.category === selectedCategory);
   }, [tiles, selectedCategory]);
 
@@ -89,16 +88,14 @@ export default function CommunicationScreen() {
   useEffect(() => {
     (async () => {
       if (sentence.length === 0) {
-        // Show initial suggestions when no sentence is built
         const timeBased = await getTimeBasedSuggestions();
         const initialSuggestions = timeBased.slice(0, 10).map((phrase, index) => ({
-          text: phrase.split(' ')[0], // Get first word of common phrases
+          text: phrase.split(' ')[0],
           confidence: Math.max(0.6, 0.8 - index * 0.05),
           type: 'temporal' as const,
           context: 'Common starter word'
         }));
         
-        // Add some common starter words if we don't have enough
         const commonStarters = ['I', 'you', 'want', 'need', 'can', 'what', 'where', 'help', 'please', 'like'];
         commonStarters.forEach((word, index) => {
           if (!initialSuggestions.some(s => s.text.toLowerCase() === word.toLowerCase())) {
@@ -118,11 +115,8 @@ export default function CommunicationScreen() {
       const words = sentence.map(t => t.text);
       const availableWords = tiles.map(t => t.text);
       
-      // CRITICAL FIX: Pass the current category AND the category tiles information
-      // Don't pass 'keyboard' category as it should redirect
       const categoryForAI = (selectedCategory !== 'all' && selectedCategory !== 'keyboard') ? selectedCategory : undefined;
       
-      // Create category tiles mapping for proper filtering
       const categoryTiles = tiles.map(tile => ({
         text: tile.text,
         category: tile.category || 'core'
@@ -154,40 +148,40 @@ export default function CommunicationScreen() {
   }, [sentence, tiles, getAdvancedSuggestions, getTimeBasedSuggestions, selectedCategory]);
 
   const handleTilePress = useCallback((tile: Tile) => {
-    resetTimer(); // Reset idle timer on user activity
+    resetTimer();
     setSentence(prev => [...prev, tile]);
   }, [resetTimer]);
 
   const handleTileLongPress = useCallback((tile: Tile) => {
-    resetTimer(); // Reset idle timer on user activity
+    resetTimer();
     if (tile.id.startsWith('custom-')) {
       removeTile(tile.id);
     }
   }, [removeTile, resetTimer]);
 
   const handleTileEdit = useCallback((tile: Tile) => {
-    resetTimer(); // Reset idle timer on user activity
+    resetTimer();
     setEditingTile(tile);
   }, [resetTimer]);
 
   const handleSaveEdit = useCallback((updatedTile: Tile) => {
-    resetTimer(); // Reset idle timer on user activity
+    resetTimer();
     updateTile(updatedTile);
     setEditingTile(null);
   }, [updateTile, resetTimer]);
 
   const handleRemoveFromSentence = useCallback((index: number) => {
-    resetTimer(); // Reset idle timer on user activity
+    resetTimer();
     setSentence(prev => prev.filter((_, i) => i !== index));
   }, [resetTimer]);
 
   const handleClearSentence = useCallback(() => {
-    resetTimer(); // Reset idle timer on user activity
+    resetTimer();
     setSentence([]);
   }, [resetTimer]);
 
   const handleDeleteLastWord = useCallback(() => {
-    resetTimer(); // Reset idle timer on user activity
+    resetTimer();
     setSentence(prev => {
       if (prev.length === 0) return prev;
       return prev.slice(0, -1);
@@ -195,7 +189,7 @@ export default function CommunicationScreen() {
   }, [resetTimer]);
 
   const handleReplayLastSentence = useCallback(async () => {
-    resetTimer(); // Reset idle timer on user activity
+    resetTimer();
     if (!lastSpokenText.trim()) return;
     
     const normalized = normalizeForTTS(lastSpokenText);
@@ -203,21 +197,18 @@ export default function CommunicationScreen() {
   }, [lastSpokenText, speak, resetTimer]);
 
   const handleSpeak = useCallback(async () => {
-    resetTimer(); // Reset idle timer on user activity
+    resetTimer();
     const text = sentence.map(t => t.text).join(' ');
     if (!text.trim()) return;
     
     const normalized = normalizeForTTS(text);
     await speak(normalized);
     
-    // Store the last spoken text for replay
     setLastSpokenText(text);
     
-    // Record the sentence for AI learning with category context
     const categoryForAI = (selectedCategory !== 'all' && selectedCategory !== 'keyboard') ? selectedCategory : undefined;
     await recordUserInput(text, categoryForAI);
     
-    // Clear the sentence after speaking
     setSentence([]);
   }, [sentence, speak, recordUserInput, selectedCategory, resetTimer]);
 
@@ -236,20 +227,18 @@ export default function CommunicationScreen() {
   };
 
   const handleBackToMenu = useCallback(() => {
-    resetTimer(); // Reset idle timer on user activity
+    resetTimer();
     router.push('/main-menu');
   }, [router, resetTimer]);
 
   const handleOpenSettings = useCallback(() => {
-    resetTimer(); // Reset idle timer on user activity
+    resetTimer();
     router.push('/settings');
   }, [router, resetTimer]);
 
-  // Handle suggestion press with full sentence replacement logic
   const handleSuggestionPress = useCallback((text: string, isFullSentence: boolean) => {
-    resetTimer(); // Reset idle timer on user activity
+    resetTimer();
     if (isFullSentence) {
-      // Clear existing sentence and replace with the full sentence
       const words = text.split(' ');
       const newSentence = words.map((word, index) => ({
         id: `suggestion-${Date.now()}-${index}`,
@@ -259,7 +248,6 @@ export default function CommunicationScreen() {
       }));
       setSentence(newSentence);
     } else {
-      // Add word to existing sentence
       const tile: Tile = {
         id: `suggestion-${Date.now()}`,
         text,
@@ -271,17 +259,17 @@ export default function CommunicationScreen() {
   }, [handleTilePress, resetTimer]);
 
   const handleCategorySelect = useCallback((categoryId: string) => {
-    resetTimer(); // Reset idle timer on user activity
+    resetTimer();
     setSelectedCategory(categoryId);
   }, [resetTimer]);
 
   const handleSettingsOpen = useCallback(() => {
-    resetTimer(); // Reset idle timer on user activity
+    resetTimer();
     setSettingsOpen(true);
   }, [resetTimer]);
 
   const handleSettingsClose = useCallback(() => {
-    resetTimer(); // Reset idle timer on user activity
+    resetTimer();
     setSettingsOpen(false);
   }, [resetTimer]);
 
@@ -328,15 +316,19 @@ export default function CommunicationScreen() {
           />
         </View>
 
-        {/* AI Sentence Predictor / Recommendations - NO TITLE */}
-        <View style={styles.predictorContainer}>
+        {/* AI Sentence Predictor / Recommendations */}
+        <ScrollView 
+          style={styles.predictorContainer}
+          onScroll={resetTimer}
+          scrollEventThrottle={16}
+          showsVerticalScrollIndicator={false}
+        >
           {advancedSuggestions.length > 0 ? (
             <AdvancedSuggestionsRow
               suggestions={advancedSuggestions}
               onPressSuggestion={handleSuggestionPress}
               onRemoveWord={(word) => {
-                resetTimer(); // Reset idle timer on user activity
-                // Remove the word from the sentence when tense is changed
+                resetTimer();
                 setSentence(prev => {
                   const index = prev.findIndex(t => t.text.toLowerCase() === word.toLowerCase());
                   if (index !== -1) {
@@ -354,30 +346,43 @@ export default function CommunicationScreen() {
               </Text>
             </View>
           )}
-        </View>
+        </ScrollView>
 
         {/* Category Bar */}
-        <View style={styles.categoryBarContainer}>
+        <ScrollView 
+          style={styles.categoryBarContainer}
+          horizontal
+          onScroll={resetTimer}
+          scrollEventThrottle={16}
+          showsHorizontalScrollIndicator={false}
+        >
           <CategoryBar
             categories={categories}
             selectedId={selectedCategory}
             onSelect={handleCategorySelect}
           />
-        </View>
+        </ScrollView>
 
         {/* Tiles Grid */}
         <View style={styles.gridContainer}>
-          <CommunicationGrid
-            tiles={filteredTiles}
-            onTilePress={handleTilePress}
-            onTileLongPress={handleTileLongPress}
-            onTileEdit={handleTileEdit}
-            onAddTile={handleSettingsOpen}
-            selectedCategory={selectedCategory}
-          />
+          <ScrollView
+            style={styles.gridScrollView}
+            onScroll={resetTimer}
+            scrollEventThrottle={16}
+            showsVerticalScrollIndicator={false}
+          >
+            <CommunicationGrid
+              tiles={filteredTiles}
+              onTilePress={handleTilePress}
+              onTileLongPress={handleTileLongPress}
+              onTileEdit={handleTileEdit}
+              onAddTile={handleSettingsOpen}
+              selectedCategory={selectedCategory}
+            />
+          </ScrollView>
         </View>
 
-        {/* Settings Sheet - Only for adding tiles */}
+        {/* Settings Sheet */}
         <TabbedSettingsSheet
           open={settingsOpen}
           onClose={handleSettingsClose}
@@ -397,7 +402,7 @@ export default function CommunicationScreen() {
             tile={editingTile}
             onSave={handleSaveEdit}
             onClose={() => {
-              resetTimer(); // Reset idle timer on user activity
+              resetTimer();
               setEditingTile(null);
             }}
           />
@@ -482,10 +487,14 @@ const styles = StyleSheet.create({
   categoryBarContainer: {
     paddingHorizontal: 16,
     paddingVertical: 8,
+    maxHeight: 60,
   },
   gridContainer: {
     flex: 1,
     paddingHorizontal: 16,
     paddingTop: 8,
+  },
+  gridScrollView: {
+    flex: 1,
   },
 });
