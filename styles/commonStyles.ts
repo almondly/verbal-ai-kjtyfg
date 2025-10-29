@@ -1,7 +1,7 @@
 
 import { StyleSheet } from 'react-native';
 
-// Restricted 5-color palette - ONLY these colors allowed!
+// Restricted 5-color palette - ONLY these colors allowed for colored elements!
 export const colors = {
   // The 5 approved colors
   color1: '#2faad6',  // Cyan blue
@@ -15,10 +15,10 @@ export const colors = {
   secondary: '#f35e69',      // Coral red
   accent: '#8fd2b0',         // Mint green
   
-  // Background colors - using the 5 colors
-  background: '#8fd2b0',     // Mint green background
-  backgroundAlt: '#2faad6',  // Cyan blue alt
-  surface: '#fb8d98',        // Pink surface
+  // Background colors - WHITE backgrounds restored
+  background: '#FFFFFF',     // White background
+  backgroundAlt: '#2faad6',  // Cyan blue for colored sections (CategoryBar, PhraseBar)
+  surface: '#fb8d98',        // Pink surface for suggestions
   
   // Text colors - ONLY BLACK
   text: '#000000',           // Black text ONLY
