@@ -248,7 +248,7 @@ export default function CommunicationScreen() {
           </TouchableOpacity>
 
           <View style={styles.emotionContainer}>
-            <EmotionFace emotion={currentEmotion} size={50} />
+            <EmotionFace emotion={currentEmotion} size={80} />
           </View>
 
           <TouchableOpacity 
@@ -366,12 +366,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingVertical: 12,
     backgroundColor: colors.backgroundAlt,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
     zIndex: 10,
     elevation: 10,
+    minHeight: 100,
   },
   backButton: {
     flexDirection: 'row',
@@ -392,7 +393,9 @@ const styles = StyleSheet.create({
   emotionContainer: {
     position: 'absolute',
     left: '50%',
-    transform: [{ translateX: -25 }],
+    transform: [{ translateX: -40 }],
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   settingsButton: {
     padding: 8,
