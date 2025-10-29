@@ -55,14 +55,14 @@ const TileItem = memo(function TileItem({
     return colors.primary;
   };
 
-  // Responsive font size - SIGNIFICANTLY INCREASED for better readability
+  // FIXED: Reduced font size for better fit
   const getResponsiveFontSize = () => {
-    if (width >= 1400) return 40;
-    if (width >= 1200) return 38;
-    if (width >= 1000) return 36;
-    if (width >= 820) return 30;
-    if (width >= 680) return 29;
-    return 16;
+    if (width >= 1400) return 32;
+    if (width >= 1200) return 30;
+    if (width >= 1000) return 28;
+    if (width >= 820) return 24;
+    if (width >= 680) return 22;
+    return 14;
   };
 
   const tileColor = getCategoryColor();
@@ -106,6 +106,9 @@ const TileItem = memo(function TileItem({
                 console.log('Failed to load ARASAAC pictogram for tile:', tile.text, tile.image, error.nativeEvent.error);
                 setPictogramError(true);
               }}
+              // PERFORMANCE: Add caching props
+              cache="force-cache"
+              defaultSource={require('../assets/images/natively-dark.png')}
             />
           ) : hasCustomImage ? (
             <Image
@@ -116,6 +119,9 @@ const TileItem = memo(function TileItem({
                 console.log('Failed to load custom image for tile:', tile.text, tile.imageUrl || tile.imageUri, error.nativeEvent.error);
                 setCustomImageError(true);
               }}
+              // PERFORMANCE: Add caching props
+              cache="force-cache"
+              defaultSource={require('../assets/images/natively-dark.png')}
             />
           ) : shouldShowIcon ? (
             <Icon name="add-circle" size={80} color={tileColor} />
@@ -178,7 +184,7 @@ const styles = StyleSheet.create({
   text: {
     fontFamily: 'Montserrat_700Bold',
     textAlign: 'center',
-    lineHeight: 70,
+    lineHeight: 26,
     paddingHorizontal: 2,
   },
 });

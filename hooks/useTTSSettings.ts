@@ -37,27 +37,55 @@ const SIMPLIFIED_VOICES: TTSVoice[] = [
   { identifier: 'neutral', name: 'Neutral Voice', language: 'en-US' },
 ];
 
-// FIXED: Voice characteristics with CORRECT pitch assignments
-// Girl = HIGH pitch (female), Boy = VERY LOW pitch (male), Neutral = balanced
-const VOICE_CHARACTERISTICS = {
+// CRITICAL FIX: Use ACTUAL different voice identifiers instead of just pitch
+// These are the actual system voice names that sound distinctly different
+const VOICE_MAPPINGS = {
   girl: {
-    pitchMultiplier: 1.8,    // VERY HIGH pitch for female voice
-    rateMultiplier: 1.2,     // Slightly faster
-    description: 'High-pitched, bright female voice',
-    preferredVoiceNames: ['Samantha', 'Karen', 'Victoria', 'Allison', 'Susan', 'Zoe', 'Fiona', 'female', 'woman']
+    // Female voices - prioritize high, clear voices
+    preferredVoices: [
+      'com.apple.voice.compact.en-US.Samantha',
+      'com.apple.ttsbundle.Samantha-compact',
+      'Samantha',
+      'Karen',
+      'Victoria',
+      'Allison',
+      'Susan',
+      'Zoe',
+      'Fiona',
+    ],
+    fallbackPitch: 1.3,
+    fallbackRate: 1.1,
+    description: 'Clear, feminine voice',
   },
   boy: {
-    pitchMultiplier: 0.3,    // ULTRA LOW pitch for deep male voice (reduced from 0.5)
-    rateMultiplier: 0.8,     // Slower and deeper
-    description: 'Deep, low-pitched male voice',
-    preferredVoiceNames: ['Alex', 'Daniel', 'Fred', 'Aaron', 'Arthur', 'Tom', 'Oliver', 'male', 'man']
+    // Male voices - prioritize deep, masculine voices
+    preferredVoices: [
+      'com.apple.voice.compact.en-US.Aaron',
+      'com.apple.ttsbundle.Aaron-compact',
+      'Aaron',
+      'Alex',
+      'Daniel',
+      'Fred',
+      'Arthur',
+      'Tom',
+      'Oliver',
+    ],
+    fallbackPitch: 0.8,
+    fallbackRate: 0.95,
+    description: 'Deep, masculine voice',
   },
   neutral: {
-    pitchMultiplier: 0.95,   // Slightly lower than standard for more natural sound
-    rateMultiplier: 1.0,     // Standard rate
-    description: 'Clear, balanced neutral voice',
-    preferredVoiceNames: ['Siri', 'Default', 'System', 'en-US-language']
-  }
+    // Neutral/default voices
+    preferredVoices: [
+      'com.apple.voice.compact.en-US.Samantha',
+      'com.apple.ttsbundle.Samantha-compact',
+      'Samantha',
+      'en-US-language',
+    ],
+    fallbackPitch: 1.0,
+    fallbackRate: 1.0,
+    description: 'Clear, balanced voice',
+  },
 };
 
 export function useTTSSettings() {
@@ -91,7 +119,7 @@ export function useTTSSettings() {
       );
       
       console.log('English voices found:', englishVoices.length);
-      console.log('Available voice names:', englishVoices.map(v => `${v.name} (${v.identifier})`).join(', '));
+      console.log('Available voice identifiers:', englishVoices.map(v => `${v.name} (${v.identifier})`).join(', '));
       setSystemVoices(englishVoices);
       
       // Always use our simplified three-voice system
@@ -190,20 +218,22 @@ export function useTTSSettings() {
     }
   }, [settings]);
 
-  // Helper function to find the best matching voice from system voices
+  // CRITICAL FIX: Find the best matching ACTUAL voice from system voices
   const findBestVoice = useCallback((voiceType: string): string | undefined => {
     if (systemVoices.length === 0) return undefined;
     
-    console.log('Finding best voice for type:', voiceType);
+    console.log('🎤 Finding best voice for type:', voiceType);
     
-    const characteristics = VOICE_CHARACTERISTICS[voiceType as keyof typeof VOICE_CHARACTERISTICS];
-    if (!characteristics) return undefined;
+    const mapping = VOICE_MAPPINGS[voiceType as keyof typeof VOICE_MAPPINGS];
+    if (!mapping) return undefined;
 
-    // Try to find a voice that matches the preferred names
-    for (const preferredName of characteristics.preferredVoiceNames) {
+    // Try to find a voice that matches the preferred identifiers
+    for (const preferredIdentifier of mapping.preferredVoices) {
       const voice = systemVoices.find(v => 
-        v.name.toLowerCase().includes(preferredName.toLowerCase()) ||
-        v.identifier.toLowerCase().includes(preferredName.toLowerCase())
+        v.identifier === preferredIdentifier ||
+        v.identifier.includes(preferredIdentifier) ||
+        v.name === preferredIdentifier ||
+        v.name.includes(preferredIdentifier)
       );
       
       if (voice) {
@@ -214,46 +244,40 @@ export function useTTSSettings() {
     
     // Fallback: return first English voice
     const fallbackVoice = systemVoices.find(v => v.language === 'en-US' || v.language.startsWith('en-'));
-    console.log('Using fallback voice:', fallbackVoice?.identifier, fallbackVoice?.name);
+    console.log('⚠️ Using fallback voice:', fallbackVoice?.identifier, fallbackVoice?.name);
     return fallbackVoice?.identifier;
   }, [systemVoices]);
 
   // Get voice characteristics for a given voice type
   const getVoiceCharacteristics = useCallback((voiceType: string) => {
-    return VOICE_CHARACTERISTICS[voiceType as keyof typeof VOICE_CHARACTERISTICS] || VOICE_CHARACTERISTICS.neutral;
+    return VOICE_MAPPINGS[voiceType as keyof typeof VOICE_MAPPINGS] || VOICE_MAPPINGS.neutral;
   }, []);
 
   const speak = useCallback(async (text: string) => {
     try {
-      console.log('Speaking text with settings:', { text, settings });
+      console.log('🔊 Speaking text with settings:', { text, settings });
       
-      // Get voice characteristics for maximum distinction
+      // Get voice characteristics
       const characteristics = getVoiceCharacteristics(settings.voiceIdentifier);
       
       const options: Speech.SpeechOptions = {
         language: settings.language,
-        // Apply dramatic pitch and rate adjustments
-        pitch: settings.pitch * characteristics.pitchMultiplier,
-        rate: settings.rate * characteristics.rateMultiplier,
+        // Use fallback pitch/rate only if we can't find a specific voice
+        pitch: settings.pitch * characteristics.fallbackPitch,
+        rate: settings.rate * characteristics.fallbackRate,
       };
 
-      // Clamp values to safe ranges
-      options.pitch = Math.max(0.3, Math.min(2.0, options.pitch!));
-      options.rate = Math.max(0.5, Math.min(2.0, options.rate!));
-
-      // Map our simplified voice types to actual system voices
+      // CRITICAL FIX: Try to use the actual voice identifier
       const voiceIdentifier = findBestVoice(settings.voiceIdentifier);
 
-      // Only set voice if we found a matching one
       if (voiceIdentifier) {
         options.voice = voiceIdentifier;
-        console.log('Using voice identifier:', voiceIdentifier);
+        console.log('✅ Using specific voice identifier:', voiceIdentifier);
       } else {
-        console.log('No specific voice found, using system default with adjusted pitch/rate');
+        console.log('⚠️ No specific voice found, using pitch/rate adjustments');
       }
 
-      console.log('Speech options:', options);
-      console.log('Voice characteristics applied:', characteristics);
+      console.log('🎤 Speech options:', options);
       await Speech.speak(text, options);
     } catch (err) {
       console.log('Error speaking text:', err);
@@ -272,30 +296,24 @@ export function useTTSSettings() {
 
   const testVoice = useCallback(async (voiceIdentifier: string) => {
     try {
-      // Get voice characteristics for maximum distinction
+      // Get voice characteristics
       const characteristics = getVoiceCharacteristics(voiceIdentifier);
       
       const options: Speech.SpeechOptions = {
         language: settings.language,
-        // Apply dramatic pitch and rate adjustments
-        pitch: settings.pitch * characteristics.pitchMultiplier,
-        rate: settings.rate * characteristics.rateMultiplier,
+        pitch: settings.pitch * characteristics.fallbackPitch,
+        rate: settings.rate * characteristics.fallbackRate,
       };
 
-      // Clamp values to safe ranges
-      options.pitch = Math.max(0.3, Math.min(2.0, options.pitch!));
-      options.rate = Math.max(0.5, Math.min(2.0, options.rate!));
-
-      // Map our simplified voice types to actual system voices
+      // CRITICAL FIX: Try to use the actual voice identifier
       const actualVoiceId = findBestVoice(voiceIdentifier);
 
       if (actualVoiceId) {
         options.voice = actualVoiceId;
-        console.log('Testing voice with identifier:', actualVoiceId);
+        console.log('✅ Testing voice with identifier:', actualVoiceId);
       }
 
-      console.log('Testing voice with options:', options);
-      console.log('Voice characteristics applied:', characteristics);
+      console.log('🎤 Testing voice with options:', options);
       
       // Use a longer test phrase to better demonstrate the voice
       const testPhrase = voiceIdentifier === 'girl' 

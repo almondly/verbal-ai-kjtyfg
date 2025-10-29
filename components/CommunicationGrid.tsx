@@ -1,6 +1,6 @@
 
 import { memo, useCallback } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
 import { Tile } from '../types';
 import TileItem from './TileItem';
 
@@ -61,36 +61,63 @@ const CommunicationGrid = memo(function CommunicationGrid({
     }
   }, [onTileLongPress, onTileEdit]);
 
+  // PERFORMANCE: Add "Add Tile" button to the data array
+  const dataWithAddButton = selectedCategory && selectedCategory !== 'all' && onAddTile
+    ? [...tiles, {
+        id: 'add-tile',
+        text: 'Add Tile',
+        color: '#E5E7EB',
+      } as Tile]
+    : tiles;
+
+  // PERFORMANCE: Use FlatList for better performance with many tiles
+  const renderItem = useCallback(({ item }: { item: Tile }) => {
+    if (item.id === 'add-tile') {
+      return (
+        <TileItem
+          tile={item}
+          onPress={onAddTile!}
+          isAdd
+          itemPercent={20}
+        />
+      );
+    }
+    
+    return (
+      <TileItem
+        key={item.id}
+        tile={item}
+        onPress={() => onTilePress(item)}
+        onLongPress={() => handleTileLongPress(item)}
+        itemPercent={20}
+      />
+    );
+  }, [onTilePress, handleTileLongPress, onAddTile]);
+
+  const keyExtractor = useCallback((item: Tile) => item.id, []);
+
   return (
-    <ScrollView 
+    <FlatList
+      data={dataWithAddButton}
+      renderItem={renderItem}
+      keyExtractor={keyExtractor}
+      numColumns={5}
       style={styles.container}
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
-    >
-      <View style={styles.grid}>
-        {tiles.map((tile) => (
-          <TileItem
-            key={tile.id}
-            tile={tile}
-            onPress={() => onTilePress(tile)}
-            onLongPress={() => handleTileLongPress(tile)}
-            itemPercent={20}
-          />
-        ))}
-        {selectedCategory && selectedCategory !== 'all' && onAddTile && (
-          <TileItem
-            tile={{
-              id: 'add-tile',
-              text: 'Add Tile',
-              color: '#E5E7EB',
-            }}
-            onPress={onAddTile}
-            isAdd
-            itemPercent={20}
-          />
-        )}
-      </View>
-    </ScrollView>
+      // PERFORMANCE: Optimize rendering
+      removeClippedSubviews={true}
+      maxToRenderPerBatch={10}
+      updateCellsBatchingPeriod={50}
+      initialNumToRender={15}
+      windowSize={5}
+      // PERFORMANCE: Use getItemLayout for better scrolling performance
+      getItemLayout={(data, index) => ({
+        length: 120, // Approximate item height
+        offset: 120 * Math.floor(index / 5),
+        index,
+      })}
+    />
   );
 });
 
@@ -103,10 +130,5 @@ const styles = StyleSheet.create({
   content: {
     paddingBottom: 30,
     paddingTop: 8,
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'flex-start',
   },
 });
