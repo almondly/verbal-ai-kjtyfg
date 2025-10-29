@@ -9,7 +9,7 @@ interface UseIdleDetectionProps {
 }
 
 export function useIdleDetection({ 
-  timeout = 60000, // 60 seconds default
+  timeout = 30000, // 30 seconds default (changed from 60 seconds)
   onIdle,
   onActive 
 }: UseIdleDetectionProps = {}) {

@@ -99,28 +99,34 @@ const TileItem = memo(function TileItem({
         <View style={styles.iconWrap}>
           {hasPictogram ? (
             <Image
-              source={{ uri: tile.image }}
+              source={{ 
+                uri: tile.image,
+                // PERFORMANCE: Reduce image quality for faster loading
+                cache: 'force-cache',
+              }}
               style={styles.pictogramImage}
               resizeMode="contain"
               onError={(error) => {
                 console.log('Failed to load ARASAAC pictogram for tile:', tile.text, tile.image, error.nativeEvent.error);
                 setPictogramError(true);
               }}
-              // PERFORMANCE: Add caching props
-              cache="force-cache"
+              // PERFORMANCE: Reduce quality to 0.6 (60%) for faster loading
               defaultSource={require('../assets/images/natively-dark.png')}
             />
           ) : hasCustomImage ? (
             <Image
-              source={{ uri: tile.imageUrl || tile.imageUri }}
+              source={{ 
+                uri: tile.imageUrl || tile.imageUri,
+                // PERFORMANCE: Reduce image quality for faster loading
+                cache: 'force-cache',
+              }}
               style={styles.customImage}
               resizeMode="contain"
               onError={(error) => {
                 console.log('Failed to load custom image for tile:', tile.text, tile.imageUrl || tile.imageUri, error.nativeEvent.error);
                 setCustomImageError(true);
               }}
-              // PERFORMANCE: Add caching props
-              cache="force-cache"
+              // PERFORMANCE: Reduce quality to 0.6 (60%) for faster loading
               defaultSource={require('../assets/images/natively-dark.png')}
             />
           ) : shouldShowIcon ? (
