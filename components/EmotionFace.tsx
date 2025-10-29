@@ -1,5 +1,5 @@
 
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Image } from 'react-native';
 import { colors } from '../styles/commonStyles';
 import React from 'react';
 
@@ -8,9 +8,32 @@ interface Props {
   size?: number;
 }
 
-// EmotionFace component now uses only fixed, programmatic emotion designs
-// No user-uploaded images are supported - all emotions are rendered using code
+// Emotion images mapping
+const EMOTION_IMAGES: Record<string, any> = {
+  'happy': require('../assets/images/aa6987ad-e069-467f-a6b3-06402e1d3639.png'),
+  'sad': require('../assets/images/ed60f147-9a17-4a92-932b-837c02d96ac0.png'),
+  'angry': require('../assets/images/9fa5e61e-7f9c-4c8a-a2d1-bedfe2f9e48a.png'),
+};
+
+// EmotionFace component now uses the provided emotion images
 export default function EmotionFace({ emotion, size = 100 }: Props) {
+  const normalizedEmotion = emotion.toLowerCase();
+  const imageSource = EMOTION_IMAGES[normalizedEmotion];
+
+  // If we have an image for this emotion, use it
+  if (imageSource) {
+    return (
+      <View style={[styles.container, { width: size, height: size }]}>
+        <Image
+          source={imageSource}
+          style={[styles.image, { width: size, height: size }]}
+          resizeMode="contain"
+        />
+      </View>
+    );
+  }
+
+  // Fallback to programmatic rendering for other emotions
   const getFaceStyle = () => {
     return {
       width: size,
@@ -30,8 +53,7 @@ export default function EmotionFace({ emotion, size = 100 }: Props) {
     
     let eyeShape = {};
     
-    switch (emotion) {
-      case 'happy':
+    switch (normalizedEmotion) {
       case 'excited':
         eyeShape = {
           width: eyeSize,
@@ -40,21 +62,12 @@ export default function EmotionFace({ emotion, size = 100 }: Props) {
           backgroundColor: colors.text,
         };
         break;
-      case 'sad':
       case 'disappointed':
         eyeShape = {
           width: eyeSize * 0.8,
           height: eyeSize,
           borderRadius: eyeSize / 2,
           backgroundColor: colors.text,
-        };
-        break;
-      case 'angry':
-        eyeShape = {
-          width: eyeSize,
-          height: eyeSize * 0.6,
-          backgroundColor: colors.text,
-          transform: [{ rotate: isLeft ? '15deg' : '-15deg' }],
         };
         break;
       case 'surprised':
@@ -94,8 +107,7 @@ export default function EmotionFace({ emotion, size = 100 }: Props) {
     const mouthWidth = size * 0.3;
     const mouthHeight = size * 0.15;
     
-    switch (emotion) {
-      case 'happy':
+    switch (normalizedEmotion) {
       case 'excited':
         return {
           position: 'absolute' as const,
@@ -108,7 +120,6 @@ export default function EmotionFace({ emotion, size = 100 }: Props) {
           borderTopWidth: 0,
           borderColor: colors.text,
         };
-      case 'sad':
       case 'disappointed':
         return {
           position: 'absolute' as const,
@@ -120,14 +131,6 @@ export default function EmotionFace({ emotion, size = 100 }: Props) {
           borderWidth: 3,
           borderBottomWidth: 0,
           borderColor: colors.text,
-        };
-      case 'angry':
-        return {
-          position: 'absolute' as const,
-          bottom: size * 0.22,
-          width: mouthWidth * 0.8,
-          height: 4,
-          backgroundColor: colors.text,
         };
       case 'surprised':
         return {
@@ -169,10 +172,7 @@ export default function EmotionFace({ emotion, size = 100 }: Props) {
     
     let transform = [];
     
-    switch (emotion) {
-      case 'angry':
-        transform = [{ rotate: isLeft ? '-20deg' : '20deg' }];
-        break;
+    switch (normalizedEmotion) {
       case 'worried':
         transform = [{ rotate: isLeft ? '10deg' : '-10deg' }];
         break;
@@ -202,9 +202,8 @@ export default function EmotionFace({ emotion, size = 100 }: Props) {
   };
 
   const getSpecialFeatures = () => {
-    switch (emotion) {
+    switch (normalizedEmotion) {
       case 'excited':
-        // Add sparkles or extra elements
         return (
           <>
             <View style={{
@@ -256,5 +255,12 @@ export default function EmotionFace({ emotion, size = 100 }: Props) {
 }
 
 const styles = StyleSheet.create({
-  // No styles needed as everything is inline
+  container: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+  },
 });

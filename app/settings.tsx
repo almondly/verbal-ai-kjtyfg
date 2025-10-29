@@ -19,11 +19,12 @@ import { categories } from '../data/categories';
 
 type TabType = 'emotions' | 'voice' | 'ai' | 'manage' | 'defaultTiles';
 
-// Get all emotions from the feelings category
-const emotionOptions = defaultTiles
-  .filter(tile => tile.category === 'feelings')
-  .map(tile => tile.text)
-  .sort();
+// Define the three emotions with their images
+const emotionOptions = [
+  { id: 'happy', label: 'Happy' },
+  { id: 'sad', label: 'Sad' },
+  { id: 'angry', label: 'Angry' },
+];
 
 export default function SettingsScreen() {
   console.log('SettingsScreen rendering...');
@@ -140,20 +141,20 @@ export default function SettingsScreen() {
 
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Choose Your Emotion</Text>
-              <Text style={styles.helperText}>Tap an emotion to select it. These are fixed emotion designs.</Text>
+              <Text style={styles.helperText}>Tap an emotion to select it. The selected emotion will appear on the home page.</Text>
               <View style={styles.emotionGrid}>
                 {emotionOptions.map((emotion) => (
                   <TouchableOpacity
-                    key={emotion}
+                    key={emotion.id}
                     style={[
                       styles.emotionOption,
-                      emotionSettings.selectedEmotion === emotion && styles.emotionOptionSelected,
+                      emotionSettings.selectedEmotion === emotion.id && styles.emotionOptionSelected,
                     ]}
-                    onPress={() => handleEmotionSelect(emotion)}
+                    onPress={() => handleEmotionSelect(emotion.id)}
                     activeOpacity={0.8}
                   >
-                    <EmotionFace emotion={emotion} size={70} />
-                    <Text style={styles.emotionOptionText}>{emotion}</Text>
+                    <EmotionFace emotion={emotion.id} size={100} />
+                    <Text style={styles.emotionOptionText}>{emotion.label}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -656,15 +657,15 @@ const styles = StyleSheet.create({
   emotionGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12 as any,
-    justifyContent: 'space-between',
+    gap: 16 as any,
+    justifyContent: 'center',
   },
   emotionOption: {
     alignItems: 'center',
     backgroundColor: '#F9FAFB',
     borderRadius: 16,
-    padding: 12,
-    width: '23%',
+    padding: 16,
+    width: '28%',
     borderWidth: 3,
     borderColor: 'transparent',
     marginBottom: 8,
@@ -674,10 +675,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#EEF2FF',
   },
   emotionOptionText: {
-    fontSize: 11,
+    fontSize: 14,
     fontFamily: 'Montserrat_600SemiBold',
     color: colors.text,
-    marginTop: 6,
+    marginTop: 12,
     textAlign: 'center',
     textTransform: 'capitalize',
   },
