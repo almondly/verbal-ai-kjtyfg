@@ -247,7 +247,7 @@ export default function CommunicationScreen() {
         </TouchableOpacity>
 
         <View style={styles.emotionContainer}>
-          <EmotionFace emotion={emotionSettings.selectedEmotion} size={80} />
+          <EmotionFace emotion={emotionSettings.selectedEmotion} size={200} />
         </View>
 
         <TouchableOpacity 
@@ -393,7 +393,7 @@ const styles = StyleSheet.create({
   emotionContainer: {
     position: 'absolute',
     left: '50%',
-    transform: [{ translateX: -40 }],
+    transform: [{ translateX: -100 }],
     alignItems: 'center',
     justifyContent: 'center',
   },

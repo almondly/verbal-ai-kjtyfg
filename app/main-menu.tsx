@@ -40,7 +40,7 @@ export default function MainMenu() {
   };
 
   // Calculate face size - make it MUCH larger (70% of screen height)
-  const faceSize = Math.min(width * 0.5, height * 0.7);
+  const faceSize = Math.min(width * 0.9, height * 1.1);
 
   // Show loading state
   if (isLoading) {
@@ -69,7 +69,7 @@ export default function MainMenu() {
             {/* Display selected emotion face */}
             <EmotionFace 
               emotion={settings.selectedEmotion} 
-              size={faceSize * 0.8}
+              size={faceSize * 1.2}
             />
           </View>
         </View>
