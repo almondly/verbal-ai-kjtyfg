@@ -27,7 +27,7 @@ export default function KeyboardScreen() {
   }, []);
 
   const [typedText, setTypedText] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState('keyboard');
   const { getAdvancedSuggestions, getTimeBasedSuggestions, recordUserInput } = useAdvancedAI();
   const { settings: emotionSettings } = useEmotionSettings();
   const { speak, stopSpeaking } = useVoiceSettings();
@@ -46,6 +46,14 @@ export default function KeyboardScreen() {
       };
     }, [stopSpeaking])
   );
+
+  // Handle category selection - redirect to communication screen if not keyboard
+  useEffect(() => {
+    if (selectedCategory !== 'keyboard') {
+      console.log('🔄 Category changed to:', selectedCategory, '- redirecting to communication screen');
+      router.push('/communication');
+    }
+  }, [selectedCategory, router]);
 
   useEffect(() => {
     (async () => {
@@ -76,7 +84,7 @@ export default function KeyboardScreen() {
 
       const words = typedText.trim().split(/\s+/);
       const [advanced, timeBased] = await Promise.all([
-        getAdvancedSuggestions(words, [], 10, selectedCategory !== 'all' ? selectedCategory : undefined),
+        getAdvancedSuggestions(words, [], 10, undefined),
         getTimeBasedSuggestions(),
       ]);
 
@@ -91,7 +99,7 @@ export default function KeyboardScreen() {
 
       setAdvancedSuggestions(combined);
     })();
-  }, [typedText, getAdvancedSuggestions, getTimeBasedSuggestions, selectedCategory]);
+  }, [typedText, getAdvancedSuggestions, getTimeBasedSuggestions]);
 
   const handleDeleteLastWord = useCallback(() => {
     setTypedText(prev => {
@@ -117,8 +125,8 @@ export default function KeyboardScreen() {
     
     setLastSpokenText(typedText);
     
-    await recordUserInput(typedText, selectedCategory !== 'all' ? selectedCategory : undefined);
-  }, [typedText, speak, recordUserInput, selectedCategory]);
+    await recordUserInput(typedText, undefined);
+  }, [typedText, speak, recordUserInput]);
 
   const normalizeForTTS = (text: string): string => {
     return text
@@ -162,6 +170,7 @@ export default function KeyboardScreen() {
   }, []);
 
   const handleCategorySelect = useCallback((categoryId: string) => {
+    console.log('🎯 Category selected in keyboard screen:', categoryId);
     setSelectedCategory(categoryId);
   }, []);
 
@@ -276,7 +285,7 @@ export default function KeyboardScreen() {
         )}
       </ScrollView>
 
-      {/* Category Bar - FIXED: Added proper positioning */}
+      {/* Category Bar */}
       <View style={styles.categoryBarContainer}>
         <CategoryBar
           categories={categories}
