@@ -12,6 +12,7 @@ import { useAdvancedAI } from '../hooks/useAdvancedAI';
 import { useVoiceSettings } from '../hooks/useVoiceSettings';
 import Icon from '../components/Icon';
 import { useRouter } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function KeyboardScreen() {
   const router = useRouter();
@@ -29,9 +30,22 @@ export default function KeyboardScreen() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const { getAdvancedSuggestions, getTimeBasedSuggestions, recordUserInput } = useAdvancedAI();
   const { settings: emotionSettings } = useEmotionSettings();
-  const { speak } = useVoiceSettings();
+  const { speak, stopSpeaking } = useVoiceSettings();
   const [advancedSuggestions, setAdvancedSuggestions] = useState<any[]>([]);
   const [lastSpokenText, setLastSpokenText] = useState<string>('');
+
+  // Stop speech when screen loses focus (e.g., navigating to settings)
+  useFocusEffect(
+    useCallback(() => {
+      console.log('📱 Keyboard screen focused');
+      
+      // Cleanup function runs when screen loses focus
+      return () => {
+        console.log('📱 Keyboard screen unfocused - stopping speech');
+        stopSpeaking();
+      };
+    }, [stopSpeaking])
+  );
 
   useEffect(() => {
     (async () => {

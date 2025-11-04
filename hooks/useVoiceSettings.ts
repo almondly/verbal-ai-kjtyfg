@@ -34,6 +34,7 @@ const VOICE_CHARACTERISTICS = {
 export function useVoiceSettings() {
   const [settings, setSettings] = useState<VoiceSettings>(DEFAULT_VOICE_SETTINGS);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSpeaking, setIsSpeaking] = useState(false);
 
   useEffect(() => {
     loadSettings();
@@ -70,9 +71,22 @@ export function useVoiceSettings() {
     }
   }, [settings]);
 
+  const stopSpeaking = useCallback(async () => {
+    try {
+      console.log('🛑 Stopping speech...');
+      await Speech.stop();
+      setIsSpeaking(false);
+    } catch (err) {
+      console.log('Error stopping speech:', err);
+    }
+  }, []);
+
   const speak = useCallback(async (text: string) => {
     try {
       console.log('🔊 Speaking text with voice:', settings.selectedVoice);
+      
+      // Stop any ongoing speech first
+      await Speech.stop();
       
       const characteristics = VOICE_CHARACTERISTICS[settings.selectedVoice];
       
@@ -80,21 +94,43 @@ export function useVoiceSettings() {
         language: 'en-US',
         pitch: characteristics.pitch,
         rate: characteristics.rate,
+        onStart: () => {
+          console.log('🎤 Speech started');
+          setIsSpeaking(true);
+        },
+        onDone: () => {
+          console.log('✅ Speech completed');
+          setIsSpeaking(false);
+        },
+        onStopped: () => {
+          console.log('⏹️ Speech stopped');
+          setIsSpeaking(false);
+        },
+        onError: (error) => {
+          console.log('❌ Speech error:', error);
+          setIsSpeaking(false);
+        },
       };
 
       console.log('🎤 Speech options:', options);
       await Speech.speak(text, options);
     } catch (err) {
       console.log('Error speaking text:', err);
+      setIsSpeaking(false);
       // Fallback to basic speech
       try {
         await Speech.speak(text, {
           language: 'en-US',
           pitch: 1.0,
           rate: 1.0,
+          onStart: () => setIsSpeaking(true),
+          onDone: () => setIsSpeaking(false),
+          onStopped: () => setIsSpeaking(false),
+          onError: () => setIsSpeaking(false),
         });
       } catch (fallbackErr) {
         console.log('Fallback speech also failed:', fallbackErr);
+        setIsSpeaking(false);
       }
     }
   }, [settings]);
@@ -129,8 +165,10 @@ export function useVoiceSettings() {
   return {
     settings,
     isLoading,
+    isSpeaking,
     updateSettings,
     speak,
+    stopSpeaking,
     testVoice,
     getVoiceCharacteristics,
   };

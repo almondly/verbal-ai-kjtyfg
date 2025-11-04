@@ -20,6 +20,7 @@ import CommunicationGrid from '../components/CommunicationGrid';
 import { useAdvancedAI } from '../hooks/useAdvancedAI';
 import { useVoiceSettings } from '../hooks/useVoiceSettings';
 import { useRouter } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function CommunicationScreen() {
   const router = useRouter();
@@ -40,9 +41,22 @@ export default function CommunicationScreen() {
   const { tiles, addTile, updateTile, removeTile, resetTiles } = useLibrary();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [advancedSuggestions, setAdvancedSuggestions] = useState<any[]>([]);
-  const { speak } = useVoiceSettings();
+  const { speak, stopSpeaking } = useVoiceSettings();
   const [editingTile, setEditingTile] = useState<Tile | null>(null);
   const [lastSpokenText, setLastSpokenText] = useState<string>('');
+
+  // Stop speech when screen loses focus (e.g., navigating to settings)
+  useFocusEffect(
+    useCallback(() => {
+      console.log('📱 Communication screen focused');
+      
+      // Cleanup function runs when screen loses focus
+      return () => {
+        console.log('📱 Communication screen unfocused - stopping speech');
+        stopSpeaking();
+      };
+    }, [stopSpeaking])
+  );
 
   // Handle keyboard category selection - redirect to keyboard screen
   useEffect(() => {
