@@ -132,8 +132,8 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   speakBtn: {
-    backgroundColor: '#4CAF50',
-    borderColor: '#4CAF50',
+    backgroundColor: '#8fd2b0',
+    borderColor: '#8fd2b0',
   },
   clearBtn: {
     backgroundColor: '#F44336',
