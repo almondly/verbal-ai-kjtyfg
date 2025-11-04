@@ -1,5 +1,5 @@
 
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Platform, ScrollView } from 'react-native';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { commonStyles, colors } from '../styles/commonStyles';
@@ -33,11 +33,13 @@ export default function KeyboardScreen() {
   const { speak, stopSpeaking } = useVoiceSettings();
   const [advancedSuggestions, setAdvancedSuggestions] = useState<any[]>([]);
   const [lastSpokenText, setLastSpokenText] = useState<string>('');
+  const isNavigatingRef = useRef(false);
 
   // Stop speech when screen loses focus (e.g., navigating to settings)
   useFocusEffect(
     useCallback(() => {
       console.log('📱 Keyboard screen focused');
+      isNavigatingRef.current = false;
       
       // Cleanup function runs when screen loses focus
       return () => {
@@ -49,9 +51,14 @@ export default function KeyboardScreen() {
 
   // Handle category selection - redirect to communication screen if not keyboard
   useEffect(() => {
-    if (selectedCategory !== 'keyboard') {
+    if (selectedCategory !== 'keyboard' && !isNavigatingRef.current) {
       console.log('🔄 Category changed to:', selectedCategory, '- redirecting to communication screen');
-      router.push('/communication');
+      isNavigatingRef.current = true;
+      // Pass the selected category to the communication screen
+      router.push({
+        pathname: '/communication',
+        params: { category: selectedCategory }
+      });
     }
   }, [selectedCategory, router]);
 

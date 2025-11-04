@@ -19,11 +19,12 @@ import AdvancedSuggestionsRow from '../components/AdvancedSuggestionsRow';
 import CommunicationGrid from '../components/CommunicationGrid';
 import { useAdvancedAI } from '../hooks/useAdvancedAI';
 import { useVoiceSettings } from '../hooks/useVoiceSettings';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 
 export default function CommunicationScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams();
 
   useEffect(() => {
     console.log('Communication screen mounted');
@@ -37,18 +38,32 @@ export default function CommunicationScreen() {
   const { getAdvancedSuggestions, getTimeBasedSuggestions, recordUserInput } = useAdvancedAI();
   const { settings: emotionSettings } = useEmotionSettings();
   const [sentence, setSentence] = useState<Tile[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState('core');
+  
+  // Initialize selectedCategory from params or default to 'core'
+  const initialCategory = (params.category as string) || 'core';
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
+  
   const { tiles, addTile, updateTile, removeTile, resetTiles } = useLibrary();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [advancedSuggestions, setAdvancedSuggestions] = useState<any[]>([]);
   const { speak, stopSpeaking } = useVoiceSettings();
   const [editingTile, setEditingTile] = useState<Tile | null>(null);
   const [lastSpokenText, setLastSpokenText] = useState<string>('');
+  const isNavigatingRef = useRef(false);
+
+  // Update category when params change (coming from keyboard screen)
+  useEffect(() => {
+    if (params.category && params.category !== 'keyboard') {
+      console.log('📍 Communication screen received category from params:', params.category);
+      setSelectedCategory(params.category as string);
+    }
+  }, [params.category]);
 
   // Stop speech when screen loses focus (e.g., navigating to settings)
   useFocusEffect(
     useCallback(() => {
       console.log('📱 Communication screen focused');
+      isNavigatingRef.current = false;
       
       // Cleanup function runs when screen loses focus
       return () => {
@@ -60,9 +75,11 @@ export default function CommunicationScreen() {
 
   // Handle keyboard category selection - redirect to keyboard screen
   useEffect(() => {
-    if (selectedCategory === 'keyboard') {
+    if (selectedCategory === 'keyboard' && !isNavigatingRef.current) {
+      console.log('🔄 Navigating to keyboard screen');
+      isNavigatingRef.current = true;
       router.push('/keyboard');
-      setSelectedCategory('core');
+      // Don't reset category here - let it stay as 'keyboard' until we come back
     }
   }, [selectedCategory, router]);
 
@@ -236,6 +253,7 @@ export default function CommunicationScreen() {
   }, [handleTilePress]);
 
   const handleCategorySelect = useCallback((categoryId: string) => {
+    console.log('🎯 Category selected in communication screen:', categoryId);
     setSelectedCategory(categoryId);
   }, []);
 
@@ -315,7 +333,7 @@ export default function CommunicationScreen() {
         )}
       </ScrollView>
 
-      {/* Category Bar - FIXED: Added proper positioning */}
+      {/* Category Bar */}
       <View style={styles.categoryBarContainer}>
         <CategoryBar
           categories={categories}
