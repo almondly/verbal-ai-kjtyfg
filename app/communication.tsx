@@ -55,6 +55,15 @@ export default function CommunicationScreen() {
   const [lastSpokenText, setLastSpokenText] = useState<string>('');
   const isNavigatingRef = useRef(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Initialize component with delay to prevent crashes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsInitialized(true);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Update category when params change (coming from keyboard screen)
   useEffect(() => {
@@ -73,10 +82,15 @@ export default function CommunicationScreen() {
     useCallback(() => {
       console.log('📱 Communication screen focused');
       isNavigatingRef.current = false;
-      setIsLoading(false);
+      
+      // Delay setting loading to false to prevent crashes
+      const timer = setTimeout(() => {
+        setIsLoading(false);
+      }, 150);
       
       // Cleanup function runs when screen loses focus
       return () => {
+        clearTimeout(timer);
         console.log('📱 Communication screen unfocused - stopping speech');
         try {
           stopSpeaking();
@@ -115,10 +129,17 @@ export default function CommunicationScreen() {
   const { resetLearning } = useAI();
 
   useEffect(() => {
+    if (!isInitialized) return;
+    
+    let isCancelled = false;
+
     (async () => {
       try {
         if (sentence.length === 0) {
           const timeBased = await getTimeBasedSuggestions();
+          
+          if (isCancelled) return;
+          
           const initialSuggestions = timeBased.slice(0, 10).map((phrase, index) => ({
             text: phrase.split(' ')[0],
             confidence: Math.max(0.6, 0.8 - index * 0.05),
@@ -138,7 +159,9 @@ export default function CommunicationScreen() {
             }
           });
           
-          setAdvancedSuggestions(initialSuggestions.slice(0, 10));
+          if (!isCancelled) {
+            setAdvancedSuggestions(initialSuggestions.slice(0, 10));
+          }
           return;
         }
 
@@ -164,6 +187,8 @@ export default function CommunicationScreen() {
           getTimeBasedSuggestions(),
         ]);
 
+        if (isCancelled) return;
+
         const combined = [...advanced, ...timeBased.slice(0, 3).map((phrase, index) => ({
           text: phrase,
           confidence: Math.max(0.5, 0.7 - index * 0.05),
@@ -173,13 +198,21 @@ export default function CommunicationScreen() {
           .sort((a, b) => b.confidence - a.confidence)
           .slice(0, 10);
 
-        setAdvancedSuggestions(combined);
+        if (!isCancelled) {
+          setAdvancedSuggestions(combined);
+        }
       } catch (error) {
         console.error('Error updating suggestions:', error);
-        setAdvancedSuggestions([]);
+        if (!isCancelled) {
+          setAdvancedSuggestions([]);
+        }
       }
     })();
-  }, [sentence, tiles, getAdvancedSuggestions, getTimeBasedSuggestions, selectedCategory]);
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [sentence, tiles, getAdvancedSuggestions, getTimeBasedSuggestions, selectedCategory, isInitialized]);
 
   const handleTilePress = useCallback((tile: Tile) => {
     try {
@@ -355,7 +388,7 @@ export default function CommunicationScreen() {
   }, []);
 
   // Show loading state briefly to prevent crashes
-  if (isLoading) {
+  if (isLoading || !isInitialized) {
     return (
       <View style={[commonStyles.container, styles.container, styles.loadingContainer]}>
         <Text style={styles.loadingText}>Loading...</Text>
@@ -535,8 +568,10 @@ const styles = StyleSheet.create({
   },
   emotionContainer: {
     position: 'absolute',
-    left: '50%',
-    transform: [{ translateX: -100 }],
+    ...(Platform.OS === 'web' 
+      ? { left: '50%', marginLeft: -100 }
+      : { left: '50%', transform: [{ translateX: -100 }] }
+    ),
     alignItems: 'center',
     justifyContent: 'center',
   },

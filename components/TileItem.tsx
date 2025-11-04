@@ -26,12 +26,19 @@ const TileItem = memo(function TileItem({
   const [pictogramError, setPictogramError] = useState(false);
   const [customImageError, setCustomImageError] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [dimensionsReady, setDimensionsReady] = useState(false);
 
-  // Ensure component is mounted before using dimensions
+  // Ensure component is mounted and dimensions are ready before rendering
   useEffect(() => {
-    setIsMounted(true);
+    const timer = setTimeout(() => {
+      setIsMounted(true);
+      setDimensionsReady(true);
+    }, 10);
+    
     console.log('TileItem mounted:', tile.text);
+    
     return () => {
+      clearTimeout(timer);
       console.log('TileItem unmounted:', tile.text);
     };
   }, [tile.text]);
@@ -92,12 +99,12 @@ const TileItem = memo(function TileItem({
     }
   };
 
-  // FIXED: Reduced font size for better fit
+  // FIXED: Reduced font size for better fit with safe fallback
   const getResponsiveFontSize = () => {
     try {
-      if (!isMounted) return 20; // Default size during initial render
+      if (!dimensionsReady) return 20; // Default size during initial render
       
-      const width = dimensions.width;
+      const width = dimensions.width || 1024; // Fallback width
       if (width >= 1400) return 30;
       if (width >= 1200) return 28;
       if (width >= 1000) return 26;
@@ -124,6 +131,15 @@ const TileItem = memo(function TileItem({
   const wrapperStyle = Platform.OS === 'web' 
     ? [styles.tileWrap, { width: `${itemPercent}%` }]
     : [styles.tileWrap, { width: `${itemPercent}%`, transform: [{ scale }] }];
+
+  // Don't render until mounted and dimensions are ready
+  if (!isMounted || !dimensionsReady) {
+    return (
+      <View style={[styles.tileWrap, { width: `${itemPercent}%` }]}>
+        <View style={[styles.tile, { backgroundColor: tileColor, borderColor: tileColor, borderWidth: 4 }]} />
+      </View>
+    );
+  }
 
   return (
     <WrapperComponent style={wrapperStyle}>

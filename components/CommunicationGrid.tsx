@@ -1,5 +1,5 @@
 
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useState, useEffect } from 'react';
 import { ScrollView, StyleSheet, View, Platform } from 'react-native';
 import { Tile } from '../types';
 import TileItem from './TileItem';
@@ -21,6 +21,16 @@ const CommunicationGrid = memo(function CommunicationGrid({
   onAddTile,
   selectedCategory,
 }: Props) {
+  const [isReady, setIsReady] = useState(false);
+
+  // Ensure component is ready before rendering tiles
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsReady(true);
+    }, 50);
+    return () => clearTimeout(timer);
+  }, []);
+
   console.log('🎨 CommunicationGrid rendering with', tiles.length, 'tiles');
 
   const handleTilePress = useCallback((tile: Tile) => {
@@ -78,6 +88,15 @@ const CommunicationGrid = memo(function CommunicationGrid({
 
   console.log('🎨 Rendering', allTiles.length, 'tiles (including add tile if shown)');
 
+  // Don't render tiles until ready (prevents web crashes)
+  if (!isReady) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.grid} />
+      </View>
+    );
+  }
+
   return (
     <ScrollView 
       style={styles.container}
@@ -86,9 +105,10 @@ const CommunicationGrid = memo(function CommunicationGrid({
       scrollEventThrottle={16}
       // Add web-specific optimizations
       removeClippedSubviews={Platform.OS !== 'web'}
-      maxToRenderPerBatch={Platform.OS === 'web' ? 20 : 10}
-      updateCellsBatchingPeriod={Platform.OS === 'web' ? 100 : 50}
-      initialNumToRender={Platform.OS === 'web' ? 20 : 10}
+      maxToRenderPerBatch={Platform.OS === 'web' ? 15 : 10}
+      updateCellsBatchingPeriod={Platform.OS === 'web' ? 150 : 50}
+      initialNumToRender={Platform.OS === 'web' ? 15 : 10}
+      windowSize={Platform.OS === 'web' ? 5 : 21}
     >
       <View style={styles.grid}>
         {allTiles.map((tile, index) => {
