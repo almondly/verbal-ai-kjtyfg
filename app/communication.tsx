@@ -18,7 +18,7 @@ import { useEmotionSettings } from '../hooks/useEmotionSettings';
 import AdvancedSuggestionsRow from '../components/AdvancedSuggestionsRow';
 import CommunicationGrid from '../components/CommunicationGrid';
 import { useAdvancedAI } from '../hooks/useAdvancedAI';
-import { useTTSSettings } from '../hooks/useTTSSettings';
+import { useVoiceSettings } from '../hooks/useVoiceSettings';
 import { useRouter } from 'expo-router';
 
 export default function CommunicationScreen() {
@@ -40,7 +40,7 @@ export default function CommunicationScreen() {
   const { tiles, addTile, updateTile, removeTile, resetTiles } = useLibrary();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [advancedSuggestions, setAdvancedSuggestions] = useState<any[]>([]);
-  const { speak } = useTTSSettings();
+  const { speak } = useVoiceSettings();
   const [editingTile, setEditingTile] = useState<Tile | null>(null);
   const [lastSpokenText, setLastSpokenText] = useState<string>('');
 

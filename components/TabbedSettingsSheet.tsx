@@ -9,7 +9,7 @@ import PictogramSelector from './PictogramSelector';
 import { Tile } from '../types';
 import { categories } from '../data/categories';
 import { defaultTiles } from '../data/defaultTiles';
-import { useTTSSettings } from '../hooks/useTTSSettings';
+import { useVoiceSettings } from '../hooks/useVoiceSettings';
 import { useAIPreferences } from '../hooks/useAIPreferences';
 
 interface Props {
@@ -21,17 +21,18 @@ interface Props {
   mode?: 'settings' | 'add';
   onAddTile?: (tile: Tile) => void;
   defaultCategoryId?: string;
-  currentEmotion?: string;
-  onEmotionChange?: (emotion: string) => void;
+  currentEmotion?: 1 | 2 | 3;
+  onEmotionChange?: (emotion: 1 | 2 | 3) => void;
 }
 
 type TabType = 'emotions' | 'voice' | 'ai' | 'manage' | 'add';
 
-// Get all emotions from the feelings category
-const emotionOptions = defaultTiles
-  .filter(tile => tile.category === 'feelings')
-  .map(tile => tile.text)
-  .sort();
+// Define the three emotions
+const emotionOptions = [
+  { id: 1, label: 'Sad' },
+  { id: 2, label: 'Happy' },
+  { id: 3, label: 'Angry' },
+];
 
 export default function TabbedSettingsSheet({
   open,
@@ -42,7 +43,7 @@ export default function TabbedSettingsSheet({
   mode = 'settings',
   onAddTile,
   defaultCategoryId,
-  currentEmotion = 'happy',
+  currentEmotion = 2,
   onEmotionChange,
 }: Props) {
   const sheetRef = useRef<BottomSheet>(null);
@@ -62,7 +63,7 @@ export default function TabbedSettingsSheet({
   // Pictogram selector state
   const [showPictogramSelector, setShowPictogramSelector] = useState(false);
   
-  const { settings: ttsSettings, availableVoices, updateSettings: updateTTSSettings, speak, testVoice, getVoiceCharacteristics } = useTTSSettings();
+  const { settings: voiceSettings, updateSettings: updateVoiceSettings, speak, testVoice, getVoiceCharacteristics } = useVoiceSettings();
   const { 
     preferenceCategories, 
     savePreference, 
@@ -132,21 +133,17 @@ export default function TabbedSettingsSheet({
     closeAndReset();
   };
 
-  const handleEmotionSelect = (emotion: string) => {
+  const handleEmotionSelect = (emotion: 1 | 2 | 3) => {
     console.log('Emotion selected:', emotion);
     onEmotionChange?.(emotion);
   };
 
-  const handleVoiceSelect = async (voiceIdentifier: string, voiceName: string, language: string) => {
-    console.log('Voice selected:', { voiceIdentifier, voiceName, language });
-    await updateTTSSettings({
-      voiceIdentifier,
-      voiceName,
-      language,
-    });
+  const handleVoiceSelect = async (voiceType: 'boy' | 'girl') => {
+    console.log('Voice selected:', voiceType);
+    await updateVoiceSettings({ selectedVoice: voiceType });
     
-    // Test the voice with a longer phrase to demonstrate the difference
-    await testVoice(voiceIdentifier);
+    // Test the voice
+    await testVoice(voiceType);
   };
 
   const handlePreferenceSelect = async (category: string, key: string, value: string) => {
@@ -171,7 +168,9 @@ export default function TabbedSettingsSheet({
               <Text style={styles.sectionTitle}>Current Emotion</Text>
               <View style={styles.currentEmotionContainer}>
                 <EmotionFace emotion={currentEmotion} size={120} />
-                <Text style={styles.currentEmotionText}>{currentEmotion}</Text>
+                <Text style={styles.currentEmotionText}>
+                  {emotionOptions.find(e => e.id === currentEmotion)?.label || 'Happy'}
+                </Text>
               </View>
             </View>
 
@@ -181,16 +180,16 @@ export default function TabbedSettingsSheet({
               <View style={styles.emotionGrid}>
                 {emotionOptions.map((emotion) => (
                   <TouchableOpacity
-                    key={emotion}
+                    key={emotion.id}
                     style={[
                       styles.emotionOption,
-                      currentEmotion === emotion && styles.emotionOptionSelected,
+                      currentEmotion === emotion.id && styles.emotionOptionSelected,
                     ]}
-                    onPress={() => handleEmotionSelect(emotion)}
+                    onPress={() => handleEmotionSelect(emotion.id)}
                     activeOpacity={0.8}
                   >
-                    <EmotionFace emotion={emotion} size={70} />
-                    <Text style={styles.emotionOptionText}>{emotion}</Text>
+                    <EmotionFace emotion={emotion.id} size={70} />
+                    <Text style={styles.emotionOptionText}>{emotion.label}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -202,21 +201,23 @@ export default function TabbedSettingsSheet({
         return (
           <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false}>
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Text-to-Speech Voice</Text>
+              <Text style={styles.sectionTitle}>Voice Selection</Text>
               <Text style={styles.helperText}>
-                Choose from three DISTINCT voice options. Each voice has unique pitch and speed characteristics for maximum clarity.
+                Choose between a young boy or young girl voice. These voices are optimized for clarity and have a youthful tone.
               </Text>
               <View style={styles.currentVoiceContainer}>
                 <View style={styles.voiceInfoContainer}>
                   <Text style={styles.currentVoiceText}>Current Voice</Text>
-                  <Text style={styles.currentVoiceSubtext}>{ttsSettings.voiceName}</Text>
+                  <Text style={styles.currentVoiceSubtext}>
+                    {getVoiceCharacteristics(voiceSettings.selectedVoice).name}
+                  </Text>
                   <Text style={styles.voiceDescription}>
-                    {getVoiceCharacteristics(ttsSettings.voiceIdentifier).description}
+                    {getVoiceCharacteristics(voiceSettings.selectedVoice).description}
                   </Text>
                 </View>
                 <TouchableOpacity 
                   style={styles.testVoiceBtn}
-                  onPress={() => testVoice(ttsSettings.voiceIdentifier)}
+                  onPress={() => testVoice(voiceSettings.selectedVoice)}
                   activeOpacity={0.8}
                 >
                   <Icon name="volume-high-outline" size={20} color={colors.primary} />
@@ -227,23 +228,23 @@ export default function TabbedSettingsSheet({
               <View style={styles.voicesContainer}>
                 <Text style={styles.voicesTitle}>Available Voices - Tap to Select & Preview</Text>
                 <View style={styles.voicesList}>
-                  {availableVoices.map((voice) => {
-                    const characteristics = getVoiceCharacteristics(voice.identifier);
-                    const isSelected = ttsSettings.voiceIdentifier === voice.identifier;
+                  {(['boy', 'girl'] as const).map((voiceType) => {
+                    const characteristics = getVoiceCharacteristics(voiceType);
+                    const isSelected = voiceSettings.selectedVoice === voiceType;
                     
                     return (
                       <TouchableOpacity
-                        key={voice.identifier}
+                        key={voiceType}
                         style={[
                           styles.voiceOption,
                           isSelected && styles.voiceOptionSelected,
                         ]}
-                        onPress={() => handleVoiceSelect(voice.identifier, voice.name, voice.language)}
+                        onPress={() => handleVoiceSelect(voiceType)}
                         activeOpacity={0.8}
                       >
                         <View style={styles.voiceInfo}>
                           <View style={styles.voiceNameRow}>
-                            <Text style={styles.voiceName}>{voice.name}</Text>
+                            <Text style={styles.voiceName}>{characteristics.name}</Text>
                             {isSelected && (
                               <Icon name="checkmark-circle" size={24} color={colors.primary} />
                             )}
@@ -251,70 +252,10 @@ export default function TabbedSettingsSheet({
                           <Text style={styles.voiceCharacteristics}>
                             {characteristics.description}
                           </Text>
-                          <View style={styles.voiceStatsRow}>
-                            <View style={styles.voiceStat}>
-                              <Icon name="musical-notes-outline" size={14} color={colors.textSecondary} />
-                              <Text style={styles.voiceStatText}>
-                                Pitch: {characteristics.pitchMultiplier}x
-                              </Text>
-                            </View>
-                            <View style={styles.voiceStat}>
-                              <Icon name="speedometer-outline" size={14} color={colors.textSecondary} />
-                              <Text style={styles.voiceStatText}>
-                                Speed: {characteristics.rateMultiplier}x
-                              </Text>
-                            </View>
-                          </View>
                         </View>
                       </TouchableOpacity>
                     );
                   })}
-                </View>
-              </View>
-            </View>
-
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Fine-Tune Voice Settings</Text>
-              <Text style={styles.helperText}>
-                Adjust these to further customize the selected voice (optional).
-              </Text>
-              <View style={styles.sliderContainer}>
-                <Text style={styles.sliderLabel}>Speech Rate: {ttsSettings.rate.toFixed(1)}</Text>
-                <View style={styles.sliderButtons}>
-                  <TouchableOpacity 
-                    style={styles.sliderBtn}
-                    onPress={() => updateTTSSettings({ rate: Math.max(0.1, ttsSettings.rate - 0.1) })}
-                    activeOpacity={0.8}
-                  >
-                    <Text style={styles.sliderBtnText}>-</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity 
-                    style={styles.sliderBtn}
-                    onPress={() => updateTTSSettings({ rate: Math.min(2.0, ttsSettings.rate + 0.1) })}
-                    activeOpacity={0.8}
-                  >
-                    <Text style={styles.sliderBtnText}>+</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-              
-              <View style={styles.sliderContainer}>
-                <Text style={styles.sliderLabel}>Pitch: {ttsSettings.pitch.toFixed(1)}</Text>
-                <View style={styles.sliderButtons}>
-                  <TouchableOpacity 
-                    style={styles.sliderBtn}
-                    onPress={() => updateTTSSettings({ pitch: Math.max(0.5, ttsSettings.pitch - 0.1) })}
-                    activeOpacity={0.8}
-                  >
-                    <Text style={styles.sliderBtnText}>-</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity 
-                    style={styles.sliderBtn}
-                    onPress={() => updateTTSSettings({ pitch: Math.min(2.0, ttsSettings.pitch + 0.1) })}
-                    activeOpacity={0.8}
-                  >
-                    <Text style={styles.sliderBtnText}>+</Text>
-                  </TouchableOpacity>
                 </View>
               </View>
             </View>
@@ -712,7 +653,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F9FAFB',
     borderRadius: 16,
     padding: 12,
-    width: '23%',
+    width: '30%',
     borderWidth: 3,
     borderColor: 'transparent',
     marginBottom: 8,
@@ -819,51 +760,6 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     marginBottom: 8,
     fontStyle: 'italic',
-  },
-  voiceStatsRow: {
-    flexDirection: 'row',
-    gap: 16 as any,
-  },
-  voiceStat: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4 as any,
-  },
-  voiceStatText: {
-    fontSize: 12,
-    fontFamily: 'Montserrat_600SemiBold',
-    color: colors.textSecondary,
-  },
-  sliderContainer: {
-    backgroundColor: '#F9FAFB',
-    borderRadius: 16,
-    padding: 20,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  sliderLabel: {
-    fontSize: 16,
-    fontFamily: 'Montserrat_600SemiBold',
-    color: colors.text,
-  },
-  sliderButtons: {
-    flexDirection: 'row',
-    gap: 12 as any,
-  },
-  sliderBtn: {
-    backgroundColor: colors.primary,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  sliderBtnText: {
-    fontSize: 20,
-    fontFamily: 'Montserrat_700Bold',
-    color: '#FFFFFF',
   },
   preferenceContainer: {
     backgroundColor: '#F9FAFB',

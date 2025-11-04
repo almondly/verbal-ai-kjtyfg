@@ -9,7 +9,7 @@ import EmotionFace from '../components/EmotionFace';
 import { useEmotionSettings } from '../hooks/useEmotionSettings';
 import AdvancedSuggestionsRow from '../components/AdvancedSuggestionsRow';
 import { useAdvancedAI } from '../hooks/useAdvancedAI';
-import { useTTSSettings } from '../hooks/useTTSSettings';
+import { useVoiceSettings } from '../hooks/useVoiceSettings';
 import Icon from '../components/Icon';
 import { useRouter } from 'expo-router';
 
@@ -29,7 +29,7 @@ export default function KeyboardScreen() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const { getAdvancedSuggestions, getTimeBasedSuggestions, recordUserInput } = useAdvancedAI();
   const { settings: emotionSettings } = useEmotionSettings();
-  const { speak } = useTTSSettings();
+  const { speak } = useVoiceSettings();
   const [advancedSuggestions, setAdvancedSuggestions] = useState<any[]>([]);
   const [lastSpokenText, setLastSpokenText] = useState<string>('');
 

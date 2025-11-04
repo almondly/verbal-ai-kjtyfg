@@ -7,7 +7,7 @@ import { commonStyles, colors } from '../styles/commonStyles';
 import LandscapeGuard from '../components/LandscapeGuard';
 import { useRouter } from 'expo-router';
 import EmotionFace from '../components/EmotionFace';
-import { useTTSSettings } from '../hooks/useTTSSettings';
+import { useVoiceSettings } from '../hooks/useVoiceSettings';
 import { useAIPreferences } from '../hooks/useAIPreferences';
 import { useEmotionSettings } from '../hooks/useEmotionSettings';
 import { defaultTiles } from '../data/defaultTiles';
@@ -21,9 +21,9 @@ type TabType = 'emotions' | 'voice' | 'ai' | 'manage' | 'defaultTiles';
 
 // Define the three emotions with their images
 const emotionOptions = [
-  { id: 'happy', label: 'Happy' },
-  { id: 'sad', label: 'Sad' },
-  { id: 'angry', label: 'Angry' },
+  { id: 1, label: 'Sad' },
+  { id: 2, label: 'Happy' },
+  { id: 3, label: 'Angry' },
 ];
 
 export default function SettingsScreen() {
@@ -39,7 +39,7 @@ export default function SettingsScreen() {
   const [animalInput, setAnimalInput] = useState('');
   
   const { settings: emotionSettings, updateEmotion } = useEmotionSettings();
-  const { settings: ttsSettings, availableVoices, updateSettings: updateTTSSettings, speak } = useTTSSettings();
+  const { settings: voiceSettings, updateSettings: updateVoiceSettings, speak, testVoice, getVoiceCharacteristics } = useVoiceSettings();
   const { 
     preferenceCategories, 
     savePreference, 
@@ -73,21 +73,17 @@ export default function SettingsScreen() {
     router.push('/main-menu');
   };
 
-  const handleEmotionSelect = (emotion: string) => {
+  const handleEmotionSelect = (emotion: 1 | 2 | 3) => {
     console.log('Emotion selected:', emotion);
     updateEmotion(emotion);
   };
 
-  const handleVoiceSelect = async (voiceIdentifier: string, voiceName: string, language: string) => {
-    console.log('Voice selected:', { voiceIdentifier, voiceName, language });
-    await updateTTSSettings({
-      voiceIdentifier,
-      voiceName,
-      language,
-    });
+  const handleVoiceSelect = async (voiceType: 'boy' | 'girl') => {
+    console.log('Voice selected:', voiceType);
+    await updateVoiceSettings({ selectedVoice: voiceType });
     
     // Test the voice
-    await speak('Hello! This is how I sound!');
+    await testVoice(voiceType);
   };
 
   const handlePreferenceSelect = async (category: string, key: string, value: string) => {
@@ -135,7 +131,9 @@ export default function SettingsScreen() {
               <Text style={styles.sectionTitle}>Current Emotion</Text>
               <View style={styles.currentEmotionContainer}>
                 <EmotionFace emotion={emotionSettings.selectedEmotion} size={120} />
-                <Text style={styles.currentEmotionText}>{emotionSettings.selectedEmotion}</Text>
+                <Text style={styles.currentEmotionText}>
+                  {emotionOptions.find(e => e.id === emotionSettings.selectedEmotion)?.label || 'Happy'}
+                </Text>
               </View>
             </View>
 
@@ -166,19 +164,23 @@ export default function SettingsScreen() {
         return (
           <View style={styles.tabContentWrapper}>
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Text-to-Speech Voice</Text>
+              <Text style={styles.sectionTitle}>Voice Selection</Text>
               <Text style={styles.helperText}>
-                Choose from three clear voice options: Male, Female, or Neutral. These voices are optimized for clarity and accessibility.
+                Choose between a young boy or young girl voice. These voices are optimized for clarity and have a youthful tone.
               </Text>
               <View style={styles.currentVoiceContainer}>
                 <View style={styles.voiceInfoContainer}>
                   <Text style={styles.currentVoiceText}>Current Voice</Text>
-                  <Text style={styles.currentVoiceSubtext}>{ttsSettings.voiceName}</Text>
-                  <Text style={styles.currentVoiceLanguage}>{ttsSettings.language}</Text>
+                  <Text style={styles.currentVoiceSubtext}>
+                    {getVoiceCharacteristics(voiceSettings.selectedVoice).name}
+                  </Text>
+                  <Text style={styles.currentVoiceLanguage}>
+                    {getVoiceCharacteristics(voiceSettings.selectedVoice).description}
+                  </Text>
                 </View>
                 <TouchableOpacity 
                   style={styles.testVoiceBtn}
-                  onPress={() => speak('Hello! This is how I sound!')}
+                  onPress={() => testVoice(voiceSettings.selectedVoice)}
                   activeOpacity={0.8}
                 >
                   <Icon name="volume-high-outline" size={20} color={colors.primary} />
@@ -189,68 +191,30 @@ export default function SettingsScreen() {
               <View style={styles.voicesContainer}>
                 <Text style={styles.voicesTitle}>Available Voices</Text>
                 <View style={styles.voicesList}>
-                  {availableVoices.map((voice) => (
-                    <TouchableOpacity
-                      key={voice.identifier}
-                      style={[
-                        styles.voiceOption,
-                        ttsSettings.voiceIdentifier === voice.identifier && styles.voiceOptionSelected,
-                      ]}
-                      onPress={() => handleVoiceSelect(voice.identifier, voice.name, voice.language)}
-                      activeOpacity={0.8}
-                    >
-                      <View style={styles.voiceInfo}>
-                        <Text style={styles.voiceName}>{voice.name}</Text>
-                        <Text style={styles.voiceLanguage}>{voice.language}</Text>
-                      </View>
-                      {ttsSettings.voiceIdentifier === voice.identifier && (
-                        <Icon name="checkmark-circle" size={24} color={colors.primary} />
-                      )}
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-            </View>
-
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Voice Settings</Text>
-              <View style={styles.sliderContainer}>
-                <Text style={styles.sliderLabel}>Speech Rate: {ttsSettings.rate.toFixed(1)}</Text>
-                <View style={styles.sliderButtons}>
-                  <TouchableOpacity 
-                    style={styles.sliderBtn}
-                    onPress={() => updateTTSSettings({ rate: Math.max(0.1, ttsSettings.rate - 0.1) })}
-                    activeOpacity={0.8}
-                  >
-                    <Text style={styles.sliderBtnText}>-</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity 
-                    style={styles.sliderBtn}
-                    onPress={() => updateTTSSettings({ rate: Math.min(2.0, ttsSettings.rate + 0.1) })}
-                    activeOpacity={0.8}
-                  >
-                    <Text style={styles.sliderBtnText}>+</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-              
-              <View style={styles.sliderContainer}>
-                <Text style={styles.sliderLabel}>Pitch: {ttsSettings.pitch.toFixed(1)}</Text>
-                <View style={styles.sliderButtons}>
-                  <TouchableOpacity 
-                    style={styles.sliderBtn}
-                    onPress={() => updateTTSSettings({ pitch: Math.max(0.5, ttsSettings.pitch - 0.1) })}
-                    activeOpacity={0.8}
-                  >
-                    <Text style={styles.sliderBtnText}>-</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity 
-                    style={styles.sliderBtn}
-                    onPress={() => updateTTSSettings({ pitch: Math.min(2.0, ttsSettings.pitch + 0.1) })}
-                    activeOpacity={0.8}
-                  >
-                    <Text style={styles.sliderBtnText}>+</Text>
-                  </TouchableOpacity>
+                  {(['boy', 'girl'] as const).map((voiceType) => {
+                    const characteristics = getVoiceCharacteristics(voiceType);
+                    const isSelected = voiceSettings.selectedVoice === voiceType;
+                    
+                    return (
+                      <TouchableOpacity
+                        key={voiceType}
+                        style={[
+                          styles.voiceOption,
+                          isSelected && styles.voiceOptionSelected,
+                        ]}
+                        onPress={() => handleVoiceSelect(voiceType)}
+                        activeOpacity={0.8}
+                      >
+                        <View style={styles.voiceInfo}>
+                          <Text style={styles.voiceName}>{characteristics.name}</Text>
+                          <Text style={styles.voiceLanguage}>{characteristics.description}</Text>
+                        </View>
+                        {isSelected && (
+                          <Icon name="checkmark-circle" size={24} color={colors.primary} />
+                        )}
+                      </TouchableOpacity>
+                    );
+                  })}
                 </View>
               </View>
             </View>
@@ -766,37 +730,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat_400Regular',
     color: colors.textSecondary,
     marginTop: 4,
-  },
-  sliderContainer: {
-    backgroundColor: '#F9FAFB',
-    borderRadius: 16,
-    padding: 20,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  sliderLabel: {
-    fontSize: 16,
-    fontFamily: 'Montserrat_600SemiBold',
-    color: colors.text,
-  },
-  sliderButtons: {
-    flexDirection: 'row',
-    gap: 12 as any,
-  },
-  sliderBtn: {
-    backgroundColor: colors.primary,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  sliderBtnText: {
-    fontSize: 20,
-    fontFamily: 'Montserrat_700Bold',
-    color: '#FFFFFF',
   },
   preferenceContainer: {
     backgroundColor: '#F9FAFB',
