@@ -7,7 +7,7 @@ export const colors = {
   color1: '#2faad6',  // Cyan blue
   color2: '#f35e69',  // Coral red
   color3: '#8fd2b0',  // Mint green
-  color4: '#fb8d98',  // Pink
+  color4: '#f271ab',  // Pink (UPDATED)
   color5: '#f9d809',  // Bright yellow
   
   // Primary colors mapped to the 5-color palette
@@ -40,23 +40,23 @@ export const colors = {
   
   // AAC Category colors - ONLY using the 5 colors for tiles and category bar
   categoryCore: '#2faad6',      // Cyan blue - Core vocabulary
-  categoryPeople: '#fb8d98',    // Pink - People
+  categoryPeople: '#f271ab',    // Pink - People (UPDATED)
   categoryActions: '#8fd2b0',   // Mint green - Actions/Verbs
   categoryFeelings: '#f9d809',  // Bright yellow - Emotions
   categoryFood: '#f35e69',      // Coral red - Food
   categoryHome: '#2faad6',      // Cyan blue - Home
   categorySchool: '#8fd2b0',    // Mint green - School
   categoryBody: '#f9d809',      // Bright yellow - Body
-  categoryPlaces: '#fb8d98',    // Pink - Places
+  categoryPlaces: '#f271ab',    // Pink - Places (UPDATED)
   categoryRoutines: '#f35e69',  // Coral red - Routines
   categoryQuestions: '#f9d809', // Bright yellow - Questions
   categoryColours: '#2faad6',   // Cyan blue - Colors
   categoryNumbers: '#8fd2b0',   // Mint green - Numbers
-  categoryAnimals: '#fb8d98',   // Pink - Animals
+  categoryAnimals: '#f271ab',   // Pink - Animals (UPDATED)
   categoryClothing: '#f35e69',  // Coral red - Clothing
   categoryWeather: '#2faad6',   // Cyan blue - Weather
   categoryTime: '#f9d809',      // Bright yellow - Time
-  categoryToys: '#fb8d98',      // Pink - Toys
+  categoryToys: '#f271ab',      // Pink - Toys (UPDATED)
 };
 
 export const commonStyles = StyleSheet.create({
