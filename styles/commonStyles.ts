@@ -5,14 +5,14 @@ import { StyleSheet } from 'react-native';
 export const colors = {
   // The 5 approved colors
   color1: '#2faad6',  // Cyan blue
-  color2: '#f35e69',  // Coral red
+  color2: '#ea4b49',  // Coral red (UPDATED)
   color3: '#8fd2b0',  // Mint green
-  color4: '#f271ab',  // Pink (UPDATED)
+  color4: '#f271ab',  // Pink
   color5: '#f9d809',  // Bright yellow
   
   // Primary colors mapped to the 5-color palette
   primary: '#2faad6',        // Cyan blue
-  secondary: '#f35e69',      // Coral red
+  secondary: '#ea4b49',      // Coral red (UPDATED)
   accent: '#8fd2b0',         // Mint green
   
   // Background colors - WHITE backgrounds restored
@@ -34,29 +34,29 @@ export const colors = {
   // Status colors - using the 5 colors
   success: '#8fd2b0',        // Mint green
   warning: '#f9d809',        // Bright yellow
-  danger: '#f35e69',         // Coral red
-  error: '#f35e69',          // Coral red
+  danger: '#ea4b49',         // Coral red (UPDATED)
+  error: '#ea4b49',          // Coral red (UPDATED)
   info: '#2faad6',           // Cyan blue
   
   // AAC Category colors - ONLY using the 5 colors for tiles and category bar
   categoryCore: '#2faad6',      // Cyan blue - Core vocabulary
-  categoryPeople: '#f271ab',    // Pink - People (UPDATED)
+  categoryPeople: '#f271ab',    // Pink - People
   categoryActions: '#8fd2b0',   // Mint green - Actions/Verbs
   categoryFeelings: '#f9d809',  // Bright yellow - Emotions
-  categoryFood: '#f35e69',      // Coral red - Food
+  categoryFood: '#ea4b49',      // Coral red - Food (UPDATED)
   categoryHome: '#2faad6',      // Cyan blue - Home
   categorySchool: '#8fd2b0',    // Mint green - School
   categoryBody: '#f9d809',      // Bright yellow - Body
-  categoryPlaces: '#f271ab',    // Pink - Places (UPDATED)
-  categoryRoutines: '#f35e69',  // Coral red - Routines
+  categoryPlaces: '#f271ab',    // Pink - Places
+  categoryRoutines: '#ea4b49',  // Coral red - Routines (UPDATED)
   categoryQuestions: '#f9d809', // Bright yellow - Questions
   categoryColours: '#2faad6',   // Cyan blue - Colors
   categoryNumbers: '#8fd2b0',   // Mint green - Numbers
-  categoryAnimals: '#f271ab',   // Pink - Animals (UPDATED)
-  categoryClothing: '#f35e69',  // Coral red - Clothing
+  categoryAnimals: '#f271ab',   // Pink - Animals
+  categoryClothing: '#ea4b49',  // Coral red - Clothing (UPDATED)
   categoryWeather: '#2faad6',   // Cyan blue - Weather
   categoryTime: '#f9d809',      // Bright yellow - Time
-  categoryToys: '#f271ab',      // Pink - Toys (UPDATED)
+  categoryToys: '#f271ab',      // Pink - Toys
 };
 
 export const commonStyles = StyleSheet.create({
