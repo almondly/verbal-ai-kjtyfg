@@ -1,6 +1,6 @@
 
-import { memo, useRef, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated, useWindowDimensions, Image } from 'react-native';
+import { memo, useRef, useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Animated, useWindowDimensions, Image, Platform } from 'react-native';
 import { Tile } from '../types';
 import { colors } from '../styles/commonStyles';
 import { categories } from '../data/categories';
@@ -22,53 +22,92 @@ const TileItem = memo(function TileItem({
   itemPercent = 20,
 }: Props) {
   const scale = useRef(new Animated.Value(1)).current;
-  const { width } = useWindowDimensions();
+  const dimensions = useWindowDimensions();
   const [pictogramError, setPictogramError] = useState(false);
   const [customImageError, setCustomImageError] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Ensure component is mounted before using dimensions
+  useEffect(() => {
+    setIsMounted(true);
+    console.log('TileItem mounted:', tile.text);
+    return () => {
+      console.log('TileItem unmounted:', tile.text);
+    };
+  }, [tile.text]);
 
   const handlePressIn = () => {
-    Animated.spring(scale, { 
-      toValue: 0.92, 
-      useNativeDriver: true, 
-      speed: 50, 
-      bounciness: 8 
-    }).start();
+    try {
+      // Disable animations on web to prevent crashes
+      if (Platform.OS === 'web') {
+        return;
+      }
+      Animated.spring(scale, { 
+        toValue: 0.92, 
+        useNativeDriver: true, 
+        speed: 50, 
+        bounciness: 8 
+      }).start();
+    } catch (error) {
+      console.error('Error in handlePressIn:', error);
+    }
   };
 
   const handlePressOut = () => {
-    Animated.spring(scale, { 
-      toValue: 1, 
-      useNativeDriver: true, 
-      speed: 50, 
-      bounciness: 8 
-    }).start();
+    try {
+      // Disable animations on web to prevent crashes
+      if (Platform.OS === 'web') {
+        return;
+      }
+      Animated.spring(scale, { 
+        toValue: 1, 
+        useNativeDriver: true, 
+        speed: 50, 
+        bounciness: 8 
+      }).start();
+    } catch (error) {
+      console.error('Error in handlePressOut:', error);
+    }
   };
 
   // Get the category color for this tile
   const getCategoryColor = () => {
-    if (isAdd) return colors.borderLight;
-    
-    // First check if tile has a category and find matching category color
-    if (tile.category) {
-      const category = categories.find(cat => cat.id === tile.category);
-      if (category) return category.color;
+    try {
+      if (isAdd) return colors.borderLight;
+      
+      // First check if tile has a category and find matching category color
+      if (tile.category) {
+        const category = categories.find(cat => cat.id === tile.category);
+        if (category) return category.color;
+      }
+      
+      // Fallback to tile's own color if set
+      if (tile.color) return tile.color;
+      
+      // Final fallback
+      return colors.primary;
+    } catch (error) {
+      console.error('Error in getCategoryColor:', error);
+      return colors.primary;
     }
-    
-    // Fallback to tile's own color if set
-    if (tile.color) return tile.color;
-    
-    // Final fallback
-    return colors.primary;
   };
 
   // FIXED: Reduced font size for better fit
   const getResponsiveFontSize = () => {
-    if (width >= 1400) return 30;
-    if (width >= 1200) return 28;
-    if (width >= 1000) return 26;
-    if (width >= 820) return 22;
-    if (width >= 680) return 20;
-    return 14;
+    try {
+      if (!isMounted) return 20; // Default size during initial render
+      
+      const width = dimensions.width;
+      if (width >= 1400) return 30;
+      if (width >= 1200) return 28;
+      if (width >= 1000) return 26;
+      if (width >= 820) return 22;
+      if (width >= 680) return 20;
+      return 14;
+    } catch (error) {
+      console.error('Error in getResponsiveFontSize:', error);
+      return 20;
+    }
   };
 
   const tileColor = getCategoryColor();
@@ -80,16 +119,31 @@ const TileItem = memo(function TileItem({
   const hasCustomImage = !isAdd && !hasPictogram && (tile.imageUrl || tile.imageUri) && !customImageError;
   const shouldShowIcon = isAdd; // ONLY show icon for the Add tile
 
+  // On web, don't use Animated.View to prevent crashes
+  const WrapperComponent = Platform.OS === 'web' ? View : Animated.View;
+  const wrapperStyle = Platform.OS === 'web' 
+    ? [styles.tileWrap, { width: `${itemPercent}%` }]
+    : [styles.tileWrap, { width: `${itemPercent}%`, transform: [{ scale }] }];
+
   return (
-    <Animated.View
-      style={[
-        styles.tileWrap,
-        { width: `${itemPercent}%`, transform: [{ scale }] },
-      ]}
-    >
+    <WrapperComponent style={wrapperStyle}>
       <TouchableOpacity
-        onPress={onPress}
-        onLongPress={onLongPress}
+        onPress={() => {
+          try {
+            onPress();
+          } catch (error) {
+            console.error('Error in tile onPress:', error);
+          }
+        }}
+        onLongPress={() => {
+          try {
+            if (onLongPress) {
+              onLongPress();
+            }
+          } catch (error) {
+            console.error('Error in tile onLongPress:', error);
+          }
+        }}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         activeOpacity={0.8}
@@ -107,12 +161,12 @@ const TileItem = memo(function TileItem({
             <Image
               source={{ 
                 uri: tile.image,
-                cache: 'force-cache',
+                ...(Platform.OS !== 'web' && { cache: 'force-cache' }),
               }}
               style={styles.pictogramImage}
               resizeMode="contain"
               onError={(error) => {
-                console.log('Failed to load ARASAAC pictogram for tile:', tile.text, tile.image, error.nativeEvent.error);
+                console.log('Failed to load ARASAAC pictogram for tile:', tile.text, tile.image);
                 setPictogramError(true);
               }}
             />
@@ -120,12 +174,12 @@ const TileItem = memo(function TileItem({
             <Image
               source={{ 
                 uri: tile.imageUrl || tile.imageUri,
-                cache: 'force-cache',
+                ...(Platform.OS !== 'web' && { cache: 'force-cache' }),
               }}
               style={styles.customImage}
               resizeMode="contain"
               onError={(error) => {
-                console.log('Failed to load custom image for tile:', tile.text, tile.imageUrl || tile.imageUri, error.nativeEvent.error);
+                console.log('Failed to load custom image for tile:', tile.text, tile.imageUrl || tile.imageUri);
                 setCustomImageError(true);
               }}
             />
@@ -143,7 +197,7 @@ const TileItem = memo(function TileItem({
           </Text>
         </View>
       </TouchableOpacity>
-    </Animated.View>
+    </WrapperComponent>
   );
 });
 
@@ -159,7 +213,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 6,
-    boxShadow: '0px 3px 10px rgba(0,0,0,0.12)',
+    ...(Platform.OS === 'web' 
+      ? { boxShadow: '0px 3px 10px rgba(0,0,0,0.12)' } 
+      : {
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 3 },
+          shadowOpacity: 0.12,
+          shadowRadius: 10,
+          elevation: 5,
+        }
+    ),
   },
   iconWrap: {
     flex: 1,

@@ -29,8 +29,12 @@ export default function CommunicationScreen() {
   useEffect(() => {
     console.log('Communication screen mounted');
     (async () => {
-      if (Platform.OS !== 'web') {
-        await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
+      try {
+        if (Platform.OS !== 'web') {
+          await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
+        }
+      } catch (error) {
+        console.error('Error locking screen orientation:', error);
       }
     })();
   }, []);
@@ -50,12 +54,17 @@ export default function CommunicationScreen() {
   const [editingTile, setEditingTile] = useState<Tile | null>(null);
   const [lastSpokenText, setLastSpokenText] = useState<string>('');
   const isNavigatingRef = useRef(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Update category when params change (coming from keyboard screen)
   useEffect(() => {
-    if (params.category && params.category !== 'keyboard') {
-      console.log('📍 Communication screen received category from params:', params.category);
-      setSelectedCategory(params.category as string);
+    try {
+      if (params.category && params.category !== 'keyboard') {
+        console.log('📍 Communication screen received category from params:', params.category);
+        setSelectedCategory(params.category as string);
+      }
+    } catch (error) {
+      console.error('Error updating category from params:', error);
     }
   }, [params.category]);
 
@@ -64,149 +73,205 @@ export default function CommunicationScreen() {
     useCallback(() => {
       console.log('📱 Communication screen focused');
       isNavigatingRef.current = false;
+      setIsLoading(false);
       
       // Cleanup function runs when screen loses focus
       return () => {
         console.log('📱 Communication screen unfocused - stopping speech');
-        stopSpeaking();
+        try {
+          stopSpeaking();
+        } catch (error) {
+          console.error('Error stopping speech:', error);
+        }
       };
     }, [stopSpeaking])
   );
 
   // Handle keyboard category selection - redirect to keyboard screen
   useEffect(() => {
-    if (selectedCategory === 'keyboard' && !isNavigatingRef.current) {
-      console.log('🔄 Navigating to keyboard screen');
-      isNavigatingRef.current = true;
-      router.push('/keyboard');
-      // Don't reset category here - let it stay as 'keyboard' until we come back
+    try {
+      if (selectedCategory === 'keyboard' && !isNavigatingRef.current) {
+        console.log('🔄 Navigating to keyboard screen');
+        isNavigatingRef.current = true;
+        router.push('/keyboard');
+        // Don't reset category here - let it stay as 'keyboard' until we come back
+      }
+    } catch (error) {
+      console.error('Error navigating to keyboard:', error);
     }
   }, [selectedCategory, router]);
 
   const filteredTiles = useMemo(() => {
-    if (selectedCategory === 'all') return tiles;
-    if (selectedCategory === 'keyboard') return [];
-    return tiles.filter(t => t.category === selectedCategory);
+    try {
+      if (selectedCategory === 'all') return tiles;
+      if (selectedCategory === 'keyboard') return [];
+      return tiles.filter(t => t.category === selectedCategory);
+    } catch (error) {
+      console.error('Error filtering tiles:', error);
+      return [];
+    }
   }, [tiles, selectedCategory]);
 
   const { resetLearning } = useAI();
 
   useEffect(() => {
     (async () => {
-      if (sentence.length === 0) {
-        const timeBased = await getTimeBasedSuggestions();
-        const initialSuggestions = timeBased.slice(0, 10).map((phrase, index) => ({
-          text: phrase.split(' ')[0],
-          confidence: Math.max(0.6, 0.8 - index * 0.05),
-          type: 'temporal' as const,
-          context: 'Common starter word'
+      try {
+        if (sentence.length === 0) {
+          const timeBased = await getTimeBasedSuggestions();
+          const initialSuggestions = timeBased.slice(0, 10).map((phrase, index) => ({
+            text: phrase.split(' ')[0],
+            confidence: Math.max(0.6, 0.8 - index * 0.05),
+            type: 'temporal' as const,
+            context: 'Common starter word'
+          }));
+          
+          const commonStarters = ['I', 'you', 'want', 'need', 'can', 'what', 'where', 'help', 'please', 'like'];
+          commonStarters.forEach((word, index) => {
+            if (!initialSuggestions.some(s => s.text.toLowerCase() === word.toLowerCase())) {
+              initialSuggestions.push({
+                text: word,
+                confidence: Math.max(0.5, 0.7 - index * 0.05),
+                type: 'contextual' as const,
+                context: 'Common word'
+              });
+            }
+          });
+          
+          setAdvancedSuggestions(initialSuggestions.slice(0, 10));
+          return;
+        }
+
+        const words = sentence.map(t => t.text);
+        const availableWords = tiles.map(t => t.text);
+        
+        const categoryForAI = (selectedCategory !== 'all' && selectedCategory !== 'keyboard') ? selectedCategory : undefined;
+        
+        const categoryTiles = tiles.map(tile => ({
+          text: tile.text,
+          category: tile.category || 'core'
         }));
         
-        const commonStarters = ['I', 'you', 'want', 'need', 'can', 'what', 'where', 'help', 'please', 'like'];
-        commonStarters.forEach((word, index) => {
-          if (!initialSuggestions.some(s => s.text.toLowerCase() === word.toLowerCase())) {
-            initialSuggestions.push({
-              text: word,
-              confidence: Math.max(0.5, 0.7 - index * 0.05),
-              type: 'contextual' as const,
-              context: 'Common word'
-            });
-          }
+        console.log('🎯 Calling getAdvancedSuggestions with:', {
+          words,
+          availableWordsCount: availableWords.length,
+          categoryForAI,
+          categoryTilesCount: categoryTiles.length
         });
         
-        setAdvancedSuggestions(initialSuggestions.slice(0, 10));
-        return;
+        const [advanced, timeBased] = await Promise.all([
+          getAdvancedSuggestions(words, availableWords, 10, categoryForAI, categoryTiles),
+          getTimeBasedSuggestions(),
+        ]);
+
+        const combined = [...advanced, ...timeBased.slice(0, 3).map((phrase, index) => ({
+          text: phrase,
+          confidence: Math.max(0.5, 0.7 - index * 0.05),
+          type: 'temporal' as const,
+          context: 'Common phrase'
+        }))]
+          .sort((a, b) => b.confidence - a.confidence)
+          .slice(0, 10);
+
+        setAdvancedSuggestions(combined);
+      } catch (error) {
+        console.error('Error updating suggestions:', error);
+        setAdvancedSuggestions([]);
       }
-
-      const words = sentence.map(t => t.text);
-      const availableWords = tiles.map(t => t.text);
-      
-      const categoryForAI = (selectedCategory !== 'all' && selectedCategory !== 'keyboard') ? selectedCategory : undefined;
-      
-      const categoryTiles = tiles.map(tile => ({
-        text: tile.text,
-        category: tile.category || 'core'
-      }));
-      
-      console.log('🎯 Calling getAdvancedSuggestions with:', {
-        words,
-        availableWordsCount: availableWords.length,
-        categoryForAI,
-        categoryTilesCount: categoryTiles.length
-      });
-      
-      const [advanced, timeBased] = await Promise.all([
-        getAdvancedSuggestions(words, availableWords, 10, categoryForAI, categoryTiles),
-        getTimeBasedSuggestions(),
-      ]);
-
-      const combined = [...advanced, ...timeBased.slice(0, 3).map((phrase, index) => ({
-        text: phrase,
-        confidence: Math.max(0.5, 0.7 - index * 0.05),
-        type: 'temporal' as const,
-        context: 'Common phrase'
-      }))]
-        .sort((a, b) => b.confidence - a.confidence)
-        .slice(0, 10);
-
-      setAdvancedSuggestions(combined);
     })();
   }, [sentence, tiles, getAdvancedSuggestions, getTimeBasedSuggestions, selectedCategory]);
 
   const handleTilePress = useCallback((tile: Tile) => {
-    setSentence(prev => [...prev, tile]);
+    try {
+      console.log('Tile pressed in communication screen:', tile.text);
+      setSentence(prev => [...prev, tile]);
+    } catch (error) {
+      console.error('Error handling tile press:', error);
+    }
   }, []);
 
   const handleTileLongPress = useCallback((tile: Tile) => {
-    if (tile.id.startsWith('custom-')) {
-      removeTile(tile.id);
+    try {
+      if (tile.id.startsWith('custom-')) {
+        removeTile(tile.id);
+      }
+    } catch (error) {
+      console.error('Error handling tile long press:', error);
     }
   }, [removeTile]);
 
   const handleTileEdit = useCallback((tile: Tile) => {
-    setEditingTile(tile);
+    try {
+      setEditingTile(tile);
+    } catch (error) {
+      console.error('Error handling tile edit:', error);
+    }
   }, []);
 
   const handleSaveEdit = useCallback((updatedTile: Tile) => {
-    updateTile(updatedTile);
-    setEditingTile(null);
+    try {
+      updateTile(updatedTile);
+      setEditingTile(null);
+    } catch (error) {
+      console.error('Error saving tile edit:', error);
+    }
   }, [updateTile]);
 
   const handleRemoveFromSentence = useCallback((index: number) => {
-    setSentence(prev => prev.filter((_, i) => i !== index));
+    try {
+      setSentence(prev => prev.filter((_, i) => i !== index));
+    } catch (error) {
+      console.error('Error removing from sentence:', error);
+    }
   }, []);
 
   const handleClearSentence = useCallback(() => {
-    setSentence([]);
+    try {
+      setSentence([]);
+    } catch (error) {
+      console.error('Error clearing sentence:', error);
+    }
   }, []);
 
   const handleDeleteLastWord = useCallback(() => {
-    setSentence(prev => {
-      if (prev.length === 0) return prev;
-      return prev.slice(0, -1);
-    });
+    try {
+      setSentence(prev => {
+        if (prev.length === 0) return prev;
+        return prev.slice(0, -1);
+      });
+    } catch (error) {
+      console.error('Error deleting last word:', error);
+    }
   }, []);
 
   const handleReplayLastSentence = useCallback(async () => {
-    if (!lastSpokenText.trim()) return;
-    
-    const normalized = normalizeForTTS(lastSpokenText);
-    await speak(normalized);
+    try {
+      if (!lastSpokenText.trim()) return;
+      
+      const normalized = normalizeForTTS(lastSpokenText);
+      await speak(normalized);
+    } catch (error) {
+      console.error('Error replaying sentence:', error);
+    }
   }, [lastSpokenText, speak]);
 
   const handleSpeak = useCallback(async () => {
-    const text = sentence.map(t => t.text).join(' ');
-    if (!text.trim()) return;
-    
-    const normalized = normalizeForTTS(text);
-    await speak(normalized);
-    
-    setLastSpokenText(text);
-    
-    const categoryForAI = (selectedCategory !== 'all' && selectedCategory !== 'keyboard') ? selectedCategory : undefined;
-    await recordUserInput(text, categoryForAI);
-    
-    setSentence([]);
+    try {
+      const text = sentence.map(t => t.text).join(' ');
+      if (!text.trim()) return;
+      
+      const normalized = normalizeForTTS(text);
+      await speak(normalized);
+      
+      setLastSpokenText(text);
+      
+      const categoryForAI = (selectedCategory !== 'all' && selectedCategory !== 'keyboard') ? selectedCategory : undefined;
+      await recordUserInput(text, categoryForAI);
+      
+      setSentence([]);
+    } catch (error) {
+      console.error('Error speaking sentence:', error);
+    }
   }, [sentence, speak, recordUserInput, selectedCategory]);
 
   const normalizeForTTS = (text: string): string => {
@@ -224,46 +289,79 @@ export default function CommunicationScreen() {
   };
 
   const handleBackToMenu = useCallback(() => {
-    router.push('/main-menu');
+    try {
+      router.push('/main-menu');
+    } catch (error) {
+      console.error('Error navigating to menu:', error);
+    }
   }, [router]);
 
   const handleOpenSettings = useCallback(() => {
-    router.push('/settings');
+    try {
+      router.push('/settings');
+    } catch (error) {
+      console.error('Error opening settings:', error);
+    }
   }, [router]);
 
   const handleSuggestionPress = useCallback((text: string, isFullSentence: boolean) => {
-    if (isFullSentence) {
-      const words = text.split(' ');
-      const newSentence = words.map((word, index) => ({
-        id: `suggestion-${Date.now()}-${index}`,
-        text: word,
-        color: colors.primary,
-        category: 'suggestion',
-      }));
-      setSentence(newSentence);
-    } else {
-      const tile: Tile = {
-        id: `suggestion-${Date.now()}`,
-        text,
-        color: colors.primary,
-        category: 'suggestion',
-      };
-      handleTilePress(tile);
+    try {
+      if (isFullSentence) {
+        const words = text.split(' ');
+        const newSentence = words.map((word, index) => ({
+          id: `suggestion-${Date.now()}-${index}`,
+          text: word,
+          color: colors.primary,
+          category: 'suggestion',
+        }));
+        setSentence(newSentence);
+      } else {
+        const tile: Tile = {
+          id: `suggestion-${Date.now()}`,
+          text,
+          color: colors.primary,
+          category: 'suggestion',
+        };
+        handleTilePress(tile);
+      }
+    } catch (error) {
+      console.error('Error handling suggestion press:', error);
     }
   }, [handleTilePress]);
 
   const handleCategorySelect = useCallback((categoryId: string) => {
-    console.log('🎯 Category selected in communication screen:', categoryId);
-    setSelectedCategory(categoryId);
+    try {
+      console.log('🎯 Category selected in communication screen:', categoryId);
+      setSelectedCategory(categoryId);
+    } catch (error) {
+      console.error('Error selecting category:', error);
+    }
   }, []);
 
   const handleSettingsOpen = useCallback(() => {
-    setSettingsOpen(true);
+    try {
+      setSettingsOpen(true);
+    } catch (error) {
+      console.error('Error opening settings sheet:', error);
+    }
   }, []);
 
   const handleSettingsClose = useCallback(() => {
-    setSettingsOpen(false);
+    try {
+      setSettingsOpen(false);
+    } catch (error) {
+      console.error('Error closing settings sheet:', error);
+    }
   }, []);
+
+  // Show loading state briefly to prevent crashes
+  if (isLoading) {
+    return (
+      <View style={[commonStyles.container, styles.container, styles.loadingContainer]}>
+        <Text style={styles.loadingText}>Loading...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={[commonStyles.container, styles.container]}>
@@ -314,13 +412,17 @@ export default function CommunicationScreen() {
             suggestions={advancedSuggestions}
             onPressSuggestion={handleSuggestionPress}
             onRemoveWord={(word) => {
-              setSentence(prev => {
-                const index = prev.findIndex(t => t.text.toLowerCase() === word.toLowerCase());
-                if (index !== -1) {
-                  return prev.filter((_, i) => i !== index);
-                }
-                return prev;
-              });
+              try {
+                setSentence(prev => {
+                  const index = prev.findIndex(t => t.text.toLowerCase() === word.toLowerCase());
+                  if (index !== -1) {
+                    return prev.filter((_, i) => i !== index);
+                  }
+                  return prev;
+                });
+              } catch (error) {
+                console.error('Error removing word from suggestion:', error);
+              }
             }}
             style={styles.suggestions}
           />
@@ -392,6 +494,15 @@ export default function CommunicationScreen() {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.background,
+  },
+  loadingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 18,
+    fontFamily: 'Montserrat_600SemiBold',
+    color: colors.text,
   },
   topBar: {
     flexDirection: 'row',
