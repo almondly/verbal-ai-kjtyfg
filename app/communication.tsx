@@ -340,27 +340,73 @@ export default function CommunicationScreen() {
   const handleSuggestionPress = useCallback((text: string, isFullSentence: boolean) => {
     try {
       if (isFullSentence) {
-        const words = text.split(' ');
-        const newSentence = words.map((word, index) => ({
-          id: `suggestion-${Date.now()}-${index}`,
-          text: word,
-          color: colors.primary,
-          category: 'suggestion',
-        }));
-        setSentence(newSentence);
+        // Get the current sentence as text
+        const currentText = sentence.map(t => t.text).join(' ').toLowerCase();
+        const suggestionLower = text.toLowerCase();
+        
+        // Check if the suggestion starts with the current input
+        if (suggestionLower.startsWith(currentText.trim()) && currentText.trim()) {
+          // Replace the entire sentence with the suggestion
+          const words = text.split(' ');
+          const newSentence = words.map((word, index) => ({
+            id: `suggestion-${Date.now()}-${index}`,
+            text: word,
+            color: colors.primary,
+            category: 'suggestion',
+          }));
+          setSentence(newSentence);
+        } else {
+          // Append the suggestion to the current sentence
+          const words = text.split(' ');
+          const newTiles = words.map((word, index) => ({
+            id: `suggestion-${Date.now()}-${index}`,
+            text: word,
+            color: colors.primary,
+            category: 'suggestion',
+          }));
+          setSentence(prev => [...prev, ...newTiles]);
+        }
       } else {
-        const tile: Tile = {
-          id: `suggestion-${Date.now()}`,
-          text,
-          color: colors.primary,
-          category: 'suggestion',
-        };
-        handleTilePress(tile);
+        // For single words, check if the last word in the sentence matches the beginning of the suggestion
+        if (sentence.length > 0) {
+          const lastWord = sentence[sentence.length - 1].text.toLowerCase();
+          const suggestionLower = text.toLowerCase();
+          
+          // Check if the suggestion starts with the last word
+          if (suggestionLower.startsWith(lastWord)) {
+            // Replace the last word with the suggestion
+            const tile: Tile = {
+              id: `suggestion-${Date.now()}`,
+              text,
+              color: colors.primary,
+              category: 'suggestion',
+            };
+            setSentence(prev => [...prev.slice(0, -1), tile]);
+          } else {
+            // Append the suggestion
+            const tile: Tile = {
+              id: `suggestion-${Date.now()}`,
+              text,
+              color: colors.primary,
+              category: 'suggestion',
+            };
+            handleTilePress(tile);
+          }
+        } else {
+          // No words in sentence, just add the suggestion
+          const tile: Tile = {
+            id: `suggestion-${Date.now()}`,
+            text,
+            color: colors.primary,
+            category: 'suggestion',
+          };
+          handleTilePress(tile);
+        }
       }
     } catch (error) {
       console.error('Error handling suggestion press:', error);
     }
-  }, [handleTilePress]);
+  }, [sentence, handleTilePress]);
 
   const handleCategorySelect = useCallback((categoryId: string) => {
     try {

@@ -159,14 +159,39 @@ export default function KeyboardScreen() {
 
   const handleSuggestionPress = useCallback((text: string, isFullSentence: boolean) => {
     if (isFullSentence) {
-      setTypedText(text);
+      // For full sentences, check if the suggestion starts with the current input
+      const currentInput = typedText.trim().toLowerCase();
+      const suggestionLower = text.toLowerCase();
+      
+      if (suggestionLower.startsWith(currentInput) && currentInput) {
+        // Replace the entire input with the suggestion
+        setTypedText(text);
+      } else {
+        // Append the suggestion to the current input
+        setTypedText(prev => {
+          const trimmed = prev.trim();
+          return trimmed ? `${trimmed} ${text}` : text;
+        });
+      }
     } else {
-      setTypedText(prev => {
-        const trimmed = prev.trim();
-        return trimmed ? `${trimmed} ${text}` : text;
-      });
+      // For single words, check if the last word matches the beginning of the suggestion
+      const words = typedText.trim().split(/\s+/);
+      const lastWord = words.length > 0 && words[words.length - 1] ? words[words.length - 1].toLowerCase() : '';
+      const suggestionLower = text.toLowerCase();
+      
+      if (lastWord && suggestionLower.startsWith(lastWord)) {
+        // Replace the last word with the suggestion
+        words[words.length - 1] = text;
+        setTypedText(words.join(' '));
+      } else {
+        // Append the suggestion
+        setTypedText(prev => {
+          const trimmed = prev.trim();
+          return trimmed ? `${trimmed} ${text}` : text;
+        });
+      }
     }
-  }, []);
+  }, [typedText]);
 
   const handleTextChange = useCallback((text: string) => {
     setTypedText(text);
