@@ -158,15 +158,22 @@ export default function KeyboardScreen() {
   }, [router]);
 
   const handleSuggestionPress = useCallback((text: string, isFullSentence: boolean) => {
+    console.log('🔍 Suggestion pressed:', { text, isFullSentence, currentInput: typedText });
+    
     if (isFullSentence) {
-      // For full sentences, check if the suggestion starts with the current input
+      // For full sentences, check if the current input is at the beginning of the suggestion
       const currentInput = typedText.trim().toLowerCase();
       const suggestionLower = text.toLowerCase();
       
-      if (suggestionLower.startsWith(currentInput) && currentInput) {
+      console.log('🔍 Comparing:', { currentInput, suggestionLower });
+      
+      // Only replace if current input matches the start of the suggestion
+      if (currentInput && suggestionLower.startsWith(currentInput)) {
+        console.log('✅ Current input matches start of suggestion - replacing');
         // Replace the entire input with the suggestion
         setTypedText(text);
       } else {
+        console.log('➕ Current input does not match - appending');
         // Append the suggestion to the current input
         setTypedText(prev => {
           const trimmed = prev.trim();
@@ -174,16 +181,21 @@ export default function KeyboardScreen() {
         });
       }
     } else {
-      // For single words, check if the last word matches the beginning of the suggestion
+      // For single words, check if the last word is at the beginning of the suggestion
       const words = typedText.trim().split(/\s+/);
       const lastWord = words.length > 0 && words[words.length - 1] ? words[words.length - 1].toLowerCase() : '';
       const suggestionLower = text.toLowerCase();
       
+      console.log('🔍 Comparing last word:', { lastWord, suggestionLower });
+      
+      // Only replace if last word matches the start of the suggestion
       if (lastWord && suggestionLower.startsWith(lastWord)) {
+        console.log('✅ Last word matches start of suggestion - replacing');
         // Replace the last word with the suggestion
         words[words.length - 1] = text;
         setTypedText(words.join(' '));
       } else {
+        console.log('➕ Last word does not match - appending');
         // Append the suggestion
         setTypedText(prev => {
           const trimmed = prev.trim();

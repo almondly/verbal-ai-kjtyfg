@@ -339,13 +339,19 @@ export default function CommunicationScreen() {
 
   const handleSuggestionPress = useCallback((text: string, isFullSentence: boolean) => {
     try {
+      console.log('🔍 Suggestion pressed:', { text, isFullSentence, currentSentence: sentence.map(t => t.text).join(' ') });
+      
       if (isFullSentence) {
         // Get the current sentence as text
-        const currentText = sentence.map(t => t.text).join(' ').toLowerCase();
+        const currentText = sentence.map(t => t.text).join(' ').trim().toLowerCase();
         const suggestionLower = text.toLowerCase();
         
-        // Check if the suggestion starts with the current input
-        if (suggestionLower.startsWith(currentText.trim()) && currentText.trim()) {
+        console.log('🔍 Comparing:', { currentText, suggestionLower });
+        
+        // Check if the current input is at the beginning of the suggestion
+        // Only replace if current text matches the start of the suggestion
+        if (currentText && suggestionLower.startsWith(currentText)) {
+          console.log('✅ Current text matches start of suggestion - replacing');
           // Replace the entire sentence with the suggestion
           const words = text.split(' ');
           const newSentence = words.map((word, index) => ({
@@ -356,6 +362,7 @@ export default function CommunicationScreen() {
           }));
           setSentence(newSentence);
         } else {
+          console.log('➕ Current text does not match - appending');
           // Append the suggestion to the current sentence
           const words = text.split(' ');
           const newTiles = words.map((word, index) => ({
@@ -372,8 +379,12 @@ export default function CommunicationScreen() {
           const lastWord = sentence[sentence.length - 1].text.toLowerCase();
           const suggestionLower = text.toLowerCase();
           
-          // Check if the suggestion starts with the last word
+          console.log('🔍 Comparing last word:', { lastWord, suggestionLower });
+          
+          // Check if the last word is at the beginning of the suggestion
+          // Only replace if last word matches the start of the suggestion
           if (suggestionLower.startsWith(lastWord)) {
+            console.log('✅ Last word matches start of suggestion - replacing');
             // Replace the last word with the suggestion
             const tile: Tile = {
               id: `suggestion-${Date.now()}`,
@@ -383,6 +394,7 @@ export default function CommunicationScreen() {
             };
             setSentence(prev => [...prev.slice(0, -1), tile]);
           } else {
+            console.log('➕ Last word does not match - appending');
             // Append the suggestion
             const tile: Tile = {
               id: `suggestion-${Date.now()}`,
@@ -393,6 +405,7 @@ export default function CommunicationScreen() {
             handleTilePress(tile);
           }
         } else {
+          console.log('➕ No words in sentence - adding suggestion');
           // No words in sentence, just add the suggestion
           const tile: Tile = {
             id: `suggestion-${Date.now()}`,
