@@ -56,7 +56,7 @@ export default function MainMenu() {
 
   return (
     <View style={[commonStyles.container, styles.container]}>
-      {/* Header - Slightly smaller */}
+      {/* Header - Smaller */}
       <View style={styles.header}>
         <Text style={styles.title}>COMpanion</Text>
       </View>
@@ -74,14 +74,14 @@ export default function MainMenu() {
           </View>
         </View>
 
-        {/* Action Buttons - Slightly smaller */}
+        {/* Action Buttons - Smaller */}
         <View style={styles.buttonSection}>
           <TouchableOpacity 
             style={[styles.actionButton, styles.primaryButton]} 
             onPress={handleStartCommunication}
             activeOpacity={0.9}
           >
-            <Icon name="grid-outline" size={36} color="#000000" />
+            <Icon name="grid-outline" size={28} color="#000000" />
             <Text style={styles.actionButtonText}>Start</Text>
           </TouchableOpacity>
 
@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   title: {
-    fontSize: 48, // Slightly smaller - reduced from 56 to 48
+    fontSize: 38,
     fontFamily: 'Montserrat_700Bold',
     color: '#000000',
     textAlign: 'center',
@@ -147,9 +147,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 16 as any,
-    paddingHorizontal: 40,
-    paddingVertical: 24,
+    gap: 12 as any,
+    paddingHorizontal: 32,
+    paddingVertical: 18,
     borderRadius: 16,
     boxShadow: '0px 4px 16px rgba(0,0,0,0.15)',
   },
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
   },
   actionButtonText: {
-    fontSize: 28, // Slightly smaller - reduced from 32 to 28
+    fontSize: 22,
     fontFamily: 'Montserrat_700Bold',
     color: '#000000',
     textAlign: 'center',

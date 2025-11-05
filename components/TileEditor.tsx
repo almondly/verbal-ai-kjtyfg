@@ -112,6 +112,7 @@ export default function TileEditor({ visible, tile, onSave, onClose }: Props) {
         animationType="slide"
         presentationStyle="pageSheet"
         onRequestClose={onClose}
+        transparent={false}
       >
         <View style={styles.container}>
           <View style={styles.header}>
@@ -286,6 +287,7 @@ export default function TileEditor({ visible, tile, onSave, onClose }: Props) {
         animationType="slide"
         presentationStyle="pageSheet"
         onRequestClose={() => setShowPictogramSelector(false)}
+        transparent={false}
       >
         <PictogramSelector
           word={text || 'communication'}
@@ -301,6 +303,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+    zIndex: 100000,
+    elevation: 100000,
   },
   header: {
     flexDirection: 'row',
@@ -310,6 +314,8 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
+    zIndex: 100000,
+    elevation: 100000,
   },
   title: {
     fontSize: 24,
@@ -505,6 +511,8 @@ const styles = StyleSheet.create({
     padding: 20,
     borderTopWidth: 1,
     borderTopColor: '#E5E7EB',
+    zIndex: 100000,
+    elevation: 100000,
   },
   footerBtn: {
     flex: 1,
