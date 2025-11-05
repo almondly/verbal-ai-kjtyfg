@@ -101,7 +101,7 @@ export default function MainMenu() {
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 32,
+    paddingHorizontal: 25,
     paddingVertical: 16,
   },
   header: {
@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   title: {
-    fontSize: 38,
+    fontSize: 25,
     fontFamily: 'Montserrat_700Bold',
     color: '#000000',
     textAlign: 'center',
@@ -148,8 +148,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 12 as any,
-    paddingHorizontal: 32,
-    paddingVertical: 18,
+    paddingHorizontal: 28,
+    paddingVertical: 14,
     borderRadius: 16,
     boxShadow: '0px 4px 16px rgba(0,0,0,0.15)',
   },
@@ -167,8 +167,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10 as any,
     backgroundColor: colors.backgroundAlt,
-    paddingHorizontal: 24,
-    paddingVertical: 14,
+    paddingHorizontal: 18,
+    paddingVertical: 12,
     borderRadius: 12,
     boxShadow: '0px 3px 10px rgba(0,0,0,0.08)',
   },
