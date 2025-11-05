@@ -56,7 +56,7 @@ export default function MainMenu() {
 
   return (
     <View style={[commonStyles.container, styles.container]}>
-      {/* Header - much smaller */}
+      {/* Header - MUCH LARGER */}
       <View style={styles.header}>
         <Text style={styles.title}>COMpanion</Text>
       </View>
@@ -74,14 +74,14 @@ export default function MainMenu() {
           </View>
         </View>
 
-        {/* Action Buttons - Much Smaller */}
+        {/* Action Buttons - MUCH LARGER */}
         <View style={styles.buttonSection}>
           <TouchableOpacity 
             style={[styles.actionButton, styles.primaryButton]} 
             onPress={handleStartCommunication}
             activeOpacity={0.9}
           >
-            <Icon name="grid-outline" size={20} color="#000000" />
+            <Icon name="grid-outline" size={36} color="#000000" />
             <Text style={styles.actionButtonText}>Start</Text>
           </TouchableOpacity>
 
@@ -90,7 +90,7 @@ export default function MainMenu() {
             onPress={handleOpenSettings}
             activeOpacity={0.9}
           >
-            <Icon name="settings-outline" size={14} color="#000000" />
+            <Icon name="settings-outline" size={24} color="#000000" />
             <Text style={styles.settingsButtonText}>Settings</Text>
           </TouchableOpacity>
         </View>
@@ -102,17 +102,18 @@ export default function MainMenu() {
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 32,
-    paddingVertical: 12,
+    paddingVertical: 16,
   },
   header: {
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 12,
   },
   title: {
-    fontSize: 24,
+    fontSize: 56, // MUCH LARGER - increased from 24 to 56
     fontFamily: 'Montserrat_700Bold',
     color: '#000000',
     textAlign: 'center',
+    letterSpacing: 2,
   },
   content: {
     flex: 1,
@@ -134,29 +135,29 @@ const styles = StyleSheet.create({
     maxHeight: '100%',
   },
   buttonSection: {
-    marginTop: 8,
-    marginBottom: 16,
+    marginTop: 16,
+    marginBottom: 24,
     alignItems: 'center',
     width: '100%',
-    maxWidth: 240,
-    gap: 10 as any,
+    maxWidth: 400, // Increased from 240
+    gap: 16 as any, // Increased gap
   },
   actionButton: {
     width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8 as any,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 12,
-    boxShadow: '0px 3px 12px rgba(0,0,0,0.1)',
+    gap: 16 as any, // Increased gap
+    paddingHorizontal: 40, // Increased padding
+    paddingVertical: 24, // Increased padding
+    borderRadius: 16, // Larger border radius
+    boxShadow: '0px 4px 16px rgba(0,0,0,0.15)',
   },
   primaryButton: {
     backgroundColor: colors.primary,
   },
   actionButtonText: {
-    fontSize: 14,
+    fontSize: 32, // MUCH LARGER - increased from 14 to 32
     fontFamily: 'Montserrat_700Bold',
     color: '#000000',
     textAlign: 'center',
@@ -164,15 +165,15 @@ const styles = StyleSheet.create({
   settingsButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6 as any,
+    gap: 10 as any, // Increased gap
     backgroundColor: colors.backgroundAlt,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 8,
-    boxShadow: '0px 2px 8px rgba(0,0,0,0.06)',
+    paddingHorizontal: 24, // Increased padding
+    paddingVertical: 14, // Increased padding
+    borderRadius: 12, // Larger border radius
+    boxShadow: '0px 3px 10px rgba(0,0,0,0.08)',
   },
   settingsButtonText: {
-    fontSize: 11,
+    fontSize: 20, // MUCH LARGER - increased from 11 to 20
     fontFamily: 'Montserrat_700Bold',
     color: '#000000',
   },

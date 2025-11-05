@@ -15,19 +15,20 @@ const DEFAULT_VOICE_SETTINGS: VoiceSettings = {
 
 const VOICE_STORAGE_KEY = 'voice_settings';
 
-// Voice characteristics for young boy and young girl
+// Voice characteristics for natural-sounding children's voices
+// Using much more natural pitch values to avoid the "chipmunk" effect
 const VOICE_CHARACTERISTICS = {
   boy: {
     name: 'Young Boy',
-    description: 'Youthful boy voice',
-    pitch: 1.3, // Higher pitch for young voice
-    rate: 1.0,
+    description: 'Natural young boy voice',
+    pitch: 1.05, // Slightly higher than adult, but natural
+    rate: 0.95, // Slightly slower for clarity
   },
   girl: {
     name: 'Young Girl',
-    description: 'Youthful girl voice',
-    pitch: 1.5, // Even higher pitch for young girl
-    rate: 1.05,
+    description: 'Natural young girl voice',
+    pitch: 1.1, // Slightly higher than boy, but still natural
+    rate: 0.95, // Slightly slower for clarity
   },
 };
 
@@ -94,6 +95,8 @@ export function useVoiceSettings() {
         language: 'en-US',
         pitch: characteristics.pitch,
         rate: characteristics.rate,
+        // Use a more natural voice quality
+        voice: undefined, // Let the system choose the best voice
         onStart: () => {
           console.log('🎤 Speech started');
           setIsSpeaking(true);
@@ -117,12 +120,12 @@ export function useVoiceSettings() {
     } catch (err) {
       console.log('Error speaking text:', err);
       setIsSpeaking(false);
-      // Fallback to basic speech
+      // Fallback to basic speech with natural settings
       try {
         await Speech.speak(text, {
           language: 'en-US',
           pitch: 1.0,
-          rate: 1.0,
+          rate: 0.95,
           onStart: () => setIsSpeaking(true),
           onDone: () => setIsSpeaking(false),
           onStopped: () => setIsSpeaking(false),
