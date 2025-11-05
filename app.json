@@ -62,10 +62,7 @@
       "typedRoutes": true
     },
     "extra": {
-      "router": {},
-      "eas": {
-        "projectId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
-      }
+      "router": {}
     },
     "description": "COMpanion is an AI-powered AAC (Augmentative and Alternative Communication) app designed to help non-verbal students communicate effectively. It uses advanced AI to learn communication patterns and provide intelligent word suggestions.",
     "privacy": "public"
