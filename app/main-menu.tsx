@@ -56,7 +56,7 @@ export default function MainMenu() {
 
   return (
     <View style={[commonStyles.container, styles.container]}>
-      {/* Header - MUCH LARGER */}
+      {/* Header - Slightly smaller */}
       <View style={styles.header}>
         <Text style={styles.title}>COMpanion</Text>
       </View>
@@ -74,7 +74,7 @@ export default function MainMenu() {
           </View>
         </View>
 
-        {/* Action Buttons - MUCH LARGER */}
+        {/* Action Buttons - Slightly smaller */}
         <View style={styles.buttonSection}>
           <TouchableOpacity 
             style={[styles.actionButton, styles.primaryButton]} 
@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   title: {
-    fontSize: 56, // MUCH LARGER - increased from 24 to 56
+    fontSize: 48, // Slightly smaller - reduced from 56 to 48
     fontFamily: 'Montserrat_700Bold',
     color: '#000000',
     textAlign: 'center',
@@ -139,25 +139,25 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     alignItems: 'center',
     width: '100%',
-    maxWidth: 400, // Increased from 240
-    gap: 16 as any, // Increased gap
+    maxWidth: 400,
+    gap: 16 as any,
   },
   actionButton: {
     width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 16 as any, // Increased gap
-    paddingHorizontal: 40, // Increased padding
-    paddingVertical: 24, // Increased padding
-    borderRadius: 16, // Larger border radius
+    gap: 16 as any,
+    paddingHorizontal: 40,
+    paddingVertical: 24,
+    borderRadius: 16,
     boxShadow: '0px 4px 16px rgba(0,0,0,0.15)',
   },
   primaryButton: {
     backgroundColor: colors.primary,
   },
   actionButtonText: {
-    fontSize: 32, // MUCH LARGER - increased from 14 to 32
+    fontSize: 28, // Slightly smaller - reduced from 32 to 28
     fontFamily: 'Montserrat_700Bold',
     color: '#000000',
     textAlign: 'center',
@@ -165,15 +165,15 @@ const styles = StyleSheet.create({
   settingsButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10 as any, // Increased gap
+    gap: 10 as any,
     backgroundColor: colors.backgroundAlt,
-    paddingHorizontal: 24, // Increased padding
-    paddingVertical: 14, // Increased padding
-    borderRadius: 12, // Larger border radius
+    paddingHorizontal: 24,
+    paddingVertical: 14,
+    borderRadius: 12,
     boxShadow: '0px 3px 10px rgba(0,0,0,0.08)',
   },
   settingsButtonText: {
-    fontSize: 20, // MUCH LARGER - increased from 11 to 20
+    fontSize: 20,
     fontFamily: 'Montserrat_700Bold',
     color: '#000000',
   },
