@@ -1,7 +1,8 @@
+
 {
   "expo": {
-    "name": "verbal-ai-kjtyfg",
-    "slug": "verbal-ai-kjtyfg",
+    "name": "COMpanion",
+    "slug": "companion-aac",
     "version": "1.0.0",
     "orientation": "landscape",
     "icon": "./assets/images/natively-dark.png",
@@ -14,10 +15,14 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.Natively",
+      "bundleIdentifier": "com.companion.aac",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
-      }
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSMicrophoneUsageDescription": "This app uses the microphone for voice input features.",
+        "NSPhotoLibraryUsageDescription": "This app needs access to your photo library to select custom images for communication tiles.",
+        "NSCameraUsageDescription": "This app needs access to your camera to take photos for custom communication tiles."
+      },
+      "buildNumber": "1"
     },
     "android": {
       "adaptiveIcon": {
@@ -25,7 +30,18 @@
         "backgroundColor": "#000000"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.COMToolsToYou.COMpanion"
+      "package": "com.companion.aac",
+      "versionCode": 1,
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "RECORD_AUDIO"
+      ],
+      "blockedPermissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ]
     },
     "web": {
       "favicon": "./assets/images/final_quest_240x240.png",
@@ -33,14 +49,26 @@
     },
     "plugins": [
       "expo-font",
-      "expo-router"
+      "expo-router",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app needs access to your photos to select custom images for communication tiles.",
+          "cameraPermission": "The app needs access to your camera to take photos for custom communication tiles."
+        }
+      ]
     ],
-    "scheme": "natively",
+    "scheme": "companion",
     "experiments": {
       "typedRoutes": true
     },
     "extra": {
-      "router": {}
-    }
+      "router": {},
+      "eas": {
+        "projectId": "your-eas-project-id"
+      }
+    },
+    "description": "COMpanion is an AI-powered AAC (Augmentative and Alternative Communication) app designed to help non-verbal students communicate effectively. It uses advanced AI to learn communication patterns and provide intelligent word suggestions.",
+    "privacy": "public"
   }
 }
